@@ -1,0 +1,13 @@
+ResourceType: GeneralTest
+Name: Valid name for valid resource
+Protocol: TCP
+Port: 8080
+#Authentication: false
+#ThreadsNo: 6
+#StorageAccessKey: pwd_number_one
+FirstTest:
+#  id: 100101
+  admin: aaa
+Genesys:
+  SwitchName: Cisco
+

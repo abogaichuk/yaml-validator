@@ -1,0 +1,85 @@
+#first comment
+ResourceType: GeneralTest
+# description comment
+Description: General test
+Types:
+  Test:
+    id:
+      type: number
+      description: test id
+    executedDate:
+      type: datetime
+      description: The time when product is valid from.
+      example: 9999-12-31T00:00:00.0Z
+    admin: string
+  User:
+    firstname: string
+    lastname: string
+    password:
+      type: secret
+      description: user password Carl!
+# params block
+# another one
+StringList:
+  - haha #haha comment
+  - hehe
+#SequenceGroup:
+#  - Type: Test
+#    Description: SequenceGroup with custom objects Test.
+#  Type: array
+#  items:
+#    type: Test
+#  description: SequenceGroup with custom objects Test.
+#FirstTest: Test
+Protocol:
+  Type: string
+  Unique: true
+  Validators:
+    List:
+      - TCP
+      - UDP
+      - HTTP
+  Description: Protocol specification
+Port:
+  Default: 7002
+  Description: "Port Id of the secondary Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
+  Type: number
+  Validators:
+    Min: 1025ads
+    Max: 65535
+Genesys:
+#    Type: Port or number or
+  SwitchName:
+    Default: "Genesys SIP server"
+    Description: "The name of the switch connected to the Genesys SIP server."
+    Type: string
+    Validators:
+      List:
+        - Avaya
+        - Cisco
+        - Genesys SIP server
+        - Nortel
+        - Aspect Call Center
+        - Aspect Spectrum
+        - Ericsson
+        - NEC
+        - Alcatel-Lucent
+  RTPMonitoringStyle:
+    Default: "Private Service"
+    Description: "Request sent as Monitor Style to Genesys in order to receive RTP events."
+    Type: string
+    Validators:
+      List:
+        - Private Service
+        - On Monitor
+        - Both
+        - Default
+  Admin: User
+#Unique: true
+#Editable: false
+Links:
+  - ResourceType: UserAdmin
+    Type: OneToOne
+    Description: SequenceGroup with custom objects Test.
+  - ResourceType: Test
+    Type: OneToOne
