@@ -10,22 +10,21 @@ import org.springframework.context.annotation.Bean;
 
 import java.io.PrintWriter;
 
-import static com.example.yamlvalidator.ValidatorUtils.needHelp;
 import static java.lang.System.exit;
 
 @SpringBootApplication
 public class YamlValidatorApplication implements CommandLineRunner {
 
 	public static void main(String[] args) {
-		SpringApplication app = new SpringApplication(YamlValidatorApplication.class);
+		var app = new SpringApplication(YamlValidatorApplication.class);
 		app.setBannerMode(Banner.Mode.OFF);
 		app.run(args);
 	}
 
 	@Override
 	public void run(String... args) throws Exception {
-		CommandLineParser parser = new DefaultParser();
-		CommandLine cmdLine = parser.parse(options(), args);
+		var parser = new DefaultParser();
+		var cmdLine = parser.parse(options(), args);
 
 		if (needHelp(cmdLine)) {
 			printHelp(options());
@@ -37,7 +36,7 @@ public class YamlValidatorApplication implements CommandLineRunner {
 
 	@Bean
 	public Options options() {
-		Options options = new Options();
+		var options = new Options();
 		options.addOption(Option.builder("h").longOpt("help").desc("HELP").build());
 		options.addOption(Option.builder("r")
 				.longOpt("resource")
@@ -48,13 +47,18 @@ public class YamlValidatorApplication implements CommandLineRunner {
 				.hasArg().numberOfArgs(1)
 				.desc("path to definition file, mandatory parameter")
 				.build());
+		options.addOption(Option.builder("e").desc("enrichment").build());
 		return options;
 	}
 
-	public void printHelp(Options options) {
-		String commandLineSyntax = "execute ./target/*.jar";
-		PrintWriter writer = new PrintWriter(System.out);
-		HelpFormatter helpFormatter = new HelpFormatter();
+	private boolean needHelp(CommandLine cmd) {
+		return cmd.getOptions().length == 0 || cmd.hasOption("h");
+	}
+
+	private void printHelp(Options options) {
+		var commandLineSyntax = "java -jar ./target/*.jar --definition=\"definition.yaml\"";
+		var writer = new PrintWriter(System.out);
+		var helpFormatter = new HelpFormatter();
 		helpFormatter.printHelp(
 				writer,
 				80,

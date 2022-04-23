@@ -7,4 +7,9 @@ import lombok.experimental.SuperBuilder;
 @Getter
 public class StringParameter extends Parameter {
     private String value;
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
 }

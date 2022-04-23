@@ -1,86 +1,50 @@
 package com.example.yamlvalidator.services;
 
+import com.example.yamlvalidator.ValidatorUtils;
 import com.example.yamlvalidator.entity.Definition;
-import com.example.yamlvalidator.entity.ValidationError;
+import com.example.yamlvalidator.entity.ObjectParameter;
+import com.example.yamlvalidator.entity.Parameter;
+import com.example.yamlvalidator.entity.ValidationResult;
+import com.example.yamlvalidator.validators.ParameterValidator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import static com.example.yamlvalidator.validators.ParameterValidator.*;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
 
 public class ValidationServiceImpl implements ValidationService {
     @Override
-    public List<ValidationError> validate(Definition definition) {
-        return Collections.emptyList();
-    }
-//    @Override
-//    public List<ValidationError> validate(Definition definition) {
-//        return definition.getParameters().stream()
-//            .filter(parameter -> !parameter.isBypass())
-//            .flatMap(parameter -> checkParameter(parameter).stream())
-//            .collect(Collectors.toList());
-//    }
-
-//    private List<ValidationError> checkParameter(Parameter parameter) {
-//        if (parameter instanceof ObjectParameter) {
-//            List<? extends Parameter> children = ((ObjectParameter) parameter).getChildren();
-//            Optional<? extends Parameter> aDefault = findChild("Default", children);
-//            Optional<? extends Parameter> validator = findChild("Validators", children);
-//            if (validator.isPresent()) {
-//                return check((ObjectParameter) validator.get(), aDefault);
-//            }
-//        }
-//        return Collections.emptyList();
-//    }
-
-//    private List<ValidationError> check(ObjectParameter validator, Optional<? extends Parameter> defaultParam) {
-//        List<ValidationError> errors = new ArrayList<>();
-//        List<? extends Parameter> children = validator.getChildren();
-//        Optional<? extends Parameter> minO = findChild("Min", children);
-//        Optional<? extends Parameter> maxO = findChild("Max", children);
-//        if (minO.isPresent() && maxO.isPresent()) {
-//            int min = Integer.parseInt(getValue(minO.get()));
-//            int max = Integer.parseInt(getValue(maxO.get()));
-//            if (min > max) {
-//                errors.add(ValidationError.of("min > max"));
-//            }
-//            if (defaultParam.isPresent()) {
-//                int defValue = Integer.parseInt(getValue(defaultParam.get()));
-//                if (defValue < min) {
-//                    errors.add(ValidationError.of("default value < min"));
-//                }
-//                if (defValue > max) {
-//                    errors.add(ValidationError.of("default value > max"));
-//                }
-//            }
-//        } else if (minO.isPresent()) {
-//            int min = Integer.parseInt(getValue(minO.get()));
-//            if (defaultParam.isPresent()) {
-//                int defValue = Integer.parseInt(getValue(defaultParam.get()));
-//                if (defValue < min) {
-//                    errors.add(ValidationError.of("default value < min"));
-//                }
-//            }
-//        } else if (maxO.isPresent()) {
-//            int max = Integer.parseInt(getValue(maxO.get()));
-//            if (defaultParam.isPresent()) {
-//                int defValue = Integer.parseInt(getValue(defaultParam.get()));
-//                if (defValue > max) {
-//                    errors.add(ValidationError.of("default value > max"));
-//                }
-//            }
-//        }
-//        return errors;
-//    }
-
-//    private String getValue(Parameter p) {
-//        return ((StringParameter) p).getValue();
-//    }
-
-//    private Optional<? extends Parameter> findChild(String name, List<? extends Parameter> children) {
-//        return children.stream()
-//            .filter(parameter -> name.equals(parameter.getName()))
+    public ValidationResult validate(Definition definition) {
+//        Optional<Parameter> port = definition.getParameters().stream()
+//            .filter(parameter -> "Port".equalsIgnoreCase(parameter.getName()))
 //            .findAny();
-//    }
+//        if (port.isPresent()) {
+//            return numbers.apply((ObjectParameter) port.get());
+//        }
+        definition.getParameters().stream()
+            .filter(parameter -> "Protocol".equalsIgnoreCase(parameter.getName()))
+            .findAny()
+            .ifPresent(protocol -> {
+                ObjectParameter p = (ObjectParameter) protocol;
+                Set<String> reasons = defaultInList.apply(p).getReasons();
+                reasons.forEach(System.out::println);
+            });
+        return ValidationResult.valid();
+//        List<? extends Parameter> validators = definition.getParameters().stream()
+//            .filter(parameter -> parameter instanceof ObjectParameter)
+//            .map(ObjectParameter.class::cast)
+//            .map(parameter -> parameter.findChildR("Validators/List"))
+//            .filter(Optional::isPresent)
+//            .map(Optional::get).collect(Collectors.toList());
+//        return ValidationResult.valid();
+    }
 }

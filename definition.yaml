@@ -33,7 +33,9 @@ StringList:
 #FirstTest: Test
 Protocol:
   Type: string
+  Default: TCPPP
   Unique: true
+  Unique: false
   Validators:
     List:
       - TCP
@@ -45,7 +47,7 @@ Port:
   Description: "Port Id of the secondary Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
   Type: number
   Validators:
-    Min: 1025ads
+    Min: 1025
     Max: 65535
 Genesys:
 #    Type: Port or number or
