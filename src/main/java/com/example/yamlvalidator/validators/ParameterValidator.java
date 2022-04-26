@@ -33,24 +33,34 @@ import static com.example.yamlvalidator.entity.ValidationResult.valid;
 
 public interface ParameterValidator extends Function<ObjectParameter, ValidationResult> {
 
+
     //todo validators for objectParams?
-    //todo duplicates
-//    Set<? extends Parameter> duplicates = p.getChildren()
-//        .stream()
-//        .filter(parameter -> Collections.frequency(p.getChildren(), parameter) > 1)
-//        .collect(Collectors.toSet());
+    //todo duplicates for sequence?
+    //number validators
     ParameterValidator minNotNAN = of(Conditions.isNAN, VALIDATOR_MIN, MIN_IS_NAN);
     ParameterValidator maxNotNAN = of(Conditions.isNAN, VALIDATOR_MAX, MAX_IS_NAN);
     ParameterValidator maxNotLessThanMin = of(Conditions.compareNums, VALIDATOR_MIN, MAX, MAX_LESS_THAN_MIN);
     ParameterValidator defaultLessThanMin = of(Conditions.compareNums, VALIDATOR_MIN, DEFAULT, DEFAULT_LESS_THAN_MIN);
     ParameterValidator defaultMoreThanMax = of(Conditions.compareNums.negate(), VALIDATOR_MAX, DEFAULT, DEFAULT_MORE_THAN_MAX);
-
     ParameterValidator numbers = minNotNAN.and(maxNotNAN).and(maxNotLessThanMin)
-        .and(maxNotLessThanMin).and(defaultLessThanMin).and(defaultMoreThanMax);
+            .and(maxNotLessThanMin).and(defaultLessThanMin).and(defaultMoreThanMax);
 
+    //list validators
     ParameterValidator defaultInList = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 
+    //object validators
     ParameterValidator noDuplicates = object(Conditions.hasDuplicates, HAS_DUPLICATES);
+    ParameterValidator objectValidators = object()
+    ParameterValidator groupObjectValidators = noDuplicates;
+
+    //parameter
+    ParameterValidator paramValidators = object(Conditions.hasDuplicates, HAS_DUPLICATES);
+
+    static ParameterValidator objectOf() {
+        return parameter -> {
+            if (parameter.getChild())
+        };
+    }
 
     static ParameterValidator object(final Predicate<ObjectParameter> predicate,
                                      final String message) {
@@ -61,35 +71,35 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
                                  final String path,
                                  final String message) {
         return parameter ->  parameter.getChild(path)
-            .filter(predicate)
-            .map(p -> invalid(toErrorMessage(p, message)))
-            .orElseGet(ValidationResult::valid);
+                .filter(predicate)
+                .map(p -> invalid(toErrorMessage(p, message)))
+                .orElseGet(ValidationResult::valid);
     }
 
     static ParameterValidator of(final BiPredicate<StringParameter, StringParameter> predicate,
                                  final String path1, final String path2, final String message) {
         return parameter -> parameter.getChild(path1)
-            .map(p1 -> parameter.getChild(path2)
-                .filter(p2 -> predicate.test(p1, p2))
-                .map(p2 -> invalid(toErrorMessage(p2, message)))
-                .orElseGet(ValidationResult::valid))
-            .orElseGet(ValidationResult::valid);
+                .map(p1 -> parameter.getChild(path2)
+                        .filter(p2 -> predicate.test(p1, p2))
+                        .map(p2 -> invalid(toErrorMessage(p2, message)))
+                        .orElseGet(ValidationResult::valid))
+                .orElseGet(ValidationResult::valid);
     }
 
     static ParameterValidator list(final BiPredicate<List<StringParameter>, StringParameter> predicate,
-                                 final String path1, final String path2, final String message) {
+                                   final String path1, final String path2, final String message) {
         return parameter -> parameter.findValidatorParam(path1)
-            .filter(p1 -> p1 instanceof ObjectParameter)
-            .map(ObjectParameter.class::cast)
-            .map(p1 -> p1.getChildren().stream()
-                .filter(sp -> sp instanceof StringParameter)
-                .map(StringParameter.class::cast)
-                .collect(Collectors.toList()))
-            .map(list -> parameter.getChild(path2)
-                .filter(p2 -> predicate.test(list, p2))
-                .map(p2 -> invalid(toErrorMessage(p2, message)))
-                .orElseGet(ValidationResult::valid))
-            .orElseGet(ValidationResult::valid);
+                .filter(p1 -> p1 instanceof ObjectParameter)
+                .map(ObjectParameter.class::cast)
+                .map(p1 -> p1.getChildren().stream()
+                        .filter(sp -> sp instanceof StringParameter)
+                        .map(StringParameter.class::cast)
+                        .collect(Collectors.toList()))
+                .map(list -> parameter.getChild(path2)
+                        .filter(p2 -> predicate.test(list, p2))
+                        .map(p2 -> invalid(toErrorMessage(p2, message)))
+                        .orElseGet(ValidationResult::valid))
+                .orElseGet(ValidationResult::valid);
     }
 
     default ParameterValidator and(final ParameterValidator other) {

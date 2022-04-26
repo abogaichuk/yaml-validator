@@ -1,10 +1,7 @@
 package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.ValidatorUtils;
-import com.example.yamlvalidator.entity.Definition;
-import com.example.yamlvalidator.entity.ObjectParameter;
-import com.example.yamlvalidator.entity.Parameter;
-import com.example.yamlvalidator.entity.ValidationResult;
+import com.example.yamlvalidator.entity.*;
 import com.example.yamlvalidator.validators.ParameterValidator;
 
 import java.util.ArrayList;
@@ -16,35 +13,60 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.example.yamlvalidator.validators.ParameterValidator.*;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.Stream.of;
 
 public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validate(Definition definition) {
-//        Optional<Parameter> port = definition.getParameters().stream()
-//            .filter(parameter -> "Port".equalsIgnoreCase(parameter.getName()))
-//            .findAny();
-//        if (port.isPresent()) {
-//            return numbers.apply((ObjectParameter) port.get());
-//        }
-        definition.getParameters().stream()
-            .filter(parameter -> "Protocol".equalsIgnoreCase(parameter.getName()))
-            .findAny()
-            .ifPresent(protocol -> {
-                ObjectParameter p = (ObjectParameter) protocol;
-                Set<String> reasons = defaultInList.apply(p).getReasons();
-                reasons.forEach(System.out::println);
-            });
+//        extractObjectParams(definition.getParameters())
+//                .map(noDuplicates)
+//                .filter(result -> !result.isValid())
+//                .forEach(result -> System.out.println(result.getReasons()));
+//        extractObjectParams(definition.getParameters())
+//                .map(pa)
         return ValidationResult.valid();
-//        List<? extends Parameter> validators = definition.getParameters().stream()
-//            .filter(parameter -> parameter instanceof ObjectParameter)
-//            .map(ObjectParameter.class::cast)
-//            .map(parameter -> parameter.findChildR("Validators/List"))
-//            .filter(Optional::isPresent)
-//            .map(Optional::get).collect(Collectors.toList());
-//        return ValidationResult.valid();
     }
+
+    private Stream<ObjectParameter> extractObjectParams(List<? extends Parameter> parameters) {
+        return parameters.stream()
+                .filter(parameter -> parameter instanceof ObjectParameter)
+                .map(ObjectParameter.class::cast)
+                .flatMap(parameter -> {
+                    Stream<ObjectParameter> objectParameters;
+                    if (parameter.getChildren().isEmpty()) {
+                        objectParameters = of(parameter);
+                    } else {
+                        objectParameters = concat(of(parameter), extractObjectParams(parameter.getChildren()));
+                    }
+                    return objectParameters;
+                });
+    }
+
+    private Stream<StringParameter> extractStringParams(List<? extends Parameter> parameters) {
+        return parameters.stream()
+                .flatMap(parameter -> {
+                    if (parameter instanceof ObjectParameter) {
+                        return extractStringParams(((ObjectParameter)parameter).getChildren());
+                    } else {
+                        return of(parameter);
+                    }
+                })
+                .map(StringParameter.class::cast);
+    }
+
+//    private List<ValidationResult> process(List<? extends Parameter> parameters) {
+//        parameters.stream()
+//                .map(this::test)
+//                .map()
+//    }
+//
+//    private ValidationResult test(Parameter parameter) {
+//        if (parameter instanceof ObjectParameter)
+//    }
 }
