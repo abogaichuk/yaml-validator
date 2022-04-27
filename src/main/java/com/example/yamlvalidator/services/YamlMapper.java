@@ -36,69 +36,84 @@ public class YamlMapper {
     }
 
     private List<Parameter> toParameters(MappingNode node) {
+        return toParameters(node, "");
+    }
+
+    private List<Parameter> toParameters(final MappingNode node, final String parent) {
         return node.getValue().stream()
             .filter(tuple -> !TYPES.equals(getKey(tuple)))
-            .map(this::toParameter)
+            .map(n -> toParameter(n, parent))
             .filter(Objects::nonNull)
             .collect(Collectors.toList());
     }
 
-    private Parameter toParameter(NodeTuple tuple) {
+    private Parameter toParameter(final NodeTuple tuple, final String parent) {
         var paramName = getKey(tuple);
-        var position = tuple.getKeyNode().getStartMark()
-            .map(this::toPosition).orElse(null);
+        var position = getPosition(tuple);
+        var path = parent.isEmpty() ? paramName : parent + "/" + paramName;
+
         if (tuple.getValueNode().getNodeType().equals(MAPPING)) {
-            return toObjectParameter(paramName, toParameters((MappingNode) tuple.getValueNode()), position);
+            return toObjectParameter(paramName, path, Parameter.ParameterType.MAPPING, toParameters((MappingNode) tuple.getValueNode(), path), position);
         } else if (tuple.getValueNode().getNodeType().equals(SCALAR)) {
-            return scalarParsing(paramName, tuple, position);
+            return scalarParsing(paramName, path, tuple, position);
         } else if (tuple.getValueNode().getNodeType().equals(SEQUENCE)) {
-            return sequenceParsing(paramName, (SequenceNode) tuple.getValueNode(), position);
+            return sequenceParsing(paramName, path, (SequenceNode) tuple.getValueNode(), position);
         } else {
             System.out.println("something wrong!!");
             return null;
         }
     }
 
-    private Parameter scalarParsing(String paramName, NodeTuple tuple, Position start) {
+    private Parameter scalarParsing(String paramName, String path, NodeTuple tuple, Position start) {
         var value = getScalarValue(tuple);
         var customType = findCustomType(value);
         if (customType.isPresent()) {
-            return toObjectParameter(paramName, toParameters((MappingNode) customType.get().getValueNode()), start);
+            return toObjectParameter(paramName, path, Parameter.ParameterType.MAPPING, toParameters((MappingNode) customType.get().getValueNode(), path), start);
         } else {
-            return toStringParameter(paramName, value, start);
+            return toStringParameter(paramName, path, Parameter.ParameterType.SCALAR, value, start);
         }
     }
 
-    private ObjectParameter sequenceParsing(String paramName, SequenceNode node, Position start) {
+    private ObjectParameter sequenceParsing(String paramName, final String path, SequenceNode node, Position start) {
         var parameters = node.getValue().stream()
-            .map(this::constructParameter)
+            .map(n -> constructParameter(n, path))
             .collect(Collectors.toList());
-        return toObjectParameter(paramName, parameters, start);
+        return toObjectParameter(paramName, path, Parameter.ParameterType.SEQUENCE, parameters, start);
     }
 
-    private Parameter constructParameter(Node node) {
+    private Parameter constructParameter(Node node, String path) {
         var position = node.getStartMark().map(this::toPosition).orElse(null);
         if (node instanceof MappingNode) {
-            return toObjectParameter("", toParameters((MappingNode) node), position);
+            return toObjectParameter("", path, Parameter.ParameterType.MAPPING, toParameters((MappingNode) node, path), position);
         } else {
-            return toStringParameter("", ((ScalarNode) node).getValue(), position);
+            return toStringParameter("", path, Parameter.ParameterType.SCALAR, ((ScalarNode) node).getValue(), position);
         }
     }
 
-    private StringParameter toStringParameter(String name, String value, Position start) {
+    private StringParameter toStringParameter(String name, String path, Parameter.ParameterType type, String value, Position start) {
         return StringParameter.builder()
             .value(value)
+            .path(path)
+            .type(type)
             .name(name)
             .position(start)
             .build();
     }
 
-    private ObjectParameter toObjectParameter(String name, List<? extends Parameter> parameters, Position start) {
+    private ObjectParameter toObjectParameter(String name, String path, Parameter.ParameterType type, List<? extends Parameter> parameters, Position start) {
         return ObjectParameter.builder()
             .name(name)
+            .path(path)
+            .type(type)
             .children(parameters)
             .position(start)
             .build();
+    }
+
+    private Position getPosition(final NodeTuple tuple) {
+        return tuple.getKeyNode().getStartMark()
+            .map(this::toPosition)
+            .orElse(null);
     }
 
     private Position toPosition(Mark mark) {

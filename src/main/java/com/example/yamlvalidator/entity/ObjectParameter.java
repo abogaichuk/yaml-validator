@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.entity;
 
 import lombok.Getter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Collections;
@@ -39,7 +40,7 @@ public class ObjectParameter extends Parameter {
         return Optional.empty();
     }
 
-    public Optional<StringParameter> getChild(final String childPath) {
+    public Optional<StringParameter> getChildAsString(final String childPath) {
         return findChildRecursive(childPath)
             .filter(p -> p instanceof StringParameter)
             .map(StringParameter.class::cast);
@@ -56,6 +57,14 @@ public class ObjectParameter extends Parameter {
         return children.stream()
             .filter(parameter -> Collections.frequency(children, parameter) > 1)
             .collect(Collectors.toSet());
+    }
+
+    public String getTypeFieldValue() {
+        return findChildRecursive("Type")
+            .filter(parameter -> parameter instanceof StringParameter)
+            .map(StringParameter.class::cast)
+            .map(StringParameter::getValue)
+            .orElse("unknown");
     }
 
     @Override

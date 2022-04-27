@@ -1,7 +1,7 @@
 #first comment
-ResourceType: GeneralTest
+#ResourceType: GeneralTest
 # description comment
-Description: General test
+#Description: General test
 Types:
   Test:
     id:
@@ -11,8 +11,12 @@ Types:
       type: datetime
       description: The time when product is valid from.
       example: 9999-12-31T00:00:00.0Z
+      Validators:
+        Before: 9999-12-31T00:00:00.0Z
+        After: 2021-01-01T00:00:00.0Z
     admin: string
   User:
+    type: object
     firstname: string
     lastname: string
     password:
@@ -41,16 +45,16 @@ Protocol:
       - TCP
       - UDP
       - HTTP
-  Description: Protocol specification
 Port:
   Default: 7002
-  Description: "Port Id of the secondary Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
+  Description: "Portdsd Id of the secondary Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
   Type: number
   Validators:
-    Min: 1025
+    Min: 1025dsdsdf
     Max: 65535
 Genesys:
 #    Type: Port or number or
+  SwitchName:
   SwitchName:
     Default: "Genesys SIP server"
     Description: "The name of the switch connected to the Genesys SIP server."
@@ -77,11 +81,10 @@ Genesys:
         - Both
         - Default
   Admin: User
-#Unique: true
-#Editable: false
-Links:
-  - ResourceType: UserAdmin
-    Type: OneToOne
-    Description: SequenceGroup with custom objects Test.
-  - ResourceType: Test
-    Type: OneToOne
+  Tested: Test
+#Links:
+#  - ResourceType: UserAdmin
+#    Type: OneToOne
+#    Description: SequenceGroup with custom objects Test.
+#  - ResourceType: Test
+#    Type: OneToOne

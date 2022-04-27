@@ -11,6 +11,7 @@ import java.util.Optional;
 @ToString
 public abstract class Parameter {
     private String name, path;
+    private ParameterType type;
 //    private boolean editable, unique, bypass;
     private Position position;
 
@@ -24,8 +25,12 @@ public abstract class Parameter {
     public boolean equals(Object obj) {
         if (obj instanceof Parameter) {
             Parameter p = (Parameter) obj;
-            return name.equals(p.getName());
+            return path.equals(p.getPath());
         }
         return false;
+    }
+
+    public enum ParameterType {
+        SCALAR, SEQUENCE, MAPPING
     }
 }

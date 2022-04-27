@@ -1,35 +1,28 @@
 package com.example.yamlvalidator.services;
 
-import com.example.yamlvalidator.ValidatorUtils;
-import com.example.yamlvalidator.entity.*;
-import com.example.yamlvalidator.validators.ParameterValidator;
+import com.example.yamlvalidator.entity.Definition;
+import com.example.yamlvalidator.entity.ObjectParameter;
+import com.example.yamlvalidator.entity.Parameter;
+import com.example.yamlvalidator.entity.StringParameter;
+import com.example.yamlvalidator.entity.ValidationResult;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.validators.ParameterValidator.*;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toCollection;
+import static com.example.yamlvalidator.validators.ParameterValidationRules.getRulesFor;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validate(Definition definition) {
-//        extractObjectParams(definition.getParameters())
-//                .map(noDuplicates)
-//                .filter(result -> !result.isValid())
-//                .forEach(result -> System.out.println(result.getReasons()));
-//        extractObjectParams(definition.getParameters())
-//                .map(pa)
+        List<ValidationResult> results = extractObjectParams(definition.getParameters())
+            .map(getRulesFor())
+//            .map(parameter -> ParameterValidationRules.getRulesFor().apply(parameter))
+            .peek(result -> result.getReasons().forEach(System.out::println))
+            .collect(Collectors.toList());
+        results.forEach(ValidationResult::getReasons);
         return ValidationResult.valid();
     }
 
