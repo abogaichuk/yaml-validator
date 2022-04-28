@@ -30,6 +30,10 @@ public abstract class Parameter {
         return false;
     }
 
+    public boolean isNotASequenceType() {
+        return !type.equals(ParameterType.SEQUENCE);
+    }
+
     public enum ParameterType {
         SCALAR, SEQUENCE, MAPPING
     }

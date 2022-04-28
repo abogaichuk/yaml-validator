@@ -10,16 +10,15 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.example.yamlvalidator.validators.ParameterValidator.*;
-
 public class ParameterValidationRules {
     private static Map<Predicate<ObjectParameter>, Function<ObjectParameter, ValidationResult>> parameterRules = new HashMap<>();
 
     static {
-        parameterRules.put(p ->  true, noDuplicates); //all params
-        parameterRules.put(ValidatorPredicates.isNumber, noDuplicates.and(numbers));
-        parameterRules.put(ValidatorPredicates.isString, noDuplicates.and(defaultInList));
-//        parameterRules.put(ValidatorPredicates.isDateTime, noDuplicates.and(defaultInList));
+//        parameterRules.put(p ->  true, noDuplicates); //all params
+        parameterRules.put(ValidatorPredicates.isCustom, ParameterValidator.customObject);
+        parameterRules.put(ValidatorPredicates.isNumber, ParameterValidator.numbers);
+        parameterRules.put(ValidatorPredicates.isString, ParameterValidator.strings);
+        parameterRules.put(ValidatorPredicates.isDateTime, ParameterValidator.dates);
     }
 
     public static Function<ObjectParameter, ValidationResult> getRulesFor() {

@@ -10,10 +10,10 @@ Types:
     executedDate:
       type: datetime
       description: The time when product is valid from.
-      example: 9999-12-31T00:00:00.0Z
+      example: 2016-03-04 11:30
       Validators:
-        Before: 9999-12-31T00:00:00.0Z
-        After: 2021-01-01T00:00:00.0Z
+        Before: 2000-03-04 11:30
+        After: 2025-03-04 11:30
     admin: string
   User:
     type: object
@@ -50,7 +50,7 @@ Port:
   Description: "Portdsd Id of the secondary Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
   Type: number
   Validators:
-    Min: 1025dsdsdf
+    Min: 1025
     Max: 65535
 Genesys:
 #    Type: Port or number or

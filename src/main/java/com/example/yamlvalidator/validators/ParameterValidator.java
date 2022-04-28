@@ -14,6 +14,9 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.example.yamlvalidator.ValidatorUtils.AFTER_IS_NOT_DATETIME;
+import static com.example.yamlvalidator.ValidatorUtils.BEFORE_DATE_IS_AFTER;
+import static com.example.yamlvalidator.ValidatorUtils.BEFORE_IS_NOT_DATETIME;
 import static com.example.yamlvalidator.ValidatorUtils.DEFAULT;
 import static com.example.yamlvalidator.ValidatorUtils.DEFAULT_LESS_THAN_MIN;
 import static com.example.yamlvalidator.ValidatorUtils.DEFAULT_MORE_THAN_MAX;
@@ -24,6 +27,8 @@ import static com.example.yamlvalidator.ValidatorUtils.MAX_IS_NAN;
 import static com.example.yamlvalidator.ValidatorUtils.MAX_LESS_THAN_MIN;
 import static com.example.yamlvalidator.ValidatorUtils.MIN;
 import static com.example.yamlvalidator.ValidatorUtils.MIN_IS_NAN;
+import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_AFTER;
+import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_BEFORE;
 import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_LIST;
 import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_MAX;
 import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_MIN;
@@ -36,11 +41,10 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
     //todo validators for objectParams?
     //todo duplicates for sequence, object sequence?
     //todo what is object? is type a mandatory field?
-    //todo parseInt -1?
     //number validators
     ParameterValidator minNotNAN = of(Conditions.isNAN, VALIDATOR_MIN, MIN_IS_NAN);
     ParameterValidator maxNotNAN = of(Conditions.isNAN, VALIDATOR_MAX, MAX_IS_NAN);
-    ParameterValidator maxNotLessThanMin = of(Conditions.compareNums, VALIDATOR_MIN, VALIDATOR_MAX, MAX_LESS_THAN_MIN);
+    ParameterValidator minGreaterThanMax = of(Conditions.compareNums, VALIDATOR_MIN, VALIDATOR_MAX, MAX_LESS_THAN_MIN);
     ParameterValidator defaultLessThanMin = of(Conditions.compareNums, VALIDATOR_MIN, DEFAULT, DEFAULT_LESS_THAN_MIN);
     ParameterValidator defaultMoreThanMax = of(Conditions.compareNums.negate(), VALIDATOR_MAX, DEFAULT, DEFAULT_MORE_THAN_MAX);
 
@@ -48,18 +52,38 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
     ParameterValidator defaultInList = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 
     //datetime validators
+    ParameterValidator afterCanBeParsed = ofDate(Conditions.isDateTime, VALIDATOR_AFTER, AFTER_IS_NOT_DATETIME);
+    ParameterValidator beforeCanBeParsed = ofDate(Conditions.isDateTime, VALIDATOR_BEFORE, BEFORE_IS_NOT_DATETIME);
+    ParameterValidator beforeIsAfter = ofDate(Conditions.compareDates, VALIDATOR_BEFORE, VALIDATOR_AFTER, BEFORE_DATE_IS_AFTER);
 //    ParameterValidator dateTime = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 
-    ParameterValidator numbers = minNotNAN.and(maxNotNAN).and(maxNotLessThanMin)
-        .and(maxNotLessThanMin).and(defaultLessThanMin).and(defaultMoreThanMax).and(defaultInList);
-
-    //object validators
+    //parameter validators
     ParameterValidator noDuplicates = object(Conditions.hasDuplicates, HAS_DUPLICATES);
-//    ParameterValidator objectValidators = object()
-    ParameterValidator groupObjectValidators = noDuplicates;
 
-    //parameter
-    ParameterValidator paramValidators = object(Conditions.hasDuplicates, HAS_DUPLICATES);
+    ParameterValidator numbers = noDuplicates.and(minNotNAN).and(maxNotNAN).and(minGreaterThanMax)
+        .and(defaultLessThanMin).and(defaultMoreThanMax).and(defaultInList);
+    ParameterValidator strings = noDuplicates.and(defaultInList);
+    ParameterValidator dates = noDuplicates.and(afterCanBeParsed).and(beforeCanBeParsed).and(beforeIsAfter);
+    ParameterValidator customObject = noDuplicates;
+
+
+    static ParameterValidator ofDate(final Predicate<StringParameter> predicate,
+                                     final String path, final String message) {
+        return parameter -> parameter.getChildAsString(path)
+            .filter(predicate.negate())
+            .map(p -> invalid(toErrorMessage(p, message)))
+            .orElseGet(ValidationResult::valid);
+    }
+
+    static ParameterValidator ofDate(final BiPredicate<StringParameter, StringParameter> predicate,
+                                     final String path1, final String path2, final String message) {
+        return parameter -> parameter.getChildAsString(path1)
+            .map(p1 -> parameter.getChildAsString(path2)
+                .filter(p2 -> predicate.test(p1, p2))
+                .map(p -> invalid(toErrorMessage(p, message)))
+                .orElseGet(ValidationResult::valid))
+            .orElseGet(ValidationResult::valid);
+    }
 
     static ParameterValidator object(final Predicate<ObjectParameter> predicate,
                                      final String message) {

@@ -21,7 +21,7 @@ public class ObjectParameter extends Parameter {
 
     public Optional<? extends Parameter> findChild(String name) {
         return isNotEmpty(name) ? children.stream()
-            .filter(param -> name.equals(param.getName()))
+            .filter(param -> name.equalsIgnoreCase(param.getName()))
             .findAny() : Optional.empty();
     }
 
@@ -31,7 +31,7 @@ public class ObjectParameter extends Parameter {
             if (parts.length > 1) {
                 Optional<? extends Parameter> child = findChild(parts[0]);
                 if (child.isPresent() && child.get() instanceof ObjectParameter) {
-                    return ((ObjectParameter) child.get()).findChild(parts[1]);
+                    return ((ObjectParameter) child.get()).findChildRecursive(parts[1]);
                 }
             } else {
                 return findChild(path);
@@ -59,7 +59,11 @@ public class ObjectParameter extends Parameter {
             .collect(Collectors.toSet());
     }
 
-    public String getTypeFieldValue() {
+    public boolean containsDuplicates() {
+        return getDuplicates().size() > 0;
+    }
+
+    public String getTypeChildValue() {
         return findChildRecursive("Type")
             .filter(parameter -> parameter instanceof StringParameter)
             .map(StringParameter.class::cast)

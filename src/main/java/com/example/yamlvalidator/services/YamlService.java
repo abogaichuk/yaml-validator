@@ -56,8 +56,8 @@ public class YamlService {
         var yaml = new Dump(settings);
         var writer = new MyStreamToStringWriter();
         yaml.dumpNode(root, writer);
-        System.out.println(writer);
-//        Files.write(Paths.get(filename), writer.toString().getBytes());
+//        System.out.println(writer);
+        Files.write(Paths.get(filename), writer.toString().getBytes());
     }
 
 }
