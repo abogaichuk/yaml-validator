@@ -1,4 +1,4 @@
-package com.example.yamlvalidator;
+package com.example.yamlvalidator.utils;
 
 import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;

@@ -5,11 +5,13 @@ import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
+import com.example.yamlvalidator.validators.ParameterValidationRules;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.example.yamlvalidator.validators.ParameterValidationRules.*;
 import static com.example.yamlvalidator.validators.ParameterValidationRules.getRulesFor;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;

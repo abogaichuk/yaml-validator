@@ -995,8 +995,6 @@ types:
     properties:
       count:
         type: integer
-        description: The number of returned documents.
-        example: 2
       data:
         type: array
         items:
@@ -1012,6 +1010,7 @@ types:
       sku: string
   SubscribeResponse:
     properties:
+    count: number
       action: string
       queryString: string
       locale: string

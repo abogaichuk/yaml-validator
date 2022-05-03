@@ -1,6 +1,6 @@
 //package com.example.yamlvalidator.validators;
 //
-//import com.example.yamlvalidator.ValidatorUtils;
+//import com.example.yamlvalidator.utils.ValidatorUtils;
 //import com.example.yamlvalidator.entity.ObjectParameter;
 //import com.example.yamlvalidator.entity.StringParameter;
 //import com.example.yamlvalidator.entity.ValidationResult;
@@ -9,7 +9,7 @@
 //import java.util.function.Function;
 //import java.util.function.Predicate;
 //
-//import static com.example.yamlvalidator.ValidatorUtils.*;
+//import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 //import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 //import static com.example.yamlvalidator.entity.ValidationResult.valid;
 //

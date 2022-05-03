@@ -1,8 +1,28 @@
-#first comment
 ResourceType: GeneralTest
 # description comment
 #Description: General test
 Types:
+  ManualTest:
+    id:
+      type: number
+      description: test id
+    executedDate:
+      type: datetime
+      description: The time when product is valid from.
+      example: 2016-03-04 11:30
+      Validators:
+        Before: 2000-03-04 adasd11:30
+        After: 2025-03-04 11:30
+  AutoTest:
+    id:
+      type: number
+      description: test id
+    testType:
+      type: string
+      Validatos:
+        List:
+        - unit
+        - integration
   User:
     type: object
     firstname: string
@@ -17,39 +37,11 @@ Types:
     password:
       type: secret
       description: user password Carl!
-  ManualTest:
-    id:
-      type: number
-      description: test id
-    executedDate:
-      type: datetime
-      description: The time when product is valid from.
-      example: 2016-03-04 11:30
-      Validators:
-        Before: 2000-03-04 adasd11:30
-        After: 2025-03-04 11:30
-    AutoTest:
-      id:
-        type: number
-        description: test id
-      testType:
-        type: string
-        Validatos:
-          List:
-            - unit
-            - integration
-
-#todo is type mandatory?
-Test: ManualTest or AutoTest
-Greetings:
-  type: string
-  default: Hello Humans or Alliens or Predators, now you are in our list!!
-
 # params block
 # another one
 StringList:
-  - haha #haha comment
-  - hehe
+- haha #haha comment
+- hehe
 #SequenceGroup:
 #  - Type: Test
 #    Description: SequenceGroup with custom objects Test.
@@ -66,46 +58,48 @@ Protocol:
   Search: true
   Validators:
     List:
-      - TCP
-      - UDP
-      - HTTP
+    - TCP
+    - UDP
+    - HTTP
 Port:
   Default: 7002
-  Description: "Port Id of the secondary Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
+  Description: "Portdsd Id of the secondary Genesys T-Server node. Valid only when\
+    \ UseRedundancyMechanism is set to true."
   Type: number
   Validators:
     Min: 102534
     Max: 65535
 Genesys:
-#    Type: Port or number or
-#  SwitchName:
-#  Search: true isn't valid
-# add skip validation (noValidationGroup)
+  #    Type: Port or number or
+  #  SwitchName:
+  #  Search: true isn't valid
+  # add skip validation (noValidationGroup)
   SwitchName:
     Default: "Genesys SIP server"
     Description: "The name of the switch connected to the Genesys SIP server."
     Type: string
     Validators:
       List:
-        - Avaya
-        - Cisco
-        - Genesys SIP server
-        - Nortel
-        - Aspect Call Center
-        - Aspect Spectrum
-        - Ericsson
-        - NEC
-        - Alcatel-Lucent
+      - Avaya
+      - Cisco
+      - Genesys SIP server
+      - Nortel
+      - Aspect Call Center
+      - Aspect Spectrum
+      - Ericsson
+      - NEC
+      - Alcatel-Lucent
   RTPMonitoringStyle:
     Default: "Private Service"
-    Description: "Request sent as Monitor Style to Genesys in order to receive RTP events."
+    Description: "Request sent as Monitor Style to Genesys in order to receive RTP\
+      \ events."
     Type: string
     Validators:
       List:
-        - Private Service
-        - On Monitor
-        - Both
-        - Default
+      - Private Service
+      - On Monitor
+      - Both
+      - Default
   Tested: ManualTest
 #  Admin:
 #    type: User
@@ -114,16 +108,8 @@ Genesys:
 cisco:
   port: Port
   address: string
-
 Links:
   type: cisco or datetime list
-#Links:
-#  type: object
-#  Validators:
-#    OneOf:
-#      - cisco
-#      - datetime
-
 
 
 

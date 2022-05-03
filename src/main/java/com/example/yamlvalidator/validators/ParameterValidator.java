@@ -1,38 +1,32 @@
 package com.example.yamlvalidator.validators;
 
 import com.example.yamlvalidator.entity.ObjectParameter;
-import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.example.yamlvalidator.ValidatorUtils.AFTER_IS_NOT_DATETIME;
-import static com.example.yamlvalidator.ValidatorUtils.BEFORE_DATE_IS_AFTER;
-import static com.example.yamlvalidator.ValidatorUtils.BEFORE_IS_NOT_DATETIME;
-import static com.example.yamlvalidator.ValidatorUtils.DEFAULT;
-import static com.example.yamlvalidator.ValidatorUtils.DEFAULT_LESS_THAN_MIN;
-import static com.example.yamlvalidator.ValidatorUtils.DEFAULT_MORE_THAN_MAX;
-import static com.example.yamlvalidator.ValidatorUtils.DEFAULT_WRONG;
-import static com.example.yamlvalidator.ValidatorUtils.HAS_DUPLICATES;
-import static com.example.yamlvalidator.ValidatorUtils.MAX;
-import static com.example.yamlvalidator.ValidatorUtils.MAX_IS_NAN;
-import static com.example.yamlvalidator.ValidatorUtils.MAX_LESS_THAN_MIN;
-import static com.example.yamlvalidator.ValidatorUtils.MIN;
-import static com.example.yamlvalidator.ValidatorUtils.MIN_IS_NAN;
-import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_AFTER;
-import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_BEFORE;
-import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_LIST;
-import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_MAX;
-import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR_MIN;
-import static com.example.yamlvalidator.ValidatorUtils.toErrorMessage;
+import static com.example.yamlvalidator.utils.ValidatorUtils.AFTER_IS_NOT_DATETIME;
+import static com.example.yamlvalidator.utils.ValidatorUtils.BEFORE_DATE_IS_AFTER;
+import static com.example.yamlvalidator.utils.ValidatorUtils.BEFORE_IS_NOT_DATETIME;
+import static com.example.yamlvalidator.utils.ValidatorUtils.DEFAULT;
+import static com.example.yamlvalidator.utils.ValidatorUtils.DEFAULT_LESS_THAN_MIN;
+import static com.example.yamlvalidator.utils.ValidatorUtils.DEFAULT_MORE_THAN_MAX;
+import static com.example.yamlvalidator.utils.ValidatorUtils.DEFAULT_WRONG;
+import static com.example.yamlvalidator.utils.ValidatorUtils.HAS_DUPLICATES;
+import static com.example.yamlvalidator.utils.ValidatorUtils.MAX_IS_NAN;
+import static com.example.yamlvalidator.utils.ValidatorUtils.MAX_LESS_THAN_MIN;
+import static com.example.yamlvalidator.utils.ValidatorUtils.MIN_IS_NAN;
+import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_AFTER;
+import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_BEFORE;
+import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_LIST;
+import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_MAX;
+import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_MIN;
+import static com.example.yamlvalidator.utils.ValidatorUtils.toErrorMessage;
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.entity.ValidationResult.valid;
 
@@ -40,7 +34,8 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
 
     //todo validators for objectParams?
     //todo duplicates for sequence, object sequence?
-    //todo what is object? is type a mandatory field?
+    //todo secret validation?
+    //todo variation group
     //number validators
     ParameterValidator minNotNAN = of(Conditions.isNAN, VALIDATOR_MIN, MIN_IS_NAN);
     ParameterValidator maxNotNAN = of(Conditions.isNAN, VALIDATOR_MAX, MAX_IS_NAN);
@@ -52,9 +47,9 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
     ParameterValidator defaultInList = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 
     //datetime validators
-    ParameterValidator afterCanBeParsed = ofDate(Conditions.isDateTime, VALIDATOR_AFTER, AFTER_IS_NOT_DATETIME);
-    ParameterValidator beforeCanBeParsed = ofDate(Conditions.isDateTime, VALIDATOR_BEFORE, BEFORE_IS_NOT_DATETIME);
-    ParameterValidator beforeIsAfter = ofDate(Conditions.compareDates, VALIDATOR_BEFORE, VALIDATOR_AFTER, BEFORE_DATE_IS_AFTER);
+    ParameterValidator afterCanBeParsed = of(Conditions.isDateTime, VALIDATOR_AFTER, AFTER_IS_NOT_DATETIME);
+    ParameterValidator beforeCanBeParsed = of(Conditions.isDateTime, VALIDATOR_BEFORE, BEFORE_IS_NOT_DATETIME);
+    ParameterValidator beforeIsAfter = of(Conditions.compareDates, VALIDATOR_BEFORE, VALIDATOR_AFTER, BEFORE_DATE_IS_AFTER);
 //    ParameterValidator dateTime = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 
     //parameter validators
@@ -66,24 +61,6 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
     ParameterValidator dates = noDuplicates.and(afterCanBeParsed).and(beforeCanBeParsed).and(beforeIsAfter);
     ParameterValidator customObject = noDuplicates;
 
-
-    static ParameterValidator ofDate(final Predicate<StringParameter> predicate,
-                                     final String path, final String message) {
-        return parameter -> parameter.getChildAsString(path)
-            .filter(predicate.negate())
-            .map(p -> invalid(toErrorMessage(p, message)))
-            .orElseGet(ValidationResult::valid);
-    }
-
-    static ParameterValidator ofDate(final BiPredicate<StringParameter, StringParameter> predicate,
-                                     final String path1, final String path2, final String message) {
-        return parameter -> parameter.getChildAsString(path1)
-            .map(p1 -> parameter.getChildAsString(path2)
-                .filter(p2 -> predicate.test(p1, p2))
-                .map(p -> invalid(toErrorMessage(p, message)))
-                .orElseGet(ValidationResult::valid))
-            .orElseGet(ValidationResult::valid);
-    }
 
     static ParameterValidator object(final Predicate<ObjectParameter> predicate,
                                      final String message) {

@@ -1,18 +1,16 @@
 package com.example.yamlvalidator.entity;
 
 import lombok.Getter;
-import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.example.yamlvalidator.ValidatorUtils.VALIDATOR;
-import static com.example.yamlvalidator.ValidatorUtils.isNotEmpty;
+import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR;
+import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
 @SuperBuilder
 @Getter

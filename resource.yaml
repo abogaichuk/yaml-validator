@@ -11,3 +11,10 @@ FirstTest:
 Genesys:
   SwitchName: Cisco
 
+Links:
+  - type: cisco
+    port: 22
+    address: localhost
+  - datetime: "2222-10-10"
+
+

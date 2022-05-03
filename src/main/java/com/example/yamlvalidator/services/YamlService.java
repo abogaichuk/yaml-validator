@@ -1,7 +1,6 @@
 package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.MyStreamToStringWriter;
-import com.example.yamlvalidator.entity.Definition;
 import com.example.yamlvalidator.entity.ValidationResult;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
@@ -18,8 +17,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 public class YamlService {
@@ -33,12 +30,14 @@ public class YamlService {
                 .orElseGet(ValidationResult::valid);
             result.getReasons().forEach(System.out::println);
 
-            save(defNode.get(), "definition1.yaml");
+
+//            save(defNode.get(), "definition1.yaml");
 //            save(resource.get(), "resource1.yaml");
         } catch (ParserException | ScannerException e) {
             System.out.println(e.getMessage());
         }
     }
+
     private Optional<Node> readFile(String filename) throws FileNotFoundException {
         var loadSettings = LoadSettings.builder()
                 .setParseComments(true)

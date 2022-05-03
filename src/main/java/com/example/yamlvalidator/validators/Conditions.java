@@ -1,17 +1,13 @@
 package com.example.yamlvalidator.validators;
 
-import com.example.yamlvalidator.ValidatorUtils;
+import com.example.yamlvalidator.utils.ValidatorUtils;
 import com.example.yamlvalidator.entity.ObjectParameter;
-import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-
-import static com.example.yamlvalidator.ValidatorUtils.*;
 
 public interface Conditions extends Predicate<StringParameter> {
 
