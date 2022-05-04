@@ -1,5 +1,6 @@
 package com.example.yamlvalidator.entity;
 
+import com.example.yamlvalidator.strategy.Validator;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
@@ -15,7 +16,31 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 @SuperBuilder
 @Getter
 public class ObjectParameter extends Parameter {
-    private List<? extends Parameter> children;
+    private List<Parameter> children;
+
+//    @Override
+//    public ValidationResult accept(Visitor v) {
+//        ValidationResult result = v.visit(this);
+//        List<ValidationResult> invalidResults = children.stream()
+//                .map(parameter -> parameter.accept(v))
+//                .filter(validationResult -> !validationResult.isValid())
+//                .collect(Collectors.toList());
+//        return invalidResults.stream()
+//                .reduce(ValidationResult::merge)
+//                .map(childResult -> childResult.merge(result))
+//                .orElse(result);
+//    }
+
+    @Override
+    public ValidationResult validate() {
+        ValidationResult result = Validator.of().validate(this);
+        ValidationResult finalResult = children.stream()
+                .map(Parameter::validate)
+                .reduce(ValidationResult::merge)
+                .map(childResult -> childResult.merge(result))
+                .orElse(result);
+        return finalResult;
+    }
 
     public Optional<? extends Parameter> findChild(String name) {
         return isNotEmpty(name) ? children.stream()

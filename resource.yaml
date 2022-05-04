@@ -8,8 +8,8 @@ Port: 8080
 FirstTest:
 #  id: 100101
   admin: aaa
-Genesys:
-  SwitchName: Cisco
+#Genesys:
+#  SwitchName: Cisco
 
 Links:
   - type: cisco

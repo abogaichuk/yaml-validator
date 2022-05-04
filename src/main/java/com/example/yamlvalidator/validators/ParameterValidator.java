@@ -47,8 +47,8 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
     ParameterValidator defaultInList = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 
     //datetime validators
-    ParameterValidator afterCanBeParsed = of(Conditions.isDateTime, VALIDATOR_AFTER, AFTER_IS_NOT_DATETIME);
-    ParameterValidator beforeCanBeParsed = of(Conditions.isDateTime, VALIDATOR_BEFORE, BEFORE_IS_NOT_DATETIME);
+    ParameterValidator afterCanBeParsed = of(Conditions.isDateTime.negate(), VALIDATOR_AFTER, AFTER_IS_NOT_DATETIME);
+    ParameterValidator beforeCanBeParsed = of(Conditions.isDateTime.negate(), VALIDATOR_BEFORE, BEFORE_IS_NOT_DATETIME);
     ParameterValidator beforeIsAfter = of(Conditions.compareDates, VALIDATOR_BEFORE, VALIDATOR_AFTER, BEFORE_DATE_IS_AFTER);
 //    ParameterValidator dateTime = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 

@@ -1,30 +1,43 @@
 package com.example.yamlvalidator.services;
 
-import com.example.yamlvalidator.entity.Definition;
-import com.example.yamlvalidator.entity.ObjectParameter;
-import com.example.yamlvalidator.entity.Parameter;
-import com.example.yamlvalidator.entity.StringParameter;
-import com.example.yamlvalidator.entity.ValidationResult;
-import com.example.yamlvalidator.validators.ParameterValidationRules;
+import com.example.yamlvalidator.entity.*;
+import com.example.yamlvalidator.strategy.Validator;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.validators.ParameterValidationRules.*;
-import static com.example.yamlvalidator.validators.ParameterValidationRules.getRulesFor;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validate(Definition definition) {
-        List<ValidationResult> results = extractObjectParams(definition.getParameters())
-            .map(getRulesFor())
-//            .map(parameter -> ParameterValidationRules.getRulesFor().apply(parameter))
-            .peek(result -> result.getReasons().forEach(System.out::println))
-            .collect(Collectors.toList());
-        results.forEach(ValidationResult::getReasons);
+//        List<ValidationResult> results = extractObjectParams(definition.getParameters())
+//            .map(getRulesFor())
+//            .peek(result -> result.getReasons().forEach(System.out::println))
+//            .collect(Collectors.toList());
+//        results.forEach(ValidationResult::getReasons);
+//        Visitor v = new ParameterVisitor();
+//        definition.getParameters().forEach(parameter -> parameter.accept(v));
+//        List<ValidationResult> results = definition.getParameters().stream()
+//                .map(parameter -> parameter.accept(v))
+//                .peek(result -> result.getReasons().forEach(System.out::println))
+//                .collect(Collectors.toList());
+
+//        ValidationResult result = definition.getParameters().stream()
+//                .filter(parameter -> parameter instanceof ObjectParameter)
+//                .map(ObjectParameter.class::cast)
+//                .map(parameter -> Validator.of().validate(parameter))
+//                .filter(validationResult -> !validationResult.isValid())
+//                .reduce(ValidationResult::merge)
+//                .orElseGet(ValidationResult::valid);
+//        ValidationResult result = definition.getParameters().stream()
+//                .map(Parameter::validate)
+//                .reduce(ValidationResult::merge)
+//                .orElseGet(ValidationResult::valid);
+        ValidationResult result = definition.validate();
+        result.getReasons().forEach(System.out::println);
         return ValidationResult.valid();
     }
 

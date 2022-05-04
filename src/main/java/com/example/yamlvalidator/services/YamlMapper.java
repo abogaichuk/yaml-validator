@@ -29,10 +29,12 @@ public class YamlMapper {
         typeTuple = findParameter((MappingNode) root, TYPES);
         var parameters = toParameters((MappingNode) root);
         return Definition.builder()
-            .parameters(parameters)
-            .resourceType(getScalarValueFrom((MappingNode) root, "ResourceType"))
-            .description(getScalarValueFrom((MappingNode) root, "Description"))
-            .build();
+                .children(parameters)
+                .name("root")
+                .type(Parameter.ParameterType.MAPPING)
+                .resourceType(getScalarValueFrom((MappingNode) root, "ResourceType"))
+                .description(getScalarValueFrom((MappingNode) root, "Description"))
+                .build();
     }
 
     private List<Parameter> toParameters(MappingNode node) {
@@ -100,7 +102,7 @@ public class YamlMapper {
             .build();
     }
 
-    private ObjectParameter toObjectParameter(String name, String path, Parameter.ParameterType type, List<? extends Parameter> parameters, Position start) {
+    private ObjectParameter toObjectParameter(String name, String path, Parameter.ParameterType type, List<Parameter> parameters, Position start) {
         return ObjectParameter.builder()
             .name(name)
             .path(path)

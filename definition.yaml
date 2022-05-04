@@ -1,5 +1,5 @@
 #first comment
-ResourceType: GeneralTest
+#ResourceType: GeneralTest
 # description comment
 #Description: General test
 Types:
@@ -26,18 +26,18 @@ Types:
       description: The time when product is valid from.
       example: 2016-03-04 11:30
       Validators:
-        Before: 2000-03-04 adasd11:30
+        Before: 2000-03-04 11:30
         After: 2025-03-04 11:30
-    AutoTest:
-      id:
-        type: number
-        description: test id
-      testType:
-        type: string
-        Validatos:
-          List:
-            - unit
-            - integration
+  AutoTest:
+    id:
+      type: number
+      description: test id
+    testType:
+      type: string
+      Validatos:
+        List:
+          - unit
+          - integration
 
 #todo is type mandatory?
 Test: ManualTest or AutoTest
@@ -58,17 +58,17 @@ StringList:
 #    type: Test
 #  description: SequenceGroup with custom objects Test.
 #FirstTest: Test
-Protocol:
-  Type: string
-  Default: TCPPP
-  Unique: true
-  Unique: false
-  Search: true
-  Validators:
-    List:
-      - TCP
-      - UDP
-      - HTTP
+#Protocol:
+#  Type: string
+#  Default: TCPPP
+#  Unique: true
+#  Unique: false
+#  Search: true
+#  Validators:
+#    List:
+#      - TCP
+#      - UDP
+#      - HTTP
 Port:
   Default: 7002
   Description: "Port Id of the secondary Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
@@ -82,8 +82,9 @@ Genesys:
 #  Search: true isn't valid
 # add skip validation (noValidationGroup)
   SwitchName:
-    Default: "Genesys SIP server"
+    Default: "Genesys SIP serverr"
     Description: "The name of the switch connected to the Genesys SIP server."
+    Description: "aaa"
     Type: string
     Validators:
       List:
@@ -98,6 +99,7 @@ Genesys:
         - Alcatel-Lucent
   RTPMonitoringStyle:
     Default: "Private Service"
+    Description: "bbbb"
     Description: "Request sent as Monitor Style to Genesys in order to receive RTP events."
     Type: string
     Validators:
@@ -111,12 +113,12 @@ Genesys:
 #    type: User
 #    description: Cisco admin
 #  Tested: ManualTest or AutoTest
-cisco:
-  port: Port
-  address: string
-
-Links:
-  type: cisco or datetime list
+#cisco:
+#  port: Port
+#  address: string
+#
+#Links:
+#  type: cisco or datetime list
 #Links:
 #  type: object
 #  Validators:
