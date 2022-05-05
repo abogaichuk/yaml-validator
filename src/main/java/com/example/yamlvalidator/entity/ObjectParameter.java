@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.entity;
 
-import com.example.yamlvalidator.strategy.Validator;
+import com.example.yamlvalidator.factory.Rule;
+import com.example.yamlvalidator.factory.RulesFactory;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
@@ -33,7 +34,9 @@ public class ObjectParameter extends Parameter {
 
     @Override
     public ValidationResult validate() {
-        ValidationResult result = Validator.of().validate(this);
+        Rule rules = RulesFactory.getRules(this);
+        ValidationResult result = rules.validate(this);
+//        ValidationResult result = Validator.of().validate(this);
         ValidationResult finalResult = children.stream()
                 .map(Parameter::validate)
                 .reduce(ValidationResult::merge)
@@ -42,17 +45,17 @@ public class ObjectParameter extends Parameter {
         return finalResult;
     }
 
-    public Optional<? extends Parameter> findChild(String name) {
+    public Optional<Parameter> findChild(String name) {
         return isNotEmpty(name) ? children.stream()
             .filter(param -> name.equalsIgnoreCase(param.getName()))
             .findAny() : Optional.empty();
     }
 
-    public Optional<? extends Parameter> findChildRecursive(String path) {
+    public Optional<Parameter> findChildRecursive(String path) {
         if (isNotEmpty(path)) {
             String[] parts = path.split("/", 2);
             if (parts.length > 1) {
-                Optional<? extends Parameter> child = findChild(parts[0]);
+                Optional<Parameter> child = findChild(parts[0]);
                 if (child.isPresent() && child.get() instanceof ObjectParameter) {
                     return ((ObjectParameter) child.get()).findChildRecursive(parts[1]);
                 }
@@ -69,14 +72,29 @@ public class ObjectParameter extends Parameter {
             .map(StringParameter.class::cast);
     }
 
-    public Optional<? extends Parameter> findValidatorParam(String name) {
+    public Optional<List<StringParameter>> getDescendantAsList(final String childPath) {
+        return findChildRecursive(childPath)
+                .map(parameter -> {
+                    if (parameter instanceof ObjectParameter) {
+                        return ((ObjectParameter) parameter).getChildren().stream()
+                                .filter(p -> p instanceof StringParameter)
+                                .map(p -> (StringParameter) p)
+                                .collect(Collectors.toList());
+                    } else {
+                        return Collections.singletonList((StringParameter) parameter);
+                    }
+                });
+
+    }
+
+    public Optional<Parameter> findValidatorParam(String name) {
         return isNotEmpty(name) ? findChild(VALIDATOR)
             .filter(p -> p instanceof ObjectParameter)
             .map(ObjectParameter.class::cast)
             .flatMap(p -> p.findChild(name)) : Optional.empty();
     }
 
-    public Set<? extends Parameter> getDuplicates() {
+    public Set<Parameter> getDuplicates() {
         return children.stream()
             .filter(parameter -> Collections.frequency(children, parameter) > 1)
             .collect(Collectors.toSet());
@@ -91,7 +109,7 @@ public class ObjectParameter extends Parameter {
             .filter(parameter -> parameter instanceof StringParameter)
             .map(StringParameter.class::cast)
             .map(StringParameter::getValue)
-            .orElse("unknown");
+            .orElse("custom");
     }
 
     @Override

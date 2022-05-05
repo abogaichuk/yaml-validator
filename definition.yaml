@@ -40,16 +40,16 @@ Types:
           - integration
 
 #todo is type mandatory?
-Test: ManualTest or AutoTest
-Greetings:
-  type: string
-  default: Hello Humans or Alliens or Predators, now you are in our list!!
+#Test: ManualTest or AutoTest
+#Greetings:
+#  type: string
+#  default: Hello Humans or Alliens or Predators, now you are in our list!!
 
 # params block
 # another one
-StringList:
-  - haha #haha comment
-  - hehe
+#StringList:
+#  - haha #haha comment
+#  - hehe
 #SequenceGroup:
 #  - Type: Test
 #    Description: SequenceGroup with custom objects Test.
@@ -58,24 +58,28 @@ StringList:
 #    type: Test
 #  description: SequenceGroup with custom objects Test.
 #FirstTest: Test
-#Protocol:
-#  Type: string
-#  Default: TCPPP
-#  Unique: true
-#  Unique: false
-#  Search: true
-#  Validators:
-#    List:
-#      - TCP
-#      - UDP
-#      - HTTP
+Protocol:
+  Type: string
+  Default: TCPPP
+  Unique: true
+  Unique: false
+  Search: true
+  Validators:
+    List:
+      - TCP
+      - UDP
+      - HTTP
 Port:
-  Default: 7002
+  Default: 7003
   Description: "Port Id of the secondary Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
   Type: number
   Validators:
     Min: 102534
     Max: 65535
+    List:
+      - 7000
+      - 7001
+      - 7002
 Genesys:
 #    Type: Port or number or
 #  SwitchName:

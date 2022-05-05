@@ -5,7 +5,7 @@ import com.example.yamlvalidator.entity.ObjectParameter;
 import java.util.function.Predicate;
 
 public interface ValidatorPredicates extends Predicate<ObjectParameter> {
-    Predicate<ObjectParameter> isCustom = parameter -> parameter.getTypeChildValue().equals("unknown");
+    Predicate<ObjectParameter> isCustom = parameter -> parameter.getTypeChildValue().equals("custom");
     Predicate<ObjectParameter> isNumber = parameter -> parameter.getTypeChildValue().equals("number");
     Predicate<ObjectParameter> isString = parameter -> parameter.getTypeChildValue().equals("string");
     Predicate<ObjectParameter> isDateTime = parameter -> parameter.getTypeChildValue().equals("datetime");

@@ -37,8 +37,8 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
     //todo secret validation?
     //todo variation group
     //number validators
-    ParameterValidator minNotNAN = of(Conditions.isNAN, VALIDATOR_MIN, MIN_IS_NAN);
-    ParameterValidator maxNotNAN = of(Conditions.isNAN, VALIDATOR_MAX, MAX_IS_NAN);
+//    ParameterValidator minNotNAN = of(Conditions.isNAN, VALIDATOR_MIN, MIN_IS_NAN);
+//    ParameterValidator maxNotNAN = of(Conditions.isNAN, VALIDATOR_MAX, MAX_IS_NAN);
     ParameterValidator minGreaterThanMax = of(Conditions.compareNums, VALIDATOR_MIN, VALIDATOR_MAX, MAX_LESS_THAN_MIN);
     ParameterValidator defaultLessThanMin = of(Conditions.compareNums, VALIDATOR_MIN, DEFAULT, DEFAULT_LESS_THAN_MIN);
     ParameterValidator defaultMoreThanMax = of(Conditions.compareNums.negate(), VALIDATOR_MAX, DEFAULT, DEFAULT_MORE_THAN_MAX);
@@ -47,18 +47,22 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
     ParameterValidator defaultInList = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 
     //datetime validators
-    ParameterValidator afterCanBeParsed = of(Conditions.isDateTime.negate(), VALIDATOR_AFTER, AFTER_IS_NOT_DATETIME);
-    ParameterValidator beforeCanBeParsed = of(Conditions.isDateTime.negate(), VALIDATOR_BEFORE, BEFORE_IS_NOT_DATETIME);
+//    ParameterValidator afterCanBeParsed = of(Conditions.isDateTime.negate(), VALIDATOR_AFTER, AFTER_IS_NOT_DATETIME);
+//    ParameterValidator beforeCanBeParsed = of(Conditions.isDateTime.negate(), VALIDATOR_BEFORE, BEFORE_IS_NOT_DATETIME);
     ParameterValidator beforeIsAfter = of(Conditions.compareDates, VALIDATOR_BEFORE, VALIDATOR_AFTER, BEFORE_DATE_IS_AFTER);
 //    ParameterValidator dateTime = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 
     //parameter validators
     ParameterValidator noDuplicates = object(Conditions.hasDuplicates, HAS_DUPLICATES);
 
-    ParameterValidator numbers = noDuplicates.and(minNotNAN).and(maxNotNAN).and(minGreaterThanMax)
+    ParameterValidator numbers = noDuplicates
+//            .and(minNotNAN).and(maxNotNAN)
+            .and(minGreaterThanMax)
         .and(defaultLessThanMin).and(defaultMoreThanMax).and(defaultInList);
     ParameterValidator strings = noDuplicates.and(defaultInList);
-    ParameterValidator dates = noDuplicates.and(afterCanBeParsed).and(beforeCanBeParsed).and(beforeIsAfter);
+    ParameterValidator dates = noDuplicates
+//            .and(afterCanBeParsed).and(beforeCanBeParsed)
+            .and(beforeIsAfter);
     ParameterValidator customObject = noDuplicates;
 
 

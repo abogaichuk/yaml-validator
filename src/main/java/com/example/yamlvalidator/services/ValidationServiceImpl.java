@@ -1,19 +1,29 @@
 package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.entity.*;
-import com.example.yamlvalidator.strategy.Validator;
+import com.example.yamlvalidator.factory.ChildRule;
+import com.example.yamlvalidator.factory.ComparingChildRule;
+import com.example.yamlvalidator.factory.Rule;
+import com.example.yamlvalidator.validators.Conditions;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.example.yamlvalidator.entity.ValidationResult.invalid;
+import static com.example.yamlvalidator.entity.ValidationResult.valid;
+import static com.example.yamlvalidator.utils.ValidatorUtils.*;
+import static com.example.yamlvalidator.utils.ValidatorUtils.MIN_IS_NAN;
+import static com.example.yamlvalidator.validators.Conditions.*;
+import static com.example.yamlvalidator.validators.ParameterValidationRules.getRulesFor;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validate(Definition definition) {
-//        List<ValidationResult> results = extractObjectParams(definition.getParameters())
+//        List<ValidationResult> results = extractObjectParams(definition.getChildren())
 //            .map(getRulesFor())
 //            .peek(result -> result.getReasons().forEach(System.out::println))
 //            .collect(Collectors.toList());
@@ -41,7 +51,7 @@ public class ValidationServiceImpl implements ValidationService {
         return ValidationResult.valid();
     }
 
-    private Stream<ObjectParameter> extractObjectParams(List<? extends Parameter> parameters) {
+    private Stream<ObjectParameter> extractObjectParams(List<Parameter> parameters) {
         return parameters.stream()
                 .filter(parameter -> parameter instanceof ObjectParameter)
                 .map(ObjectParameter.class::cast)

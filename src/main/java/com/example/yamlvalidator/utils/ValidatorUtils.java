@@ -57,6 +57,7 @@ public class ValidatorUtils {
         return toInt(intParam).isPresent();
     }
 
+
     public static Optional<Integer> toInt(StringParameter parameter) {
         String value = getValue(parameter);
         try {
@@ -93,9 +94,13 @@ public class ValidatorUtils {
             .orElse(Boolean.FALSE);
     }
 
-    public static <T> boolean canBeParsed(StringParameter param, Function<StringParameter, Optional<T>> parser) {
-        return parser.apply(param).isPresent();
+    public static <T> boolean canBeParsed(Parameter param, Function<StringParameter, Optional<T>> parser) {
+        return param instanceof StringParameter && parser.apply((StringParameter) param).isPresent();
     }
+
+//    public static <T> boolean canBeParsed(StringParameter param, Function<StringParameter, Optional<T>> parser) {
+//        return parser.apply(param).isPresent();
+//    }
 
     public static boolean canBeParsedToDatetime(StringParameter datetimeParam) {
         return toDatetime(datetimeParam).isPresent();
@@ -124,6 +129,6 @@ public class ValidatorUtils {
     }
 
     public static String toErrorMessage(Parameter p, String message) {
-        return format("{0} paramname: {1} (row #{2})", message, p.getName(), p.getRow());
+        return format("{0} paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
     }
 }

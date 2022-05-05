@@ -14,12 +14,16 @@ public interface Conditions extends Predicate<StringParameter> {
     Predicate<StringParameter> isNumber = parameter -> ValidatorUtils.canBeParsed(parameter, ValidatorUtils::toInt);
     Predicate<StringParameter> isNAN = isNumber.negate();
     Predicate<StringParameter> isDateTime = parameter -> ValidatorUtils.canBeParsed(parameter, ValidatorUtils::toDatetime);
+//    Predicate<ObjectParameter> isNumber = parameter -> ValidatorUtils.canBeParsed(parameter, ValidatorUtils::toInt);
+//    Predicate<ObjectParameter> isNAN = isNumber.negate();
+//    Predicate<ObjectParameter> isDateTime = parameter -> ValidatorUtils.canBeParsed(parameter, ValidatorUtils::toDatetime);
     Predicate<ObjectParameter> hasDuplicates = parameter -> parameter.isNotASequenceType() && parameter.containsDuplicates();
 //    BiPredicate<StringParameter, StringParameter> compareNums = ValidatorUtils::compareInts;
     BiPredicate<StringParameter, StringParameter> compareNums = (min, max) -> ValidatorUtils.compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
     BiPredicate<StringParameter, StringParameter> compareDates = (before, after) -> ValidatorUtils.compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
 //    BiPredicate<StringParameter, StringParameter> compareDates = ValidatorUtils::compareDates;
     BiPredicate<List<String>, String> contains = List::contains;
+    BiPredicate<List<StringParameter>, StringParameter> insideList = List::contains;
 //    BiPredicate<List<StringParameter>, StringParameter> contains = List::contains;
 
 //    Condition isNumber = ValidatorUtils::canBeParsedToInt;
