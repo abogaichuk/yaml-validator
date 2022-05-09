@@ -2,45 +2,63 @@
 #ResourceType: GeneralTest
 # description comment
 #Description: General test
-Types:
-  User:
-    type: object
-    firstname: string
-    lastname: string
-    password:
-      type: secret
-      description: user password Carl!
-  CiscoUser:
-    type: object
-    firstname: string
-    lastname: string
-    password:
-      type: secret
-      description: user password Carl!
-  ManualTest:
-    id:
-      type: number
-      description: test id
-    executedDate:
-      type: datetime
-      description: The time when product is valid from.
-      example: 2016-03-04 11:30
-      Validators:
-        Before: 2000-03-04 11:30
-        After: 2025-03-04 11:30
-  AutoTest:
-    id:
-      type: number
-      description: test id
-    testType:
-      type: string
-      Validatos:
-        List:
-          - unit
-          - integration
+#Types:
+User:
+  type: object
+  firstname: string
+  lastname: string
+  password:
+    type: secret
+    description: user password Carl!
+CiscoUser:
+  type: object
+  firstname: string
+  lastname: string
+  password:
+    type: secret
+    description: user password Carl!
+ManualTest:
+  id:
+    type: number
+    description: test id
+  executedDate:
+    type: datetime
+    description: The time when product is valid from.
+    example: 2016-03-04 11:30
+    Validators:
+      Before: 2000-03-04 11:30
+      After: 2025-03-04 11:30
+AutoTest:
+  id:
+    type: number
+    description: test id
+  testType:
+    type: string
+    Validatos:
+      List:
+        - unit
+        - integration
 
 #todo is type mandatory?
-#Test: ManualTest or AutoTest
+ResourceName: string
+Test: ManualTest or AutoTest
+#Test:
+#  type: object
+#  oneOf:
+#    - ManualTest
+#    - AutoTest
+#Test:
+#  type: object
+#  anyOf:
+#    - ManualTest
+#    - AutoTest
+#    - datetime
+#Test:
+#  type: object
+#  Validators:
+#    Oneof:
+#      - ManualTest
+#      - AutoTest
 #Greetings:
 #  type: string
 #  default: Hello Humans or Alliens or Predators, now you are in our list!!
@@ -61,9 +79,8 @@ Types:
 Protocol:
   Type: string
   Default: TCPPP
-  Unique: true
-  Unique: false
-  Search: true
+  Default: TCPPPPP
+  Search: boolean
   Validators:
     List:
       - TCP

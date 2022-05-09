@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.factory;
 
 import com.example.yamlvalidator.entity.ObjectParameter;
+import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 
@@ -21,8 +22,8 @@ public class ChildRule implements Rule {
     }
 
     @Override
-    public ValidationResult validate(ObjectParameter parameter) {
-        return parameter.getChildAsString(childName)
+    public ValidationResult validate(Parameter parameter) {
+        return ((ObjectParameter) parameter).getChildAsString(childName)
                 .filter(predicate)
                 .map(p -> invalid(toErrorMessage(p, message)))
                 .orElseGet(ValidationResult::valid);

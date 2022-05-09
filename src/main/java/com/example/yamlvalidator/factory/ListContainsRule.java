@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.factory;
 
 import com.example.yamlvalidator.entity.ObjectParameter;
+import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 
@@ -26,9 +27,9 @@ public class ListContainsRule implements Rule {
     }
 
     @Override
-    public ValidationResult validate(ObjectParameter parameter) {
-        return extractChild(parameter)
-                .map(list -> parameter.getChildAsString(child2)
+    public ValidationResult validate(Parameter parameter) {
+        return extractChild((ObjectParameter) parameter)
+                .map(list -> ((ObjectParameter) parameter).getChildAsString(child2)
                         .filter(p2 -> predicate.test(list, p2.getValue()))
                         .map(p2 -> invalid(toErrorMessage(p2, message)))
                         .orElseGet(ValidationResult::valid))

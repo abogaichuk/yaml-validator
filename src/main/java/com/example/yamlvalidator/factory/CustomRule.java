@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.factory;
 
 import com.example.yamlvalidator.entity.ObjectParameter;
+import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 
 import java.util.function.Predicate;
@@ -19,8 +20,8 @@ public class CustomRule implements Rule {
     }
 
     @Override
-    public ValidationResult validate(ObjectParameter parameter) {
+    public ValidationResult validate(Parameter parameter) {
 //        return parameter -> predicate.test(parameter) ? invalid(toErrorMessage(parameter, message)) : valid();
-        return predicate.test(parameter) ? invalid(toErrorMessage(parameter, message)) : valid();
+        return predicate.test((ObjectParameter) parameter) ? invalid(toErrorMessage(parameter, message)) : valid();
     }
 }

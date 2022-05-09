@@ -3,6 +3,7 @@ package com.example.yamlvalidator.entity;
 import com.example.yamlvalidator.factory.Rule;
 import com.example.yamlvalidator.factory.RulesFactory;
 import lombok.Getter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Collections;
@@ -110,6 +111,20 @@ public class ObjectParameter extends Parameter {
             .map(StringParameter.class::cast)
             .map(StringParameter::getValue)
             .orElse("custom");
+    }
+
+    public Optional<ObjectParameter> getValidator() {
+        return children.stream()
+                .filter(parameter -> "Validators".equalsIgnoreCase(parameter.getName()))
+                .findAny()
+                .filter(parameter -> parameter instanceof ObjectParameter)
+                .map(ObjectParameter.class::cast);
+    }
+
+    public List<Parameter> getValidators() {
+        return getValidator()
+                .map(ObjectParameter::getChildren)
+                .orElseGet(Collections::emptyList);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.factory;
 
 import com.example.yamlvalidator.entity.ObjectParameter;
+import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 
@@ -24,9 +25,9 @@ public class ComparingChildRule implements Rule {
     }
 
     @Override
-    public ValidationResult validate(ObjectParameter parameter) {
-        return parameter.getChildAsString(child1)
-                .map(p1 -> parameter.getChildAsString(child2)
+    public ValidationResult validate(Parameter parameter) {
+        return ((ObjectParameter) parameter).getChildAsString(child1)
+                .map(p1 -> ((ObjectParameter) parameter).getChildAsString(child2)
                         .filter(p2 -> comparator.test(p1, p2))
                         .map(p2 -> invalid(toErrorMessage(p2, message)))
                         .orElseGet(ValidationResult::valid))

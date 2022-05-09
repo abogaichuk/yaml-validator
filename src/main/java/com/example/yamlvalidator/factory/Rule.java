@@ -1,11 +1,12 @@
 package com.example.yamlvalidator.factory;
 
 import com.example.yamlvalidator.entity.ObjectParameter;
+import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 import com.example.yamlvalidator.validators.ParameterValidator;
 
 public interface Rule {
-    ValidationResult validate(ObjectParameter parameter);
+    ValidationResult validate(Parameter parameter);
 
     default Rule and(final Rule other) {
         return parameter -> {

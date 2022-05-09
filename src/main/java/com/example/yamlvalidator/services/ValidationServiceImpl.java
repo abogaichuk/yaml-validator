@@ -22,7 +22,7 @@ import static java.util.stream.Stream.of;
 
 public class ValidationServiceImpl implements ValidationService {
     @Override
-    public ValidationResult validate(Definition definition) {
+    public ValidationResult validate(final Definition definition) {
 //        List<ValidationResult> results = extractObjectParams(definition.getChildren())
 //            .map(getRulesFor())
 //            .peek(result -> result.getReasons().forEach(System.out::println))
@@ -46,9 +46,22 @@ public class ValidationServiceImpl implements ValidationService {
 //                .map(Parameter::validate)
 //                .reduce(ValidationResult::merge)
 //                .orElseGet(ValidationResult::valid);
-        ValidationResult result = definition.validate();
-        result.getReasons().forEach(System.out::println);
+
+//        ValidationResult result = definition.validate();
+//        result.getReasons().forEach(System.out::println);
+        extractAll(definition.getChildren()).forEach(System.out::println);
+
         return ValidationResult.valid();
+    }
+
+    private Stream<Parameter> extractAll(List<Parameter> parameters) {
+        return parameters.stream()
+                .flatMap(parameter -> {
+                    if (parameter instanceof ObjectParameter) {
+                        return Stream.concat(Stream.of(parameter), extractAll(((ObjectParameter) parameter).getChildren()));
+                    }
+                    return Stream.of(parameter);
+                });
     }
 
     private Stream<ObjectParameter> extractObjectParams(List<Parameter> parameters) {

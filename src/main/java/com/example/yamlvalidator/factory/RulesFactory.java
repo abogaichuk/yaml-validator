@@ -8,6 +8,7 @@ import java.util.Map;
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.entity.ValidationResult.valid;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
+import static com.example.yamlvalidator.validators.Conditions.compareDates;
 import static com.example.yamlvalidator.validators.Conditions.*;
 
 public class RulesFactory {
@@ -24,19 +25,19 @@ public class RulesFactory {
     }
 
     private static Rule strings() {
-        return custom()
+        return noDuplicates()
                 .and(new ListContainsRule(VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG, contains.negate()));
     }
 
     private static Rule datetime() {
-        return custom()
+        return noDuplicates()
                 .and(new ChildRule(VALIDATOR_AFTER, AFTER_IS_NOT_DATETIME, isDateTime.negate()))
                 .and(new ChildRule(VALIDATOR_BEFORE, BEFORE_IS_NOT_DATETIME, isDateTime.negate()))
                 .and(new ComparingChildRule(VALIDATOR_BEFORE, VALIDATOR_AFTER, BEFORE_DATE_IS_AFTER, compareDates));
     }
 
     private static Rule numbers() {
-        return custom()
+        return noDuplicates()
                 .and(new ChildRule(VALIDATOR_MIN, MIN_IS_NAN, isNAN))
                 .and(new ChildRule(VALIDATOR_MAX, MAX_IS_NAN, isNAN))
                 .and(new ComparingChildRule(VALIDATOR_MIN, VALIDATOR_MAX, MAX_LESS_THAN_MIN, compareNums))
@@ -50,6 +51,11 @@ public class RulesFactory {
     }
 
     private static Rule noDuplicates() {
-        return parameter -> hasDuplicates.test(parameter) ? invalid(toErrorMessage(parameter, HAS_DUPLICATES)) : valid();
+        return parameter -> hasDuplicates.test((ObjectParameter) parameter) ? invalid(toErrorMessage(parameter, HAS_DUPLICATES)) : valid();
     }
+
+//    private static Rule oneOf() {
+//        return parameter -> parameter.findValidatorParam("OneOf")
+//                .map()
+//    }
 }

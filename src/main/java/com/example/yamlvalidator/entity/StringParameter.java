@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.entity;
 
 import lombok.Getter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 @SuperBuilder
@@ -8,8 +9,11 @@ import lombok.experimental.SuperBuilder;
 public class StringParameter extends Parameter {
     private String value;
 
+    //todo stringparam validation for keywords value or custom types??
+    //todo stream over all parameters with ruleFactory or abstractfctory
     @Override
     public ValidationResult validate() {
+        System.out.println("Validate parameter: " + getName() + ", value: " + value);
         return ValidationResult.valid();
     }
 
