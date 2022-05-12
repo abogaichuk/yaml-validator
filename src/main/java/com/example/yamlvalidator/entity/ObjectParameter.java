@@ -1,8 +1,10 @@
 package com.example.yamlvalidator.entity;
 
-import com.example.yamlvalidator.factory.Rule;
-import com.example.yamlvalidator.factory.RulesFactory;
+import com.example.yamlvalidator.services.ValidationService;
+import com.example.yamlvalidator.services.ValidationServiceImpl;
+import com.example.yamlvalidator.utils.PadmGrammar;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
@@ -10,16 +12,32 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR;
 import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
 @SuperBuilder
 @Getter
+@Setter
 public class ObjectParameter extends Parameter {
     private List<Parameter> children;
 
+
+//    enum RuleType{
+//        NUMBER(ValidationServiceImpl::numberValidators),
+//        BOOLEAN(ValidationServiceImpl::booleanValidators),
+//        STRING(ValidationServiceImpl::stringValidators),
+//        OBJECT(ValidationServiceImpl::objectValidators),
+//        SECRET(ValidationServiceImpl::secretValidators),
+//        DATETIME(ValidationServiceImpl::datetimeValidators);
+//
+//        public final BiFunction<ValidationServiceImpl, ObjectParameter, ValidationResult> rules;
+//
+//        private RuleType(BiFunction<ValidationServiceImpl, ObjectParameter, ValidationResult> rules) {
+//            this.rules = rules;
+//        }
+//    }
 //    @Override
 //    public ValidationResult accept(Visitor v) {
 //        ValidationResult result = v.visit(this);
@@ -35,15 +53,19 @@ public class ObjectParameter extends Parameter {
 
     @Override
     public ValidationResult validate() {
-        Rule rules = RulesFactory.getRules(this);
-        ValidationResult result = rules.validate(this);
-//        ValidationResult result = Validator.of().validate(this);
-        ValidationResult finalResult = children.stream()
+//        Rule rules = RulesFactory.getRules(this);
+//        ValidationResult result = rules.validate(this);
+////        ValidationResult result = Validator.of().validate(this);
+//        ValidationResult finalResult = children.stream()
+//                .map(Parameter::validate)
+//                .reduce(ValidationResult::merge)
+//                .map(childResult -> childResult.merge(result))
+//                .orElse(result);
+//        return finalResult;
+        return children.stream()
                 .map(Parameter::validate)
                 .reduce(ValidationResult::merge)
-                .map(childResult -> childResult.merge(result))
-                .orElse(result);
-        return finalResult;
+                .orElseGet(ValidationResult::valid);
     }
 
     public Optional<Parameter> findChild(String name) {
@@ -89,7 +111,7 @@ public class ObjectParameter extends Parameter {
     }
 
     public Optional<Parameter> findValidatorParam(String name) {
-        return isNotEmpty(name) ? findChild(VALIDATOR)
+        return isNotEmpty(name) ? findChild(PadmGrammar.VALIDATORS_KEY_NAME)
             .filter(p -> p instanceof ObjectParameter)
             .map(ObjectParameter.class::cast)
             .flatMap(p -> p.findChild(name)) : Optional.empty();

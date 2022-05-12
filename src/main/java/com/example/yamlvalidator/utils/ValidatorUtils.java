@@ -12,61 +12,56 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.text.MessageFormat.*;
 
 public class ValidatorUtils {
-    public static final String MIN_IS_NAN = "Validator.Min is not an number";
-    public static final String MAX_IS_NAN = "Validator.Max is not an number";
-    public static final String MAX_LESS_THAN_MIN = "Validator.Max < Validators.Min";
-    public static final String DEFAULT_LESS_THAN_MIN = "Default < Validators.Min";
-    public static final String DEFAULT_MORE_THAN_MAX = "Default > Validators.Max";
-    public static final String DEFAULT_WRONG = "Validators.List doesn't contain Default value";
+    public static final String MIN_IS_NAN = "Min is not an number";
+    public static final String MAX_IS_NAN = "Max is not an number";
+    public static final String MAX_LESS_THAN_MIN = "Max < Min";
+    public static final String DEFAULT_LESS_THAN_MIN = "Default < Min";
+    public static final String DEFAULT_MORE_THAN_MAX = "Default > Max";
+    public static final String DEFAULT_IS_BEFORE_AFTER = "Default before After";
+    public static final String DEFAULT_IS_AFTER_BEFORE = "Default after Before";
+    public static final String DEFAULT_WRONG = "List doesn't contains Default value";
     public static final String HAS_DUPLICATES = "ObjectParam has duplicates";
-    public static final String AFTER_IS_NOT_DATETIME = "Validator.After is not a datetime";
-    public static final String BEFORE_IS_NOT_DATETIME = "Validator.Before is not a datetime";
-    public static final String BEFORE_DATE_IS_AFTER = "Validator.After is before Validator.Before";
+    public static final String AFTER_IS_NOT_DATETIME = "After is not a datetime";
+    public static final String BEFORE_IS_NOT_DATETIME = "Before is not a datetime";
+    public static final String BEFORE_DATE_IS_AFTER = "After is before Before";
+//    public static final String UNKNOWN_TYPE = "Type is not define";
+    public static final String DEFAULT_IS_NOT_NUMBER = "Default is not a number";
+    public static final String DEFAULT_IS_NOT_DATETIME = "Default is not a datetime";
+    public static final String DEFAULT_IS_NOT_BOOL = "Default is not a boolean";
 
-    public static final String DEFAULT = "Default";
-    public static final String TYPE = "Type";
-    public static final String FORMAT = "Format";
-    public static final String VALIDATOR = "Validators";
-    public static final String VALIDATOR_MIN = "Validators/Min";
-    public static final String VALIDATOR_MAX = "Validators/Max";
-    public static final String VALIDATOR_AFTER = "Validators/After";
-    public static final String VALIDATOR_BEFORE = "Validators/Before";
-    public static final String VALIDATOR_LIST = "List";
-    public static final String MIN = "Min";
-    public static final String MAX = "Max";
+//    public static final String DEFAULT = "Default";
+//    public static final String TYPE = "Type";
+//    public static final String FORMAT = "Format";
+//    public static final String VALIDATOR = "Validators";
+//    public static final String VALIDATOR_MIN = "Validators/Min";
+//    public static final String VALIDATOR_MAX = "Validators/Max";
+//    public static final String VALIDATOR_AFTER = "Validators/After";
+//    public static final String VALIDATOR_BEFORE = "Validators/Before";
+//    public static final String VALIDATOR_LIST = "List";
+//    public static final String MIN = "Min";
+//    public static final String MAX = "Max";
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-//    public static Optional<? extends Parameter> findChild(String name, ObjectParameter parameter) {
-//        return isNotEmpty(name) ? parameter.getChildren().stream()
-//            .filter(param -> name.equals(param.getName()))
-//            .findAny() : Optional.empty();
-//    }
-//
-//    public static Optional<? extends Parameter> findValidatorByName(String name, ObjectParameter parameter) {
-//        return isEmpty(name) ? Optional.empty() :
-//            findChild(VALIDATOR, parameter)
-//                .flatMap(p -> findChild(name, (ObjectParameter) p));
-//    }
+    private static final Pattern pattern = Pattern.compile(".*?\\$\\{(\\w+)\\}.*?");
 
     public static boolean canBeParsedToInt(StringParameter intParam) {
         return toInt(intParam).isPresent();
     }
 
-
     public static Optional<Integer> toInt(StringParameter parameter) {
-        String value = getValue(parameter);
+        var value = getValue(parameter);
         try {
             return Optional.of(Integer.parseInt(value));
         } catch (NumberFormatException e) {
             return Optional.empty();
         }
     }
-
 
     public static <T> boolean compare(StringParameter p1, StringParameter p2,
                                       Function<StringParameter, Optional<T>> parser,
@@ -107,12 +102,17 @@ public class ValidatorUtils {
     }
 
     public static Optional<LocalDateTime> toDatetime(StringParameter parameter) {
-        String value = getValue(parameter);
+        var value = getValue(parameter);
         try {
             return Optional.of(LocalDateTime.parse(value, formatter));
         } catch (DateTimeParseException e) {
             return Optional.empty();
         }
+    }
+
+    public static Optional<Boolean> toBoolean(StringParameter parameter) {
+        var value = getValue(parameter);
+        return "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value) ? Optional.of(Boolean.parseBoolean(value)) : Optional.empty();
     }
 
     public static String getValue(Parameter p) {
@@ -130,5 +130,25 @@ public class ValidatorUtils {
 
     public static String toErrorMessage(Parameter p, String message) {
         return format("{0} paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
+    }
+
+    public static String toErrorMessage(Parameter p, String incorrectValue, String message) {
+        return format("{0} paramname: {1}, parameterValue: {2} (row #{3})", message, p.getPath(), incorrectValue, p.getRow());
+    }
+
+    public static String replaceHolder(String s, String placeholder) {
+        var env = System.getenv(placeholder);
+        var replacement = "${" + placeholder + "}";
+        //todo throw an error?
+        return env == null ? s.replace(replacement, placeholder) : s.replace(replacement, env);
+    }
+
+    public static String matchAndReplaceHolders(String s) {
+        var matcher = pattern.matcher(s);
+        while (matcher.matches()) {
+            s = replaceHolder(s, matcher.group(1));
+            matcher = pattern.matcher(s);
+        }
+        return s;
     }
 }

@@ -7,6 +7,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SuperBuilder
 @Getter
@@ -22,6 +23,12 @@ public class Definition extends ObjectParameter {
     public ValidationResult validate() {
         return super.validate();
 //        return parameters
+    }
+
+    public List<String> getCustomTypes() {
+        return getChildren().stream()
+                .map(Parameter::getName)
+                .collect(Collectors.toList());
     }
 
     public List<Parameter> getAllTypes() {

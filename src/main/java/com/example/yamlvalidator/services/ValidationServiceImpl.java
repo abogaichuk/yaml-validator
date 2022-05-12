@@ -1,57 +1,82 @@
 package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.entity.*;
-import com.example.yamlvalidator.factory.ChildRule;
-import com.example.yamlvalidator.factory.ComparingChildRule;
-import com.example.yamlvalidator.factory.Rule;
-import com.example.yamlvalidator.validators.Conditions;
+import com.example.yamlvalidator.factory.RulesFactory;
+import com.example.yamlvalidator.rules.Rule;
+import com.example.yamlvalidator.rules.datetime.AfterIsBeforeBeforeRule;
+import com.example.yamlvalidator.rules.datetime.AfterValidatorRule;
+import com.example.yamlvalidator.rules.datetime.BeforeValidatorRule;
+import com.example.yamlvalidator.rules.default_param.DefaultInListRule;
+import com.example.yamlvalidator.rules.default_param.DefaultLessThanMinRule;
+import com.example.yamlvalidator.rules.default_param.DefaultMoreThanMaxRule;
+import com.example.yamlvalidator.rules.numbers.MaxLessThanMinRule;
+import com.example.yamlvalidator.rules.numbers.MaxValidatorRule;
+import com.example.yamlvalidator.rules.numbers.MinValidatorRule;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
-import static com.example.yamlvalidator.entity.ValidationResult.valid;
-import static com.example.yamlvalidator.utils.ValidatorUtils.*;
-import static com.example.yamlvalidator.utils.ValidatorUtils.MIN_IS_NAN;
-import static com.example.yamlvalidator.validators.Conditions.*;
-import static com.example.yamlvalidator.validators.ParameterValidationRules.getRulesFor;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 
 public class ValidationServiceImpl implements ValidationService {
     @Override
     public ValidationResult validate(final Definition definition) {
-//        List<ValidationResult> results = extractObjectParams(definition.getChildren())
-//            .map(getRulesFor())
-//            .peek(result -> result.getReasons().forEach(System.out::println))
-//            .collect(Collectors.toList());
-//        results.forEach(ValidationResult::getReasons);
-//        Visitor v = new ParameterVisitor();
-//        definition.getParameters().forEach(parameter -> parameter.accept(v));
-//        List<ValidationResult> results = definition.getParameters().stream()
-//                .map(parameter -> parameter.accept(v))
-//                .peek(result -> result.getReasons().forEach(System.out::println))
-//                .collect(Collectors.toList());
-
-//        ValidationResult result = definition.getParameters().stream()
-//                .filter(parameter -> parameter instanceof ObjectParameter)
-//                .map(ObjectParameter.class::cast)
-//                .map(parameter -> Validator.of().validate(parameter))
-//                .filter(validationResult -> !validationResult.isValid())
+//        List<Rule> rules = getAllRules();
+//        ValidationResult result = extractObjectParams(definition.getChildren())
+//                .map(parameter -> rules.stream()
+//                        .map(rule -> rule.validate(parameter))
+//                        .reduce(ValidationResult::merge)
+//                        .orElseGet(ValidationResult::valid))
 //                .reduce(ValidationResult::merge)
 //                .orElseGet(ValidationResult::valid);
-//        ValidationResult result = definition.getParameters().stream()
-//                .map(Parameter::validate)
-//                .reduce(ValidationResult::merge)
-//                .orElseGet(ValidationResult::valid);
-
-//        ValidationResult result = definition.validate();
 //        result.getReasons().forEach(System.out::println);
-        extractAll(definition.getChildren()).forEach(System.out::println);
 
+        ValidationResult result = definition.getChildren().stream()
+                .filter(parameter -> parameter instanceof ObjectParameter)
+                .map(ObjectParameter.class::cast)
+                .map(parameter -> RulesFactory.getRules(parameter).validate(parameter))
+                .reduce(ValidationResult::merge)
+                .orElseGet(ValidationResult::valid);
+        result.getReasons().forEach(System.out::println);
         return ValidationResult.valid();
+    }
+
+//    public ValidationResult secretValidators(ObjectParameter parameter) {
+//        System.out.println("secret!!");
+//        return ValidationResult.valid();
+//    }
+//
+//    public ValidationResult datetimeValidators(ObjectParameter parameter) {
+//        System.out.println("datetime!");
+//        return ValidationResult.valid();
+//    }
+//
+//    public ValidationResult numberValidators(ObjectParameter parameter) {
+//        System.out.println("number!");
+//        return ValidationResult.valid();
+//    }
+//
+//    public ValidationResult booleanValidators(ObjectParameter parameter) {
+//        System.out.println("boolean!");
+//        return ValidationResult.valid();
+//    }
+//
+//    public ValidationResult objectValidators(ObjectParameter parameter) {
+//        System.out.println("object!");
+//        return ValidationResult.valid();
+//    }
+//
+//    public ValidationResult stringValidators(ObjectParameter parameter) {
+//        System.out.println("string!");
+//        return ValidationResult.valid();
+//    }
+
+    private List<Rule> getAllRules() {
+        return List.of(new AfterIsBeforeBeforeRule(), new AfterValidatorRule(), new BeforeValidatorRule(),
+                new DefaultInListRule(), new DefaultLessThanMinRule(), new DefaultMoreThanMaxRule(),
+                new MaxLessThanMinRule(), new MaxValidatorRule(), new MinValidatorRule());
     }
 
     private Stream<Parameter> extractAll(List<Parameter> parameters) {

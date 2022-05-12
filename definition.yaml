@@ -3,45 +3,48 @@
 # description comment
 #Description: General test
 #Types:
-User:
-  type: object
-  firstname: string
-  lastname: string
-  password:
-    type: secret
-    description: user password Carl!
-CiscoUser:
-  type: object
-  firstname: string
-  lastname: string
-  password:
-    type: secret
-    description: user password Carl!
-ManualTest:
-  id:
-    type: number
-    description: test id
-  executedDate:
-    type: datetime
-    description: The time when product is valid from.
-    example: 2016-03-04 11:30
-    Validators:
-      Before: 2000-03-04 11:30
-      After: 2025-03-04 11:30
-AutoTest:
-  id:
-    type: number
-    description: test id
-  testType:
-    type: string
-    Validatos:
-      List:
-        - unit
-        - integration
+#User:
+#  type: object
+#  firstname: string
+#  lastname: string
+#  password:
+#    type: secret
+#    description: user password Carl!
+#CiscoUser:
+#  type: object
+#  firstname: string
+#  lastname: string
+#  password:
+#    type: secret
+#    description: user password Carl!
+#ManualTest:
+#  id:
+#    type: number
+#    description: test id
+#  executedDate:
+#    type: datetime
+#    default: 2022-01-01 00:01
+#    description: The time when product is valid from.
+#    example: 2016-03-04 11:30
+#    Validators:
+#      Before: 2020-03-04 11:30
+#      After: 2005-03-04 11:30
+#AutoTest:
+#  id:
+#    type: number
+#    description: test id
+#  testType:
+#    type: string
+#    Validatos:
+#      List:
+#        - unit
+#        - integration
 
-#todo is type mandatory?
-ResourceName: string
-Test: ManualTest or AutoTest
+#ResourceName: string
+#Test: ManualTest or AutoTest
+#Port2:
+#  type: Port or number or datetime
+#  default: 5
 #Test:
 #  type: object
 #  oneOf:
@@ -76,60 +79,59 @@ Test: ManualTest or AutoTest
 #    type: Test
 #  description: SequenceGroup with custom objects Test.
 #FirstTest: Test
-Protocol:
-  Type: string
-  Default: TCPPP
-  Default: TCPPPPP
-  Search: boolean
-  Validators:
-    List:
-      - TCP
-      - UDP
-      - HTTP
+#Protocol:
+#  Type: string
+#  Default: TCPPP
+#  Default: TCPPPPP
+#  Search: boolean
+#  Validators:
+#    List:
+#      - TCP
+#      - UDP
+#      - HTTP
 Port:
-  Default: 7003
-  Description: "Port Id of the secondary Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
+  Default: 700200
+  Description: "${USER} of the secondary ${HOME11} Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
   Type: number
-  Validators:
-    Min: 102534
-    Max: 65535
-    List:
-      - 7000
-      - 7001
-      - 7002
-Genesys:
-#    Type: Port or number or
+  min: 1025000
+  max: 65535
+  list:
+    - 7000
+    - 7001
+    - 7002
+#Genesys:
+##    Type: Port or number or
+##  SwitchName:
+##  Search: true isn't valid
+## add skip validation (noValidationGroup)
 #  SwitchName:
-#  Search: true isn't valid
-# add skip validation (noValidationGroup)
-  SwitchName:
-    Default: "Genesys SIP serverr"
-    Description: "The name of the switch connected to the Genesys SIP server."
-    Description: "aaa"
-    Type: string
-    Validators:
-      List:
-        - Avaya
-        - Cisco
-        - Genesys SIP server
-        - Nortel
-        - Aspect Call Center
-        - Aspect Spectrum
-        - Ericsson
-        - NEC
-        - Alcatel-Lucent
-  RTPMonitoringStyle:
-    Default: "Private Service"
-    Description: "bbbb"
-    Description: "Request sent as Monitor Style to Genesys in order to receive RTP events."
-    Type: string
-    Validators:
-      List:
-        - Private Service
-        - On Monitor
-        - Both
-        - Default
-  Tested: ManualTest
+#    Default: "Genesys SIP serverr"
+#    Description: "The name of the switch connected to the Genesys SIP server."
+#    Description: "aaa"
+#    Type: string
+#    Validators:
+#      List:
+#        - Avaya
+#        - Cisco
+#        - Genesys SIP server
+#        - Nortel
+#        - Aspect Call Center
+#        - Aspect Spectrum
+#        - Ericsson
+#        - NEC
+#        - Alcatel-Lucent
+#  RTPMonitoringStyle:
+#    Default: "Private Service"
+#    Description: "bbbb"
+#    Description: "Request sent as Monitor Style to Genesys in order to receive RTP events."
+#    Type: string
+#    Validators:
+#      List:
+#        - Private Service
+#        - On Monitor
+#        - Both
+#        - Default
+#  Tested: ManualTest
 #  Admin:
 #    type: User
 #    description: Cisco admin

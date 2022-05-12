@@ -9,18 +9,25 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
+import static com.example.yamlvalidator.utils.ValidatorUtils.*;
+
 public interface Conditions extends Predicate<StringParameter> {
 
-    Predicate<StringParameter> isNumber = parameter -> ValidatorUtils.canBeParsed(parameter, ValidatorUtils::toInt);
+    Predicate<StringParameter> isNumber = parameter -> canBeParsed(parameter, ValidatorUtils::toInt);
     Predicate<StringParameter> isNAN = isNumber.negate();
-    Predicate<StringParameter> isDateTime = parameter -> ValidatorUtils.canBeParsed(parameter, ValidatorUtils::toDatetime);
+    Predicate<StringParameter> isDateTime = parameter -> canBeParsed(parameter, ValidatorUtils::toDatetime);
 //    Predicate<ObjectParameter> isNumber = parameter -> ValidatorUtils.canBeParsed(parameter, ValidatorUtils::toInt);
 //    Predicate<ObjectParameter> isNAN = isNumber.negate();
 //    Predicate<ObjectParameter> isDateTime = parameter -> ValidatorUtils.canBeParsed(parameter, ValidatorUtils::toDatetime);
     Predicate<ObjectParameter> hasDuplicates = parameter -> parameter.isNotASequenceType() && parameter.containsDuplicates();
+    Predicate<ObjectParameter> isBypass = parameter -> parameter.findChild("bypass")
+            .map(StringParameter.class::cast)
+            .map(StringParameter::getValue)
+            .map(Boolean::parseBoolean)
+            .orElse(Boolean.FALSE);
 //    BiPredicate<StringParameter, StringParameter> compareNums = ValidatorUtils::compareInts;
-    BiPredicate<StringParameter, StringParameter> compareNums = (min, max) -> ValidatorUtils.compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
-    BiPredicate<StringParameter, StringParameter> compareDates = (before, after) -> ValidatorUtils.compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
+    BiPredicate<StringParameter, StringParameter> compareNums = (min, max) -> compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
+    BiPredicate<StringParameter, StringParameter> compareDates = (before, after) -> compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
 //    BiPredicate<StringParameter, StringParameter> compareDates = ValidatorUtils::compareDates;
     BiPredicate<List<String>, String> contains = List::contains;
     BiPredicate<List<StringParameter>, StringParameter> insideList = List::contains;

@@ -3,6 +3,7 @@ package com.example.yamlvalidator.validators;
 import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
+import com.example.yamlvalidator.utils.PadmGrammar;
 
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -13,7 +14,6 @@ import java.util.stream.Collectors;
 import static com.example.yamlvalidator.utils.ValidatorUtils.AFTER_IS_NOT_DATETIME;
 import static com.example.yamlvalidator.utils.ValidatorUtils.BEFORE_DATE_IS_AFTER;
 import static com.example.yamlvalidator.utils.ValidatorUtils.BEFORE_IS_NOT_DATETIME;
-import static com.example.yamlvalidator.utils.ValidatorUtils.DEFAULT;
 import static com.example.yamlvalidator.utils.ValidatorUtils.DEFAULT_LESS_THAN_MIN;
 import static com.example.yamlvalidator.utils.ValidatorUtils.DEFAULT_MORE_THAN_MAX;
 import static com.example.yamlvalidator.utils.ValidatorUtils.DEFAULT_WRONG;
@@ -21,11 +21,6 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.HAS_DUPLICATES;
 import static com.example.yamlvalidator.utils.ValidatorUtils.MAX_IS_NAN;
 import static com.example.yamlvalidator.utils.ValidatorUtils.MAX_LESS_THAN_MIN;
 import static com.example.yamlvalidator.utils.ValidatorUtils.MIN_IS_NAN;
-import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_AFTER;
-import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_BEFORE;
-import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_LIST;
-import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_MAX;
-import static com.example.yamlvalidator.utils.ValidatorUtils.VALIDATOR_MIN;
 import static com.example.yamlvalidator.utils.ValidatorUtils.toErrorMessage;
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.entity.ValidationResult.valid;
@@ -39,17 +34,17 @@ public interface ParameterValidator extends Function<ObjectParameter, Validation
     //number validators
 //    ParameterValidator minNotNAN = of(Conditions.isNAN, VALIDATOR_MIN, MIN_IS_NAN);
 //    ParameterValidator maxNotNAN = of(Conditions.isNAN, VALIDATOR_MAX, MAX_IS_NAN);
-    ParameterValidator minGreaterThanMax = of(Conditions.compareNums, VALIDATOR_MIN, VALIDATOR_MAX, MAX_LESS_THAN_MIN);
-    ParameterValidator defaultLessThanMin = of(Conditions.compareNums, VALIDATOR_MIN, DEFAULT, DEFAULT_LESS_THAN_MIN);
-    ParameterValidator defaultMoreThanMax = of(Conditions.compareNums.negate(), VALIDATOR_MAX, DEFAULT, DEFAULT_MORE_THAN_MAX);
+    ParameterValidator minGreaterThanMax = of(Conditions.compareNums, PadmGrammar.MIN_KEY_NAME, PadmGrammar.MAX_KEY_NAME, MAX_LESS_THAN_MIN);
+    ParameterValidator defaultLessThanMin = of(Conditions.compareNums, PadmGrammar.MIN_KEY_NAME, PadmGrammar.DEFAULT_KEY_NAME, DEFAULT_LESS_THAN_MIN);
+    ParameterValidator defaultMoreThanMax = of(Conditions.compareNums.negate(), PadmGrammar.MAX_KEY_NAME, PadmGrammar.DEFAULT_KEY_NAME, DEFAULT_MORE_THAN_MAX);
 
     //list validators
-    ParameterValidator defaultInList = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
+    ParameterValidator defaultInList = list(Conditions.contains.negate(), PadmGrammar.LIST_KEY_NAME, PadmGrammar.DEFAULT_KEY_NAME, DEFAULT_WRONG);
 
     //datetime validators
 //    ParameterValidator afterCanBeParsed = of(Conditions.isDateTime.negate(), VALIDATOR_AFTER, AFTER_IS_NOT_DATETIME);
 //    ParameterValidator beforeCanBeParsed = of(Conditions.isDateTime.negate(), VALIDATOR_BEFORE, BEFORE_IS_NOT_DATETIME);
-    ParameterValidator beforeIsAfter = of(Conditions.compareDates, VALIDATOR_BEFORE, VALIDATOR_AFTER, BEFORE_DATE_IS_AFTER);
+    ParameterValidator beforeIsAfter = of(Conditions.compareDates, PadmGrammar.BEFORE_KEY_NAME, PadmGrammar.AFTER_KEY_NAME, BEFORE_DATE_IS_AFTER);
 //    ParameterValidator dateTime = list(Conditions.contains.negate(), VALIDATOR_LIST, DEFAULT, DEFAULT_WRONG);
 
     //parameter validators

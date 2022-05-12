@@ -6,6 +6,7 @@ import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.Position;
 import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.utils.PadmGrammar;
+import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 import org.snakeyaml.engine.v2.nodes.MappingNode;
 import org.snakeyaml.engine.v2.nodes.Node;
@@ -14,42 +15,44 @@ import org.snakeyaml.engine.v2.nodes.ScalarNode;
 import org.snakeyaml.engine.v2.nodes.SequenceNode;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.example.yamlvalidator.utils.PadmGrammar.*;
+import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 import static org.snakeyaml.engine.v2.nodes.NodeType.MAPPING;
 import static org.snakeyaml.engine.v2.nodes.NodeType.SCALAR;
 import static org.snakeyaml.engine.v2.nodes.NodeType.SEQUENCE;
 
 public class YamlMapper {
     private final String TYPES = "Types";
-    private Optional<NodeTuple> typeTuple;
 
     public Definition toDefinition(Node root) {
-//        typeTuple = findParameter((MappingNode) root, TYPES);
-        var parameters = toParameters((MappingNode) root);
-//        var types = findParameter((MappingNode) root, TYPES)
-//                .map(NodeTuple::getValueNode)
-//                .filter(node -> node instanceof MappingNode)
-//                .map(MappingNode.class::cast)
-//                .map(this::toParameters)
-//                .orElseGet(Collections::emptyList);
-        return Definition.builder()
-                .children(parameters)
+        var definition = Definition.builder()
 //                .types(types)
                 .name("root")
                 .type(Parameter.ParameterType.MAPPING)
                 .resourceType(getScalarValueFrom((MappingNode) root, "ResourceType"))
                 .description(getScalarValueFrom((MappingNode) root, "Description"))
                 .build();
+        var parameters = toParameters((MappingNode) root, definition);
+        definition.setChildren(parameters);
+//        var types = findParameter((MappingNode) root, TYPES)
+//                .map(NodeTuple::getValueNode)
+//                .filter(node -> node instanceof MappingNode)
+//                .map(MappingNode.class::cast)
+//                .map(this::toParameters)
+//                .orElseGet(Collections::emptyList);
+        return definition;
     }
 
     private List<Parameter> toParameters(MappingNode node) {
-        return toParameters(node, "");
+        return toParameters(node, null);
     }
 
-    private List<Parameter> toParameters(final MappingNode node, final String parent) {
+    private List<Parameter> toParameters(final MappingNode node, final ObjectParameter parent) {
         return node.getValue().stream()
 //            .filter(tuple -> !TYPES.equals(getKey(tuple)))
             .map(n -> toParameter(n, parent))
@@ -57,19 +60,22 @@ public class YamlMapper {
             .collect(Collectors.toList());
     }
 
-    private Parameter toParameter(final NodeTuple tuple, final String parent) {
-        var paramName = getKey(tuple);
+    private Parameter toParameter(final NodeTuple tuple, final ObjectParameter parent) {
+        var paramName = getKey(tuple).toLowerCase();
         var position = getPosition(tuple);
-        var path = parent.isEmpty() ? paramName : parent + "/" + paramName;
+        var path = parent == null ? paramName : parent.getPath() + "/" + paramName;
 
 //        if (getKeyWord(paramName).isEmpty()) {
 //            getStandardType()
 //        }
 
         if (tuple.getValueNode().getNodeType().equals(MAPPING)) {
-            return toObjectParameter(paramName, path, Parameter.ParameterType.MAPPING, toParameters((MappingNode) tuple.getValueNode(), path), position);
+            ObjectParameter parameter = toObjectParameter(paramName, parent, Parameter.ParameterType.MAPPING, position);
+            parameter.setChildren(toParameters((MappingNode) tuple.getValueNode(), parameter));
+            return parameter;
         } else if (tuple.getValueNode().getNodeType().equals(SCALAR)) {
             var value = getScalarValue(tuple);
+            value = matchAndReplaceHolders(value);
 //            if (getKeyWord(paramName).isEmpty()) {
 //                if (getStandardType(value).isEmpty()) {
 //                    Optional<NodeTuple> customType = findCustomType(value);
@@ -79,21 +85,21 @@ public class YamlMapper {
 //                    }
 //                }
 //            }
-            return scalarParsing(paramName, value, path, tuple, position);
+            return scalarParsing(paramName, value, parent, tuple, position);
         } else if (tuple.getValueNode().getNodeType().equals(SEQUENCE)) {
-            return sequenceParsing(paramName, path, (SequenceNode) tuple.getValueNode(), position);
+            return sequenceParsing(paramName, parent, (SequenceNode) tuple.getValueNode(), position);
         } else {
             System.out.println("something wrong!!");
             return null;
         }
     }
 
-    private Parameter scalarParsing(String paramName, String value, String path, NodeTuple tuple, Position start) {
+    private Parameter scalarParsing(String paramName, String value, ObjectParameter parent, NodeTuple tuple, Position start) {
 //        var value = getScalarValue(tuple);
 //        var customType = findCustomType(value);
 
 //        validateType(paramName, value, path, start);
-        return toStringParameter(paramName, path, Parameter.ParameterType.SCALAR, value, start);
+        return toStringParameter(paramName, parent, Parameter.ParameterType.SCALAR, value, start);
 //        if (customType.isPresent()) {
 //            return toObjectParameter(paramName, path, Parameter.ParameterType.MAPPING, toParameters((MappingNode) customType.get().getValueNode(), path), start);
 //        } else {
@@ -102,78 +108,74 @@ public class YamlMapper {
     }
 
 
-    private void validateType(String name, String value, String path, Position start) {
-        Optional<String> word = keywords.stream()
-                .filter(keyword -> keyword.equalsIgnoreCase(name))
-                .findAny();
-        if (word.isEmpty()) {
-            if (!standardTypes.contains(value)) {
-                Optional<NodeTuple> customType = findCustomType(value);
-                if (customType.isEmpty()) {
-                    throw new IllegalArgumentException("type: " + value + " not found for parameter name: " + name);
-                }
-            }
-        } else if (word.get().equalsIgnoreCase(TYPE_KEY_NAME)) {
-            String[] types = value.split("or");
-            for (String type : types) {
-                if (!standardTypes.contains(type.trim())) {
-                    Optional<NodeTuple> customType = findCustomType(type.trim());
-                    if (customType.isEmpty()) {
-                        throw new IllegalArgumentException("type: " + value + " not found for parameter name: " + name);
-                    } else {
-                        ObjectParameter objectParameter = toObjectParameter(name, path, Parameter.ParameterType.MAPPING,
-                                toParameters((MappingNode) customType.get().getValueNode(), path), start);
-                        System.out.println(objectParameter);
-                    }
-                }
-            }
-        }
-    }
+//    private void validateType(String name, String value, String path, Position start) {
+//        Optional<String> word = keywords.stream()
+//                .filter(keyword -> keyword.equalsIgnoreCase(name))
+//                .findAny();
+//        if (word.isEmpty()) {
+//            if (!standardTypes.contains(value)) {
+//                Optional<NodeTuple> customType = findCustomType(value);
+//                if (customType.isEmpty()) {
+//                    throw new IllegalArgumentException("type: " + value + " not found for parameter name: " + name);
+//                }
+//            }
+//        } else if (word.get().equalsIgnoreCase(TYPE_KEY_NAME)) {
+//            String[] types = value.split("or");
+//            for (String type : types) {
+//                if (!standardTypes.contains(type.trim())) {
+//                    Optional<NodeTuple> customType = findCustomType(type.trim());
+//                    if (customType.isEmpty()) {
+//                        throw new IllegalArgumentException("type: " + value + " not found for parameter name: " + name);
+//                    } else {
+//                        ObjectParameter objectParameter = toObjectParameter(name, path, Parameter.ParameterType.MAPPING,
+//                                toParameters((MappingNode) customType.get().getValueNode(), path), start);
+//                        System.out.println(objectParameter);
+//                    }
+//                }
+//            }
+//        }
+//    }
 
-    private List<NodeTuple> findCustomTypes(NodeTuple tuple, String value) {
-        String[] types = value.split("or");
-        List<NodeTuple> tuples = Stream.of(types)
-                .map(this::findCustomType)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-        return tuples;
-    }
-
-    private ObjectParameter sequenceParsing(String paramName, final String path, SequenceNode node, Position start) {
-        var parameters = node.getValue().stream()
-            .map(n -> constructParameter(n, path))
+    private ObjectParameter sequenceParsing(String paramName, final ObjectParameter parent, SequenceNode node, Position start) {
+        ObjectParameter parameter = toObjectParameter(paramName, parent, Parameter.ParameterType.SEQUENCE, start);
+        var children = node.getValue().stream()
+            .map(n -> constructParameter(n, parameter))
             .collect(Collectors.toList());
-        return toObjectParameter(paramName, path, Parameter.ParameterType.SEQUENCE, parameters, start);
+        parameter.setChildren(children);
+        return parameter;
     }
 
-    private Parameter constructParameter(Node node, String path) {
+    private Parameter constructParameter(Node node, ObjectParameter parent) {
         var position = node.getStartMark().map(this::toPosition).orElse(null);
         if (node instanceof MappingNode) {
-            return toObjectParameter("", path, Parameter.ParameterType.MAPPING, toParameters((MappingNode) node, path), position);
+            ObjectParameter parameter = toObjectParameter("", parent, Parameter.ParameterType.MAPPING, position);
+            parameter.setChildren(toParameters((MappingNode) node, parameter));
+            return parameter;
         } else {
-            return toStringParameter("", path, Parameter.ParameterType.SCALAR, ((ScalarNode) node).getValue(), position);
+            return toStringParameter("", parent, Parameter.ParameterType.SCALAR, ((ScalarNode) node).getValue(), position);
         }
     }
 
-    private StringParameter toStringParameter(String name, String path, Parameter.ParameterType type, String value, Position start) {
+    private StringParameter toStringParameter(String name, ObjectParameter parent, Parameter.ParameterType type, String value, Position start) {
         return StringParameter.builder()
             .value(value)
-            .path(path)
+//            .path(path)
+            .parent(parent)
             .type(type)
             .name(name)
             .position(start)
             .build();
     }
 
-    private ObjectParameter toObjectParameter(String name, String path, Parameter.ParameterType type, List<Parameter> parameters, Position start) {
+    private ObjectParameter toObjectParameter(String name, ObjectParameter parent, Parameter.ParameterType type, Position start) {
         return ObjectParameter.builder()
-            .name(name)
-            .path(path)
-            .type(type)
-            .children(parameters)
-            .position(start)
-            .build();
+                .name(name)
+//            .path(path)
+                .parent(parent)
+                .type(type)
+//                .children(parameters)
+                .position(start)
+                .build();
     }
 
     private Position getPosition(final NodeTuple tuple) {
@@ -184,14 +186,6 @@ public class YamlMapper {
 
     private Position toPosition(Mark mark) {
         return Position.of(mark.getLine(), mark.getColumn());
-    }
-
-    private Optional<NodeTuple> findCustomType(String value) {
-        return typeTuple
-            .map(tuple -> (MappingNode) tuple.getValueNode())
-            .flatMap(node -> node.getValue().stream()
-                .filter(pair -> value.equals(getKey(pair)))
-                .findAny());
     }
 
     private String getScalarValueFrom(MappingNode node, String param) {

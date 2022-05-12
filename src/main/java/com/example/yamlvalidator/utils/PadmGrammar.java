@@ -24,20 +24,23 @@ public class PadmGrammar {
     public static final String AFTER_KEY_NAME = "after";
     public static final String BEFORE_KEY_NAME = "before";
 
-    public static final String OBJECT_TYPE_NAME = "object";
-    public static final String STRING_TYPE_NAME = "string";
-    public static final String DATETIME_TYPE_NAME = "datetime";
-    public static final String INTEGER_TYPE_NAME = "int";
-    public static final String NUMBER_TYPE_NAME = "number";
-    public static final String BOOLEAN_TYPE_NAME = "boolean";
-    public static final String SECRET_TYPE_NAME = "secret";
+    public static final String OR_KEYWORD = " or ";
+
+    public static final String OBJECT_TYPE = "object";
+    public static final String STRING_TYPE = "string";
+    public static final String DATETIME_TYPE = "datetime";
+    public static final String INTEGER_TYPE = "int";
+    public static final String NUMBER_TYPE = "number";
+    public static final String BOOLEAN_TYPE = "boolean";
+    public static final String SECRET_TYPE= "secret";
 
     public static List<String> keywords = List.of(TYPE_KEY_NAME, ITEMS_KEY_NAME, VALIDATORS_KEY_NAME, ENUM_KEY_NAME,
             ONE_OF_KEY_NAME, ANY_OF_KEY_NAME, PROPERTIES_KEY_NAME, PATTERN_KEY_NAME, DESCRIPTION_KEY_NAME, DEFAULT_KEY_NAME,
-            REQUIRED_KEY_NAME, EXAMPLE_KEY_NAME, MIN_KEY_NAME, MAX_KEY_NAME, LIST_KEY_NAME, AFTER_KEY_NAME, BEFORE_KEY_NAME);
+            REQUIRED_KEY_NAME, EXAMPLE_KEY_NAME, MIN_KEY_NAME, MAX_KEY_NAME, LIST_KEY_NAME, AFTER_KEY_NAME, BEFORE_KEY_NAME,
+            OR_KEYWORD);
 
-    public static List<String> standardTypes = List.of(OBJECT_TYPE_NAME, STRING_TYPE_NAME, DATETIME_TYPE_NAME,
-            INTEGER_TYPE_NAME, NUMBER_TYPE_NAME, BOOLEAN_TYPE_NAME, SECRET_TYPE_NAME);
+    public static List<String> standardTypes = List.of(OBJECT_TYPE, STRING_TYPE, DATETIME_TYPE,
+            INTEGER_TYPE, NUMBER_TYPE, BOOLEAN_TYPE, SECRET_TYPE);
 
 
     public static Optional<String> getKeyWord(String word) {
@@ -52,5 +55,33 @@ public class PadmGrammar {
         return list.stream()
                 .filter(s -> s.equalsIgnoreCase(value))
                 .findAny();
+    }
+
+    enum Validators {
+        TYPE_KEY_NAME("type"),
+        ITEMS_KEY_NAME("items"),
+        ENUM_KEY_NAME("enum"),
+        ONE_OF_KEY_NAME("oneOf"),
+        ANY_OF_KEY_NAME("anyOf"),
+        PROPERTIES_KEY_NAME("properties"),
+        PATTERN_KEY_NAME("pattern"),
+        DESCRIPTION_KEY_NAME("description"),
+        DEFAULT_KEY_NAME("default"),
+        REQUIRED_KEY_NAME("required"),
+        EXAMPLE_KEY_NAME("example"),
+        MIN_KEY_NAME("min"),
+        MAX_KEY_NAME("max"),
+        AFTER_KEY_NAME("after"),
+        BEFORE_KEY_NAME("before");
+
+        private final String key;
+
+        public String getKey() {
+            return key;
+        }
+
+        Validators(String key) {
+            this.key = key;
+        }
     }
 }
