@@ -2,11 +2,14 @@ package com.example.yamlvalidator;
 
 import com.example.yamlvalidator.services.YamlService;
 import org.apache.commons.cli.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 
 import java.io.PrintWriter;
 
@@ -14,6 +17,9 @@ import static java.lang.System.exit;
 
 @SpringBootApplication
 public class YamlValidatorApplication implements CommandLineRunner {
+
+	@Autowired
+	private YamlService yamlService;
 
 	public static void main(String[] args) {
 		var app = new SpringApplication(YamlValidatorApplication.class);
@@ -29,7 +35,7 @@ public class YamlValidatorApplication implements CommandLineRunner {
 		if (needHelp(cmdLine)) {
 			printHelp(options());
 		} else {
-			new YamlService().execute(cmdLine.getOptionValue("d"), cmdLine.getOptionValue("r"));
+			yamlService.execute(cmdLine.getOptionValue("d"), cmdLine.getOptionValue("r"));
 		}
 		exit(0);
 	}

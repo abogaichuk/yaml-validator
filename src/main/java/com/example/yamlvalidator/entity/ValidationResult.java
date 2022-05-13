@@ -11,6 +11,7 @@ public interface ValidationResult {
 
     boolean isValid();
 
+    //todo singelton
     static ValidationResult valid() {
         return new Valid();
     }

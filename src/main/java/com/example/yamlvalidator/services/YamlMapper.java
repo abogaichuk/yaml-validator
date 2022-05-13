@@ -5,8 +5,6 @@ import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.Position;
 import com.example.yamlvalidator.entity.StringParameter;
-import com.example.yamlvalidator.utils.PadmGrammar;
-import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 import org.snakeyaml.engine.v2.nodes.MappingNode;
 import org.snakeyaml.engine.v2.nodes.Node;
@@ -15,12 +13,8 @@ import org.snakeyaml.engine.v2.nodes.ScalarNode;
 import org.snakeyaml.engine.v2.nodes.SequenceNode;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.utils.PadmGrammar.*;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 import static org.snakeyaml.engine.v2.nodes.NodeType.MAPPING;
 import static org.snakeyaml.engine.v2.nodes.NodeType.SCALAR;

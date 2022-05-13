@@ -11,6 +11,9 @@ import org.snakeyaml.engine.v2.exceptions.ScannerException;
 import org.snakeyaml.engine.v2.nodes.Node;
 import org.snakeyaml.engine.v2.parser.ParserImpl;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -19,14 +22,18 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+@Component
 public class YamlService {
+    @Autowired
+    private ValidationServiceImpl validationService;
+
     public void execute(String definitionFile, String resourceFile) throws IOException {
         try {
             var defNode = readFile(definitionFile);
 //            Optional<Node> resource = readFile(resourceFile);
             var result = defNode
                 .map(root -> new YamlMapper().toDefinition(root))
-                .map(definition -> new ValidationServiceImpl().validate(definition))
+                .map(definition -> validationService.validate(definition))
                 .orElseGet(ValidationResult::valid);
             result.getReasons().forEach(System.out::println);
 

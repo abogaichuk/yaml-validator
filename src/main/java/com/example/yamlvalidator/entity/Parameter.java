@@ -16,7 +16,6 @@ public abstract class Parameter {
 //    private boolean editable, unique, bypass;
     private Position position;
 
-//    public abstract ValidationResult accept(Visitor v);
     public abstract ValidationResult validate();
 
     public int getRow() {
