@@ -16,18 +16,21 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
 public interface Conditions extends Predicate<StringParameter> {
 
+    Predicate<Parameter> isStringParameter = parameter -> parameter instanceof StringParameter;
+    Predicate<Parameter> isObjectParameter = parameter -> parameter instanceof ObjectParameter;
+
     Predicate<Parameter> isNumber = parameter -> toInt(parameter).isPresent();
     Predicate<Parameter> isNAN = isNumber.negate();
     Predicate<Parameter> isDateTime = parameter -> toDatetime(parameter).isPresent();
     Predicate<Parameter> isBoolean = parameter -> toBoolean(parameter).isPresent();
 
-    Predicate<Parameter> hasUnknownType = p -> KeyWord.TYPE.paramType.predicate.test(p) && isWrongType((StringParameter) p);
+    //keywords have specific type value: oneOf is object(mapping node), description is string(scalar node)
     Predicate<Parameter> isKeyWordAndIncorrectType = p -> Stream.of(KeyWord.values())
             .anyMatch(keyWord -> keyWord.name().equalsIgnoreCase(p.getName()) && keyWord.paramType.predicate.negate().test(p));
     Predicate<Parameter> isByPass = p -> toBoolean(p).filter(Boolean.TRUE::equals).isPresent();
 
     Predicate<ObjectParameter> hasDuplicates = p -> p.isNotASequenceType() && p.containsDuplicates();
-    Predicate<StringParameter> notKeywordAndUnknownType = p -> isNotAKeyword(p) && isWrongType(p);
+    Predicate<StringParameter> isWrongTypeDefinition = p -> p.isTypeOrNotAKeyword() && p.isWrongType();
 
     BiPredicate<Parameter, Parameter> compareNums = (min, max) -> compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
     BiPredicate<Parameter, Parameter> compareDates = (before, after) -> compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);

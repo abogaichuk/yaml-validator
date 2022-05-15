@@ -8,6 +8,7 @@ import com.example.yamlvalidator.entity.ValidationResult;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.example.yamlvalidator.rules.Conditions.*;
 import static com.example.yamlvalidator.rules.ParameterRuleFactory.*;
 import static com.example.yamlvalidator.utils.ValidatorUtils.OBJECT_KEYWORD;
 import static com.example.yamlvalidator.utils.ValidatorUtils.STRING_KEYWORD;
@@ -60,8 +61,8 @@ public class PadmGrammar {
     }
 
     public enum KeyWordType {
-        STRING(STRING_KEYWORD, p -> p instanceof StringParameter),
-        OBJECT(OBJECT_KEYWORD, p -> p instanceof ObjectParameter);
+        STRING(STRING_KEYWORD, isStringParameter),
+        OBJECT(OBJECT_KEYWORD, isObjectParameter);
 
         public final String message;
         public final Predicate<Parameter> predicate;

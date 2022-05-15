@@ -15,10 +15,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.rules.PadmGrammar.*;
-import static java.text.MessageFormat.*;
+import static java.text.MessageFormat.format;
 
 public class ValidatorUtils {
     public static final String IS_NAN = "{0} is not a number";
@@ -29,8 +27,8 @@ public class ValidatorUtils {
     public static final String IS_BEFORE = "{0} is before {1}";
     public static final String IS_AFTER = "{0} is after {1}";
     public static final String DEFAULT_WRONG = "List doesn't contains Default value";
-    public static final String HAS_DUPLICATES = "ObjectParam has duplicates";
-    public static final String UNKNOWN_TYPE = "Type is not define";
+    public static final String HAS_DUPLICATES = "Parameter: {0} has duplicates";
+    public static final String UNKNOWN_TYPE = "Type {0} is not define";
     public static final String PARAMETER_BYPASS = "Parameter Bypass, validation is skipped";
     public static final String WRONG_KEYWORD = "Wrong keyword type";
     public static final String STRING_KEYWORD = "Keyword must be a string";
@@ -38,10 +36,6 @@ public class ValidatorUtils {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final Pattern pattern = Pattern.compile(".*?\\$\\{(\\w+)\\}.*?");
-
-    public static boolean canBeParsedToInt(StringParameter intParam) {
-        return toInt(intParam).isPresent();
-    }
 
     public static <T> boolean compare(Parameter p1, Parameter p2,
                                       Function<Parameter, Optional<T>> parser,
@@ -60,33 +54,6 @@ public class ValidatorUtils {
         return paramParser.apply(p2)
                 .map(value -> predicate.test(listParser.apply(p1), value))
                 .orElse(Boolean.FALSE);
-//        return parser.apply(p2)
-//                .map(value -> listParser.apply(p1).contains(value))
-//                .orElse(Boolean.FALSE);
-    }
-
-    public static boolean compareInts(StringParameter minP, StringParameter maxP) {
-        return toInt(minP)
-            .map(min -> toInt(maxP)
-                .map(max -> min > max)
-                .orElse(Boolean.FALSE))
-            .orElse(Boolean.FALSE);
-    }
-
-    public static boolean compareDates(StringParameter beforeP, StringParameter afterP) {
-        return toDatetime(beforeP)
-            .map(before -> toDatetime(afterP)
-                .map(before::isAfter)
-                .orElse(Boolean.FALSE))
-            .orElse(Boolean.FALSE);
-    }
-
-    public static <T> boolean canBeParsed(Parameter p, Function<Parameter, Optional<T>> parser) {
-        return parser.apply(p).isPresent();
-    }
-
-    public static boolean canBeParsedToDatetime(final StringParameter datetimeParam) {
-        return toDatetime(datetimeParam).isPresent();
     }
 
     public static Optional<Integer> toInt(final Parameter parameter) {
@@ -140,77 +107,10 @@ public class ValidatorUtils {
         }
     }
 
-//    public static Optional<String> findWrongType(final Parameter parameter) {
-//        try {
-//            var value = getValue(parameter);
-//            return Stream.of(value.split(OR_KEYWORD))
-//                    .map(String::trim)
-//                    .filter(partedType -> isNotAType(parameter, partedType))
-//                    .findAny();
-//        } catch (ClassCastException e) {
-//            e.printStackTrace();
-//            return Optional.of(e.getMessage());
-//        }
-//    }
-
-    //todo logic for objectparam type child?!!
-    public static boolean isWrongType(final StringParameter p) {
-        return Stream.of(p.getValue().split(OR_TYPE_SPLITTER))
-                .map(String::trim)
-                .anyMatch(part -> isNotAType(p, part));
-    }
-    //todo logic for stringParam??!!
-    public static Optional<String> getIncorrectType(final Parameter p) {
-        return isKeyWord(p) ? Optional.empty() : getTypeValue(p)
-                .flatMap(value -> Stream.of(value.split(OR_TYPE_SPLITTER))
-                        .map(String::trim)
-                        .filter(splitted -> isNotAType(p, splitted))
-                        .findAny());
-    }
-
-    public static Optional<String> getTypeValue(final Parameter p) {
-        if (p instanceof StringParameter) {
-            return Optional.of(getValue(p));
-        } else {
-            return ((ObjectParameter) p).findChild(KeyWord.TYPE.name())
-                    .map(ValidatorUtils::getValue);
-        }
-    }
-
     //todo refactor? inside Parameter?
     public static String getValue(final Parameter p) {
         Objects.requireNonNull(p);
         return ((StringParameter) p).getValue();
-    }
-
-    public static boolean isNotAKeyword(final Parameter p) {
-        return !isKeyWord(p);
-    }
-
-    private static boolean isKeyWord(final Parameter p) {
-        return Stream.of(KeyWord.values()).anyMatch(keyWord -> keyWord.name().equalsIgnoreCase(p.getName()));
-    }
-
-    private static boolean isNotAType(final Parameter parameter, final String type) {
-        return isNotAStandardType(type) && isNotACustomType(parameter, type);
-    }
-
-    private static boolean isNotACustomType(final Parameter parameter, final String type) {
-        return !isCustomType(parameter, type);
-    }
-
-    private static boolean isCustomType(final Parameter parameter, final String type) {
-        return parameter.getRoot().getCustomTypes().stream()
-                .anyMatch(t -> t.equalsIgnoreCase(type));
-    }
-
-    private static boolean isNotAStandardType(String type) {
-        return !isStandardType(type);
-    }
-
-    private static boolean isStandardType(String type) {
-        return Stream.of(StandardType.values())
-                .anyMatch(t -> t.name().equalsIgnoreCase(type));
     }
 
     public static boolean isEmpty(String s) {
@@ -232,7 +132,8 @@ public class ValidatorUtils {
     }
 
     public static String toErrorMessage(Parameter p, String incorrectValue, String message) {
-        return format("{0}, paramname: {1}, parameterValue: {2} (row #{3})", message, p.getPath(), incorrectValue, p.getRow());
+        message = format(message, incorrectValue);
+        return format("{0}, paramname: {1} (row #{3})", message, p.getPath(), incorrectValue, p.getRow());
     }
 
     public static String replaceHolder(String s, String placeholder) {

@@ -1,10 +1,15 @@
 package com.example.yamlvalidator.entity;
 
+import com.example.yamlvalidator.rules.PadmGrammar;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.util.Optional;
+import java.util.stream.Stream;
+
+import static com.example.yamlvalidator.rules.PadmGrammar.OR_TYPE_SPLITTER;
+import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
 @SuperBuilder
 @Getter
@@ -15,6 +20,10 @@ public abstract class Parameter {
     private Parameter parent;
 //    private boolean editable, unique, bypass;
     private Position position;
+
+    public enum ParameterType {
+        SCALAR, SEQUENCE, MAPPING
+    }
 
     public abstract ValidationResult validate();
 
@@ -50,7 +59,43 @@ public abstract class Parameter {
         return !type.equals(ParameterType.SEQUENCE);
     }
 
-    public enum ParameterType {
-        SCALAR, SEQUENCE, MAPPING
+    //if name == type or name != keyword, so it's a new type definition (Test: Manual or Auto)
+    //todo if name is empty == collection type
+    public boolean isTypeOrNotAKeyword() {
+        return isNotEmpty(name) && (isType() || isNotAKeyword());
+    }
+
+    protected boolean isNotAType(final String type) {
+        return isNotAStandardType(type) && isNotACustomType(type);
+    }
+
+    private boolean isType() {
+        return PadmGrammar.KeyWord.TYPE.name().equalsIgnoreCase(name);
+    }
+
+    private boolean isNotAKeyword() {
+        return !isKeyWord();
+    }
+
+    private boolean isKeyWord() {
+        return Stream.of(PadmGrammar.KeyWord.values()).anyMatch(keyWord -> keyWord.name().equalsIgnoreCase(name));
+    }
+
+    private boolean isNotACustomType(final String type) {
+        return !isCustomType(type);
+    }
+
+    private boolean isCustomType(final String type) {
+        return getRoot().getCustomTypes().stream()
+                .anyMatch(t -> t.equalsIgnoreCase(type));
+    }
+
+    private boolean isNotAStandardType(String type) {
+        return !isStandardType(type);
+    }
+
+    private boolean isStandardType(String type) {
+        return Stream.of(PadmGrammar.StandardType.values())
+                .anyMatch(t -> t.name().equalsIgnoreCase(type));
     }
 }

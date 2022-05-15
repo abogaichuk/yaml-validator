@@ -21,7 +21,21 @@ public class ParameterRuleFactory {
 //        return bypass()
 //                .or(custom().and(numbers()).and(datetime()).and(strings()).and(secrets()).and(booleans()));
         return bypass()
-                .or(custom().and(standardTypeRule()));
+                .or(custom().or(standardTypeRule()));
+//                .or(custom().and(standardTypeRule()));
+    }
+
+    public static ParameterRule<StringParameter> stringRules() {
+        return correctType().and(keyWordRuleS());//.and(keyWordRule());
+    }
+
+    public static ParameterRule<ObjectParameter> enumRules() {
+        return children();
+    }
+
+    private static ParameterRule<StringParameter> correctType() {
+        return parameter -> isWrongTypeDefinition.test(parameter) ?
+                invalid(toErrorMessage(parameter, parameter.getValue(), UNKNOWN_TYPE)) : valid();
     }
 
     private static ParameterRule<ObjectParameter> standardTypeRule() {
@@ -33,24 +47,14 @@ public class ParameterRuleFactory {
                 .orElseGet(ValidationResult::valid);
     }
 
-    public static ParameterRule<StringParameter> stringRules() {
-        return correctType();//.and(keyWordRule());
-    }
-
-    private static ParameterRule<StringParameter> correctType() {
-        return parameter -> notKeywordAndUnknownType.test(parameter) ?
-                invalid(toErrorMessage(parameter, UNKNOWN_TYPE)) : valid();
-    }
-
     private static ParameterRule<ObjectParameter> bypass() {
         return singleFieldValidation(KeyWord.BYPASS.name(), PARAMETER_BYPASS, isByPass);
     }
 
     public static ParameterRule<ObjectParameter> custom() {
         return noDuplicates()
-                .and(keyWordRule())
-                .and(children())
-                .and(singleFieldValidation(KeyWord.TYPE.name(), UNKNOWN_TYPE, hasUnknownType)); //type child is defined correctly
+                .and(keyWordRuleO()
+                        .or(children()));
     }
 
     private static ParameterRule<ObjectParameter> noDuplicates() {
@@ -64,11 +68,12 @@ public class ParameterRuleFactory {
                 .orElseGet(ValidationResult::valid);
     }
 
-    private static ParameterRule<ObjectParameter> keyWordRule() {
-        return parameter -> parameter.getChildren().stream()
-                .map(p -> isKeyWordAndIncorrectType.test(p) ? invalid(toErrorMessage(p, WRONG_KEYWORD)) : valid())
-                .reduce(ValidationResult::merge)
-                .orElseGet(ValidationResult::valid);
+    private static ParameterRule<StringParameter> keyWordRuleS() {
+        return parameter -> isKeyWordAndIncorrectType.test(parameter) ? invalid(toErrorMessage(parameter, WRONG_KEYWORD)) : valid();
+    }
+
+    private static ParameterRule<ObjectParameter> keyWordRuleO() {
+        return parameter -> isKeyWordAndIncorrectType.test(parameter) ? invalid(toErrorMessage(parameter, WRONG_KEYWORD)) : valid();
     }
 
     //todo datetime custom pattern

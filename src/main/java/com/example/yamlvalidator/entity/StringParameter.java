@@ -1,8 +1,12 @@
 package com.example.yamlvalidator.entity;
 
+import com.example.yamlvalidator.rules.PadmGrammar;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
+import java.util.stream.Stream;
+
+import static com.example.yamlvalidator.rules.PadmGrammar.OR_TYPE_SPLITTER;
 import static com.example.yamlvalidator.rules.ParameterRuleFactory.stringRules;
 
 @SuperBuilder
@@ -13,6 +17,12 @@ public class StringParameter extends Parameter {
     @Override
     public ValidationResult validate() {
         return stringRules().validate(this);
+    }
+
+    public boolean isWrongType() {
+        return Stream.of(value.split(OR_TYPE_SPLITTER))
+                .map(String::trim)
+                .anyMatch(this::isNotAType);
     }
 
     @Override

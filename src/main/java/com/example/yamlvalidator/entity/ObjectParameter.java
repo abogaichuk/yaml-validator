@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.example.yamlvalidator.rules.ParameterRuleFactory.enumRules;
 import static com.example.yamlvalidator.rules.ParameterRuleFactory.objectRules;
 import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
@@ -22,11 +23,7 @@ public class ObjectParameter extends Parameter {
     @Override
     public ValidationResult validate() {
         return objectRules().validate(this);
-//        return children.stream()
-//                .map(Parameter::validate)
-//                .reduce(objectRules().validate(this), ValidationResult::merge);
-//                .map(result -> result.merge(ParameterRuleFactory.objectRules().validate(this)))
-//                .orElseGet(ValidationResult::valid);
+//        return ParameterType.MAPPING.equals(getType()) ? objectRules().validate(this) : enumRules().validate(this);
     }
 
     public Optional<Parameter> findChild(String name) {
