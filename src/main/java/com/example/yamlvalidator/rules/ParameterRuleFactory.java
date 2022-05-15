@@ -4,10 +4,12 @@ import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
+import com.example.yamlvalidator.utils.ValidatorUtils;
 
 import java.util.Arrays;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.entity.ValidationResult.valid;
@@ -26,8 +28,8 @@ public class ParameterRuleFactory {
     }
 
     public static ParameterRule<StringParameter> stringRules() {
-        return correctType();
-//                .and(keyWordRuleS());//.and(keyWordRule());
+        return correctType()
+                .and((ParameterRule<StringParameter>) keyWordRule());//.and(keyWordRule());
     }
 
     public static ParameterRule<ObjectParameter> enumRules() {
@@ -55,6 +57,7 @@ public class ParameterRuleFactory {
     public static ParameterRule<ObjectParameter> custom() {
         return noDuplicates()
 //                .and(keyWordRuleO()
+                .and((ParameterRule<ObjectParameter>) keyWordRule())
                         .or(children());
     }
 
@@ -69,13 +72,14 @@ public class ParameterRuleFactory {
                 .orElseGet(ValidationResult::valid);
     }
 
-//    private static ParameterRule<StringParameter> keyWordRuleS() {
-//        return parameter -> isKeyWordAndIncorrectType.test(parameter) ? invalid(toErrorMessage(parameter, parameter.getKeyWordError())) : valid();
-//    }
-//
-//    private static ParameterRule<ObjectParameter> keyWordRuleO() {
-//        return parameter -> isKeyWordAndIncorrectType.test(parameter) ? invalid(toErrorMessage(parameter, parameter.getKeyWordError())) : valid();
-//    }
+    //keywords have specific type value: oneOf is object(mapping node), description is string(scalar node)
+    private static ParameterRule<? extends Parameter> keyWordRule() {
+        return parameter -> Stream.of(PadmGrammar.KeyWord.values())
+                .filter(keyWord -> isKeyWordIncorrect(parameter, keyWord))
+                .findAny()
+                .map(keyWord -> invalid(toErrorMessage(parameter, keyWord.paramType.message)))
+                .orElseGet(ValidationResult::valid);
+    }
 
     //todo datetime custom pattern
     public static ParameterRule<ObjectParameter> datetime() {

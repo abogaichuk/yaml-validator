@@ -2,16 +2,16 @@ package com.example.yamlvalidator.rules;
 
 import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;
-import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.example.yamlvalidator.entity.ValidationResult.*;
-import static com.example.yamlvalidator.rules.Conditions.*;
+import static com.example.yamlvalidator.rules.Conditions.isObjectParameter;
+import static com.example.yamlvalidator.rules.Conditions.isStringParameter;
 import static com.example.yamlvalidator.rules.ParameterRuleFactory.*;
-import static com.example.yamlvalidator.utils.ValidatorUtils.*;
+import static com.example.yamlvalidator.utils.ValidatorUtils.OBJECT_KEYWORD;
+import static com.example.yamlvalidator.utils.ValidatorUtils.STRING_KEYWORD;
 
 public class PadmGrammar {
     public static final String OR_TYPE_SPLITTER = " or ";
@@ -58,14 +58,9 @@ public class PadmGrammar {
         KeyWord(KeyWordType paramType) {
             this.paramType = paramType;
         }
-
-//        @Override
-//        public ValidationResult validate(Parameter parameter) {
-//            return paramType.predicate.test(parameter) ? valid() : invalid(toErrorMessage(parameter, paramType.message));
-//        }
     }
 
-    public enum KeyWordType implements ParameterRule {
+    public enum KeyWordType {
         STRING(STRING_KEYWORD, isStringParameter),
         OBJECT(OBJECT_KEYWORD, isObjectParameter);
 
@@ -74,11 +69,6 @@ public class PadmGrammar {
         KeyWordType(String message, Predicate<Parameter> predicate) {
             this.message = message;
             this.predicate = predicate;
-        }
-
-        @Override
-        public ValidationResult validate(Parameter parameter) {
-            return predicate.test(parameter) ? valid() : invalid(toErrorMessage(parameter, message));
         }
     }
 }

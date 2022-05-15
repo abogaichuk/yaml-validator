@@ -3,26 +3,18 @@ package com.example.yamlvalidator.entity;
 import com.example.yamlvalidator.rules.PadmGrammar;
 import lombok.Getter;
 import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.rules.Conditions.isObjectParameter;
-import static com.example.yamlvalidator.rules.Conditions.isStringParameter;
-import static com.example.yamlvalidator.rules.PadmGrammar.OR_TYPE_SPLITTER;
-import static com.example.yamlvalidator.utils.ValidatorUtils.*;
+import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
-//@SuperBuilder
 @Getter
 @ToString
 public abstract class Parameter {
     private String name;
     private ParameterType type;
-    private Optional<PadmGrammar.KeyWord> keyWord;
     private Parameter parent;
-//    private boolean editable, unique, bypass;
     private Position position;
 
     public enum ParameterType {
@@ -31,9 +23,6 @@ public abstract class Parameter {
 
     public Parameter(String name, ParameterType type, Parameter parent, Position position) {
         this.name = name;
-        this.keyWord = Stream.of(PadmGrammar.KeyWord.values())
-                .filter(kw -> kw.name().equalsIgnoreCase(name))
-                .findAny();
         this.type = type;
         this.parent = parent;
         this.position = position;
@@ -112,45 +101,4 @@ public abstract class Parameter {
         return Stream.of(PadmGrammar.StandardType.values())
                 .anyMatch(t -> t.name().equalsIgnoreCase(type));
     }
-
-    public String getKeyWordError() {
-        return keyWord.map(kw -> kw.paramType.message).orElse("");
-    }
-
-//    public enum KeyWord {
-//        TYPE(KeyWordType.STRING),
-//        ITEMS(KeyWordType.OBJECT),
-//        ENUM(KeyWordType.OBJECT),
-//        ONEOF(KeyWordType.OBJECT),
-//        ANYOF(KeyWordType.OBJECT),
-//        PROPERTIES(KeyWordType.OBJECT),
-//        PATTERN(KeyWordType.STRING),
-//        DESCRIPTION(KeyWordType.STRING),
-//        DEFAULT(KeyWordType.STRING),
-//        REQUIRED(KeyWordType.STRING),
-//        EXAMPLE(KeyWordType.STRING),
-//        BYPASS(KeyWordType.STRING),
-//        MIN(KeyWordType.STRING),
-//        MAX(KeyWordType.STRING),
-//        LIST(KeyWordType.OBJECT),
-//        AFTER(KeyWordType.STRING),
-//        BEFORE(KeyWordType.STRING);
-//
-//        public final KeyWordType paramType;
-//        KeyWord(KeyWordType paramType) {
-//            this.paramType = paramType;
-//        }
-//    }
-//
-//    public enum KeyWordType {
-//        STRING(STRING_KEYWORD, isStringParameter),
-//        OBJECT(OBJECT_KEYWORD, isObjectParameter);
-//
-//        public final String message;
-//        public final Predicate<Parameter> predicate;
-//        KeyWordType(String message, Predicate<Parameter> predicate) {
-//            this.message = message;
-//            this.predicate = predicate;
-//        }
-//    }
 }

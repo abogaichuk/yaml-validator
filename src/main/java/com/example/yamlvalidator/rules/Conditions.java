@@ -24,17 +24,12 @@ public interface Conditions extends Predicate<StringParameter> {
     Predicate<Parameter> isDateTime = parameter -> toDatetime(parameter).isPresent();
     Predicate<Parameter> isBoolean = parameter -> toBoolean(parameter).isPresent();
 
-    //keywords have specific type value: oneOf is object(mapping node), description is string(scalar node)
-    Predicate<Parameter> isKeyWordAndIncorrectType = p -> p.getKeyWord()
-            .map(keyWord -> keyWord.paramType.predicate.negate().test(p))
-            .orElse(Boolean.FALSE);
-//    Predicate<Parameter> isKeyWordAndIncorrectType = p -> Stream.of(KeyWord.values())
-//            .anyMatch(keyWord -> keyWord.name().equalsIgnoreCase(p.getName()) && keyWord.paramType.predicate.negate().test(p));
     Predicate<Parameter> isByPass = p -> toBoolean(p).filter(Boolean.TRUE::equals).isPresent();
 
     Predicate<ObjectParameter> hasDuplicates = p -> p.isNotASequenceType() && p.containsDuplicates();
     Predicate<StringParameter> isWrongTypeDefinition = p -> p.isTypeOrNotAKeyword() && p.isWrongType();
 
+//    BiPredicate<Parameter, PadmGrammar.KeyWordType> isRightKeyWord = (parameter, keyWordType) ->
     BiPredicate<Parameter, Parameter> compareNums = (min, max) -> compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
     BiPredicate<Parameter, Parameter> compareDates = (before, after) -> compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
     BiPredicate<Parameter, Parameter> listContains = (list, value) -> contains((ObjectParameter) list, value, ValidatorUtils::toList, ValidatorUtils::toString, List::contains);

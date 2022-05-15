@@ -3,6 +3,7 @@ package com.example.yamlvalidator.utils;
 import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
+import com.example.yamlvalidator.rules.PadmGrammar;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -30,7 +31,6 @@ public class ValidatorUtils {
     public static final String HAS_DUPLICATES = "Parameter: {0} has duplicates";
     public static final String UNKNOWN_TYPE = "Type {0} is not define";
     public static final String PARAMETER_BYPASS = "Parameter Bypass, validation is skipped";
-    public static final String WRONG_KEYWORD = "Wrong keyword type";
     public static final String STRING_KEYWORD = "Keyword {0} must be a string";
     public static final String OBJECT_KEYWORD = "Keyword {0} must be an object";
 
@@ -150,5 +150,9 @@ public class ValidatorUtils {
             matcher = pattern.matcher(s);
         }
         return s;
+    }
+
+    public static boolean isKeyWordIncorrect(Parameter p, PadmGrammar.KeyWord keyWord) {
+        return keyWord.name().equalsIgnoreCase(p.getName()) && keyWord.paramType.predicate.negate().test(p);
     }
 }
