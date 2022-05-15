@@ -15,6 +15,25 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.STRING_KEYWORD;
 public class PadmGrammar {
     public static final String OR_TYPE_SPLITTER = " or ";
 
+    public enum StandardType implements ParameterRule<ObjectParameter> {
+        OBJECT(() -> custom()),
+        STRING(() -> strings()),
+        DATETIME(() -> datetime()),
+        NUMBER(() -> numbers()),
+        BOOLEAN(() -> booleans()),
+        SECRET(() -> secrets());
+
+        private final Supplier<ParameterRule<ObjectParameter>> supplier;
+        StandardType(Supplier<ParameterRule<ObjectParameter>> supplier) {
+            this.supplier = supplier;
+        }
+
+        @Override
+        public ValidationResult validate(ObjectParameter parameter) {
+            return supplier.get().validate(parameter);
+        }
+    }
+
     public enum KeyWord {
         TYPE(KeyWordType.STRING),
         ITEMS(KeyWordType.OBJECT),
@@ -49,25 +68,6 @@ public class PadmGrammar {
         KeyWordType(String message, Predicate<Parameter> predicate) {
             this.message = message;
             this.predicate = predicate;
-        }
-    }
-
-    public enum StandardType implements ParameterRule<ObjectParameter> {
-        OBJECT(() -> custom()),
-        STRING(() -> strings()),
-        DATETIME(() -> datetime()),
-        NUMBER(() -> numbers()),
-        BOOLEAN(() -> booleans()),
-        SECRET(() -> secrets());
-
-        private final Supplier<ParameterRule<ObjectParameter>> supplier;
-        StandardType(Supplier<ParameterRule<ObjectParameter>> supplier) {
-            this.supplier = supplier;
-        }
-
-        @Override
-        public ValidationResult validate(ObjectParameter parameter) {
-            return supplier.get().validate(parameter);
         }
     }
 }

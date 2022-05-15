@@ -73,26 +73,26 @@ public class ParameterRuleFactory {
 
     //todo datetime custom pattern
     public static ParameterRule<ObjectParameter> datetime() {
-        return singleFieldValidation(KeyWord.AFTER.name(), AFTER_IS_NOT_DATETIME, isDateTime.negate())
-                .and(singleFieldValidation(KeyWord.BEFORE.name(), BEFORE_IS_NOT_DATETIME, isDateTime.negate()))
-                .and(singleFieldValidation(KeyWord.DEFAULT.name(), DEFAULT_IS_NOT_A_DATETIME, isDateTime.negate()))
-                .and(doubleFieldsValidation(KeyWord.AFTER.name(), KeyWord.BEFORE.name(), BEFORE_DATE_IS_AFTER, compareDates))
-                .and(doubleFieldsValidation(KeyWord.DEFAULT.name(), KeyWord.BEFORE.name(), DEFAULT_IS_AFTER_BEFORE, compareDates))
-                .and(doubleFieldsValidation(KeyWord.AFTER.name(), KeyWord.DEFAULT.name(), DEFAULT_IS_BEFORE_AFTER, compareDates));
+        return singleFieldValidation(KeyWord.AFTER.name(), IS_NOT_A_DATETIME, isDateTime.negate())
+                .and(singleFieldValidation(KeyWord.BEFORE.name(), IS_NOT_A_DATETIME, isDateTime.negate()))
+                .and(singleFieldValidation(KeyWord.DEFAULT.name(), IS_NOT_A_DATETIME, isDateTime.negate()))
+                .and(doubleFieldsValidation(KeyWord.AFTER.name(), KeyWord.BEFORE.name(), IS_BEFORE, compareDates))
+                .and(doubleFieldsValidation(KeyWord.BEFORE.name(), KeyWord.DEFAULT.name(), IS_AFTER, compareDates.negate()))
+                .and(doubleFieldsValidation(KeyWord.AFTER.name(), KeyWord.DEFAULT.name(), IS_BEFORE, compareDates));
     }
 
     public static ParameterRule<ObjectParameter> numbers() {
-        return singleFieldValidation(KeyWord.MIN.name(), MIN_IS_NAN, isNAN)
-                .and(singleFieldValidation(KeyWord.MAX.name(), MAX_IS_NAN, isNAN))
-                .and(singleFieldValidation(KeyWord.DEFAULT.name(), DEFAULT_IS_NAN, isNAN))
-                .and(doubleFieldsValidation(KeyWord.MIN.name(), KeyWord.MAX.name(), MAX_LESS_THAN_MIN, compareNums))
-                .and(doubleFieldsValidation(KeyWord.MIN.name(), KeyWord.DEFAULT.name(), DEFAULT_LESS_THAN_MIN, compareNums))
-                .and(doubleFieldsValidation(KeyWord.MAX.name(), KeyWord.DEFAULT.name(), DEFAULT_MORE_THAN_MAX, compareNums.negate()))
+        return singleFieldValidation(KeyWord.MIN.name(), IS_NAN, isNAN)
+                .and(singleFieldValidation(KeyWord.MAX.name(), IS_NAN, isNAN))
+                .and(singleFieldValidation(KeyWord.DEFAULT.name(), IS_NAN, isNAN))
+                .and(doubleFieldsValidation(KeyWord.MIN.name(), KeyWord.MAX.name(), LESS_THAN, compareNums))
+                .and(doubleFieldsValidation(KeyWord.MIN.name(), KeyWord.DEFAULT.name(), LESS_THAN, compareNums))
+                .and(doubleFieldsValidation(KeyWord.MAX.name(), KeyWord.DEFAULT.name(), MORE_THAN, compareNums.negate()))
                 .and(doubleFieldsValidation(KeyWord.LIST.name(), KeyWord.DEFAULT.name(), DEFAULT_WRONG, listContains.negate()));
     }
 
     public static ParameterRule<ObjectParameter> booleans() {
-        return singleFieldValidation(KeyWord.DEFAULT.name(), DEFAULT_IS_NOT_A_BOOLEAN, isBoolean);
+        return singleFieldValidation(KeyWord.DEFAULT.name(), IS_NOT_A_BOOLEAN, isBoolean);
     }
 
     public static ParameterRule<ObjectParameter> secrets() {
@@ -115,7 +115,7 @@ public class ParameterRuleFactory {
         return parameter ->  parameter.findChild(child1)
                 .map(p1 -> parameter.findChild(child2)
                         .filter(p2 -> comparator.test(p1, p2))
-                        .map(p2 -> invalid(toErrorMessage(p2, message)))
+                        .map(p2 -> invalid(toErrorMessage(p2, p1, message)))
                         .orElseGet(ValidationResult::valid))
                 .orElseGet(ValidationResult::valid);
     }

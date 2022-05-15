@@ -29,13 +29,13 @@
 #    Validators:
 #      Before: 2020-03-04 11:30
 #      After: 2005-03-04 11:30
-executedDate:
-  type: datetime
-  default: 2000-01-01 00:01
-  description: The time when product is valid from.
-  example: 2016-03-04 11:30
-  before: 2020-03-04 11:30
-  after: 2005-03-04 11:30
+#executedDate:
+#  type: datetime
+#  default: 2000-01-01 00:01
+#  description: The time when product is valid from.
+#  example: 2016-03-04 11:30
+#  before: 1999-03-04 11:30
+#  after: 2005-03-04 11:30
 #AutoTest:
 #  id:
 #    type: number
@@ -96,19 +96,19 @@ executedDate:
 #    - TCP
 #    - UDP
 #    - HTTP
-#Test:
-#  description: "asaas"
-#  description: "asdasdass"
-#  bypass: false
-#  type:
-#    aa: "aa"
-#    bb: "bb"
+Test:
+  description: "asaas"
+  description: "asdasdass"
+  bypass: false
+  type:
+    aa: "aa"
+    bb: "bb"
 #Protocol: string or aaa
 #Port:
 #  Default: 70021
 #  Description: "${USER} of the secondary ${HOME11} Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
-#  Type: datetime
-#  min: 1025000
+#  Type: number
+#  min: 102500
 #  max: 65535
 #  list:
 #    - 7000

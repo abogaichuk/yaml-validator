@@ -21,26 +21,17 @@ import static com.example.yamlvalidator.rules.PadmGrammar.*;
 import static java.text.MessageFormat.*;
 
 public class ValidatorUtils {
-    public static final String MIN_IS_NAN = "Min is not a number";
-    public static final String MAX_IS_NAN = "Max is not a number";
-    public static final String DEFAULT_IS_NAN = "Default is not a number";
-    public static final String DEFAULT_IS_NOT_A_BOOLEAN = "Default is not a boolean";
-    public static final String DEFAULT_IS_NOT_A_DATETIME = "Default is not a datetime";
-    public static final String MAX_LESS_THAN_MIN = "Max < Min";
-    public static final String DEFAULT_LESS_THAN_MIN = "Default < Min";
-    public static final String DEFAULT_MORE_THAN_MAX = "Default > Max";
-    public static final String DEFAULT_IS_BEFORE_AFTER = "Default before After";
-    public static final String DEFAULT_IS_AFTER_BEFORE = "Default after Before";
+    public static final String IS_NAN = "{0} is not a number";
+    public static final String IS_NOT_A_BOOLEAN = "{0} is not a boolean";
+    public static final String IS_NOT_A_DATETIME= "{0} is not a datetime";
+    public static final String LESS_THAN = "{0} < {1}";
+    public static final String MORE_THAN = "{0} > {1}";
+    public static final String IS_BEFORE = "{0} is before {1}";
+    public static final String IS_AFTER = "{0} is after {1}";
     public static final String DEFAULT_WRONG = "List doesn't contains Default value";
     public static final String HAS_DUPLICATES = "ObjectParam has duplicates";
-    public static final String AFTER_IS_NOT_DATETIME = "After is not a datetime";
-    public static final String BEFORE_IS_NOT_DATETIME = "Before is not a datetime";
-    public static final String BEFORE_DATE_IS_AFTER = "After is before Before";
     public static final String UNKNOWN_TYPE = "Type is not define";
     public static final String PARAMETER_BYPASS = "Parameter Bypass, validation is skipped";
-    public static final String DEFAULT_IS_NOT_NUMBER = "Default is not a number";
-    public static final String DEFAULT_IS_NOT_DATETIME = "Default is not a datetime";
-    public static final String DEFAULT_IS_NOT_BOOL = "Default is not a boolean";
     public static final String WRONG_KEYWORD = "Wrong keyword type";
     public static final String STRING_KEYWORD = "Keyword must be a string";
     public static final String OBJECT_KEYWORD = "Keyword must be an object";
@@ -231,11 +222,17 @@ public class ValidatorUtils {
     }
 
     public static String toErrorMessage(Parameter p, String message) {
-        return format("{0} paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
+        message = format(message, p.getName());
+        return format("{0}, paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
+    }
+
+    public static String toErrorMessage(Parameter p1, Parameter p2, String message) {
+        message = format(message, p1.getName(), p2.getName());
+        return format("{0}, paramname: {1} (row #{2}), paramname: {3} (row #{4})", message, p1.getPath(), p1.getRow(), p2.getPath(), p2.getRow());
     }
 
     public static String toErrorMessage(Parameter p, String incorrectValue, String message) {
-        return format("{0} paramname: {1}, parameterValue: {2} (row #{3})", message, p.getPath(), incorrectValue, p.getRow());
+        return format("{0}, paramname: {1}, parameterValue: {2} (row #{3})", message, p.getPath(), incorrectValue, p.getRow());
     }
 
     public static String replaceHolder(String s, String placeholder) {
