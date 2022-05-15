@@ -88,18 +88,19 @@
 #FirstTest:
 #  type: Test
 #SecondTest: Test
-Protocol:
-  Type: string
-  Default: TCPP
-  Search: boolean
-  List:
-    - TCP
-    - UDP
-    - HTTP
-#Test:
-#  description:
-#    cc: "cc"
-#    dd: "dd"
+#Protocol:
+#  Type: string
+#  Default: TCP
+#  Search: boolean
+#  List:
+#    - TCP
+#    - UDP
+#    - HTTP
+#CiscoProtocol: Protocoll
+Test:
+  description:
+    cc: "cc"
+    dd: "dd"
 #  description: "asdasdass"
 #  bypass: false
 #  type:

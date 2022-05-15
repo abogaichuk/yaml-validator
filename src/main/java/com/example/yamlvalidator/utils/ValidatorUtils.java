@@ -31,8 +31,8 @@ public class ValidatorUtils {
     public static final String UNKNOWN_TYPE = "Type {0} is not define";
     public static final String PARAMETER_BYPASS = "Parameter Bypass, validation is skipped";
     public static final String WRONG_KEYWORD = "Wrong keyword type";
-    public static final String STRING_KEYWORD = "Keyword must be a string";
-    public static final String OBJECT_KEYWORD = "Keyword must be an object";
+    public static final String STRING_KEYWORD = "Keyword {0} must be a string";
+    public static final String OBJECT_KEYWORD = "Keyword {0} must be an object";
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final Pattern pattern = Pattern.compile(".*?\\$\\{(\\w+)\\}.*?");

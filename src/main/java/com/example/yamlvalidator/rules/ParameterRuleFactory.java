@@ -26,7 +26,8 @@ public class ParameterRuleFactory {
     }
 
     public static ParameterRule<StringParameter> stringRules() {
-        return correctType().and(keyWordRuleS());//.and(keyWordRule());
+        return correctType();
+//                .and(keyWordRuleS());//.and(keyWordRule());
     }
 
     public static ParameterRule<ObjectParameter> enumRules() {
@@ -53,8 +54,8 @@ public class ParameterRuleFactory {
 
     public static ParameterRule<ObjectParameter> custom() {
         return noDuplicates()
-                .and(keyWordRuleO()
-                        .or(children()));
+//                .and(keyWordRuleO()
+                        .or(children());
     }
 
     private static ParameterRule<ObjectParameter> noDuplicates() {
@@ -68,13 +69,13 @@ public class ParameterRuleFactory {
                 .orElseGet(ValidationResult::valid);
     }
 
-    private static ParameterRule<StringParameter> keyWordRuleS() {
-        return parameter -> isKeyWordAndIncorrectType.test(parameter) ? invalid(toErrorMessage(parameter, WRONG_KEYWORD)) : valid();
-    }
-
-    private static ParameterRule<ObjectParameter> keyWordRuleO() {
-        return parameter -> isKeyWordAndIncorrectType.test(parameter) ? invalid(toErrorMessage(parameter, WRONG_KEYWORD)) : valid();
-    }
+//    private static ParameterRule<StringParameter> keyWordRuleS() {
+//        return parameter -> isKeyWordAndIncorrectType.test(parameter) ? invalid(toErrorMessage(parameter, parameter.getKeyWordError())) : valid();
+//    }
+//
+//    private static ParameterRule<ObjectParameter> keyWordRuleO() {
+//        return parameter -> isKeyWordAndIncorrectType.test(parameter) ? invalid(toErrorMessage(parameter, parameter.getKeyWordError())) : valid();
+//    }
 
     //todo datetime custom pattern
     public static ParameterRule<ObjectParameter> datetime() {

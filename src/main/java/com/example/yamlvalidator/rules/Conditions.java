@@ -25,8 +25,11 @@ public interface Conditions extends Predicate<StringParameter> {
     Predicate<Parameter> isBoolean = parameter -> toBoolean(parameter).isPresent();
 
     //keywords have specific type value: oneOf is object(mapping node), description is string(scalar node)
-    Predicate<Parameter> isKeyWordAndIncorrectType = p -> Stream.of(KeyWord.values())
-            .anyMatch(keyWord -> keyWord.name().equalsIgnoreCase(p.getName()) && keyWord.paramType.predicate.negate().test(p));
+    Predicate<Parameter> isKeyWordAndIncorrectType = p -> p.getKeyWord()
+            .map(keyWord -> keyWord.paramType.predicate.negate().test(p))
+            .orElse(Boolean.FALSE);
+//    Predicate<Parameter> isKeyWordAndIncorrectType = p -> Stream.of(KeyWord.values())
+//            .anyMatch(keyWord -> keyWord.name().equalsIgnoreCase(p.getName()) && keyWord.paramType.predicate.negate().test(p));
     Predicate<Parameter> isByPass = p -> toBoolean(p).filter(Boolean.TRUE::equals).isPresent();
 
     Predicate<ObjectParameter> hasDuplicates = p -> p.isNotASequenceType() && p.containsDuplicates();
