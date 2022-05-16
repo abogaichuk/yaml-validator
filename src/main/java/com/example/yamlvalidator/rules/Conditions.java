@@ -9,15 +9,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.rules.PadmGrammar.KeyWord;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
 public interface Conditions extends Predicate<StringParameter> {
 
-    Predicate<Parameter> isStringParameter = parameter -> parameter instanceof StringParameter;
-    Predicate<Parameter> isObjectParameter = parameter -> parameter instanceof ObjectParameter;
+    Predicate<Parameter> isStringParameter = StringParameter.class::isInstance;
+    Predicate<Parameter> isObjectParameter = ObjectParameter.class::isInstance;
 
     Predicate<Parameter> isNumber = parameter -> toInt(parameter).isPresent();
     Predicate<Parameter> isNAN = isNumber.negate();

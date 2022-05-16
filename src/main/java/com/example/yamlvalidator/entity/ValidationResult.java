@@ -11,9 +11,8 @@ public interface ValidationResult {
 
     boolean isValid();
 
-    //todo singelton
     static ValidationResult valid() {
-        return new Valid();
+        return Valid.instance;
     }
 
     static ValidationResult invalid(final Set<String> reasons) {
@@ -56,6 +55,9 @@ public interface ValidationResult {
     }
 
     class Valid implements ValidationResult {
+        private static final Valid instance = new Valid();
+        private Valid() {}
+
         @Override
         public ValidationResult merge(final ValidationResult right) {
             return right;

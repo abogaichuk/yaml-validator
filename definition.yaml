@@ -109,7 +109,7 @@ Test: ManualTest or AutoTest
 #  type:
 #    aa: "aa"
 #    bb: "bb"
-#Protocol: string or aaa
+Protocol: string or aaa
 #Port:
 #  oneOf: "ccc"
 #  description:

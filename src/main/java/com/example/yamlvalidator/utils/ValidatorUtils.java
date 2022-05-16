@@ -3,7 +3,6 @@ package com.example.yamlvalidator.utils;
 import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
-import com.example.yamlvalidator.rules.PadmGrammar;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,6 +35,8 @@ public class ValidatorUtils {
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final Pattern pattern = Pattern.compile(".*?\\$\\{(\\w+)\\}.*?");
+
+    private ValidatorUtils() {}
 
     public static <T> boolean compare(Parameter p1, Parameter p2,
                                       Function<Parameter, Optional<T>> parser,
@@ -133,7 +134,7 @@ public class ValidatorUtils {
 
     public static String toErrorMessage(Parameter p, String incorrectValue, String message) {
         message = format(message, incorrectValue);
-        return format("{0}, paramname: {1} (row #{3})", message, p.getPath(), incorrectValue, p.getRow());
+        return format("{0}, paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
     }
 
     public static String replaceHolder(String s, String placeholder) {

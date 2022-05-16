@@ -17,6 +17,8 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
 public class ParameterRuleFactory {
 
+    private ParameterRuleFactory() {}
+
     public static ParameterRule<ObjectParameter> objectRules() {
         //if bypass == skip validation
         //if keyword has incorrect type, does not make sense to proceed validation into parameter
@@ -43,7 +45,7 @@ public class ParameterRuleFactory {
 
     private static ParameterRule<ObjectParameter> standardTypeRule() {
         return parameter -> parameter.findChild(KeyWord.TYPE.name())
-                .filter(type -> type instanceof StringParameter)
+                .filter(StringParameter.class::isInstance)
                 .map(StringParameter.class::cast)
                 .map(type -> StandardType.valueOf(type.getValue().toUpperCase()))
                 .map(standardType -> standardType.validate(parameter))

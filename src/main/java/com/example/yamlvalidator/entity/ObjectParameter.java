@@ -1,7 +1,6 @@
 package com.example.yamlvalidator.entity;
 
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,7 +19,6 @@ public class ObjectParameter extends Parameter {
     @Override
     public ValidationResult validate() {
         return objectRules().validate(this);
-//        return ParameterType.MAPPING.equals(getType()) ? objectRules().validate(this) : enumRules().validate(this);
     }
 
     public Optional<Parameter> findChild(String name) {
@@ -36,15 +34,15 @@ public class ObjectParameter extends Parameter {
     }
 
     public boolean containsDuplicates() {
-        return getDuplicates().size() > 0;
+        return !getDuplicates().isEmpty();
     }
 
-    public boolean addChildren(List<Parameter> parameters) {
-        return children.addAll(parameters);
+    public void addChildren(List<Parameter> parameters) {
+        children.addAll(parameters);
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
-    }
+//    @Override
+//    public boolean equals(Object obj) {
+//        return super.equals(obj);
+//    }
 }

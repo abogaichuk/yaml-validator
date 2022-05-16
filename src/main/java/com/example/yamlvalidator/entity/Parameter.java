@@ -7,8 +7,6 @@ import lombok.ToString;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
-
 @Getter
 @ToString
 public abstract class Parameter {
@@ -21,7 +19,7 @@ public abstract class Parameter {
         SCALAR, SEQUENCE, MAPPING
     }
 
-    public Parameter(String name, ParameterType type, Parameter parent, Position position) {
+    protected Parameter(String name, ParameterType type, Parameter parent, Position position) {
         this.name = name;
         this.type = type;
         this.parent = parent;
@@ -41,11 +39,11 @@ public abstract class Parameter {
     }
 
     public Definition getRoot() {
-        Parameter parent = getParent();
-        while (parent.getParent() != null) {
-            parent = parent.getParent();
+        Parameter p = getParent();
+        while (p.getParent() != null) {
+            p = p.getParent();
         }
-        return (Definition) parent;
+        return (Definition) p;
     }
 
     @Override
@@ -53,9 +51,13 @@ public abstract class Parameter {
         if (obj instanceof Parameter) {
             Parameter p = (Parameter) obj;
             return getPath().equals(p.getPath());
-//            return name.equals(p.getName());
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return getPath().hashCode();
     }
 
     public boolean isNotASequenceType() {

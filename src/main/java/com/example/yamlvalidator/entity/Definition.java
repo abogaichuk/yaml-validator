@@ -19,12 +19,6 @@ public class Definition extends ObjectParameter {
         this.links = links;
     }
 
-
-    @Override
-    public ValidationResult validate() {
-        return super.validate();
-    }
-
     public List<String> getCustomTypes() {
         return getChildren().stream()
                 .map(Parameter::getName)

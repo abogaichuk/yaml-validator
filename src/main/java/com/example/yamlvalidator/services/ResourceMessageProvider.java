@@ -13,7 +13,7 @@ public class ResourceMessageProvider implements MessageProvider {
 
     @Override
     public String getMessage(String code) {
-        return getMessage(code, null);
+        return getMessage(code, (Object) null);
     }
 
     @Override

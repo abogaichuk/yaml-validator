@@ -13,7 +13,6 @@ import org.snakeyaml.engine.v2.parser.ParserImpl;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;

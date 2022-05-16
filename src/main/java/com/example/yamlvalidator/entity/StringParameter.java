@@ -26,14 +26,4 @@ public class StringParameter extends Parameter {
                 .map(String::trim)
                 .anyMatch(this::isNotAType);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-//        if (obj instanceof StringParameter) {
-//            return  ((StringParameter) obj).getValue().equals(value);
-//        } else {
-//            return false;
-//        }
-        return super.equals(obj);
-    }
 }
