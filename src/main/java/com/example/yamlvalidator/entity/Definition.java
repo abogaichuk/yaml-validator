@@ -2,21 +2,19 @@ package com.example.yamlvalidator.entity;
 
 import lombok.Getter;
 import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-//@SuperBuilder
 @Getter
 @ToString
 public class Definition extends ObjectParameter {
-    private String resourceType;
-    private String description;
-    private List<Link> links;
+    private final String resourceType;
+//    private final String description;
+    private final List<Link> links;
 
-    public Definition(String name, ParameterType type, Parameter parent, Position position, List<Parameter> children, String resourceType, List<Link> links) {
-        super(name, type, parent, position, children);
+    public Definition(String name, ParameterType type, Parameter parent, Position position, String resourceType, List<Link> links) {
+        super(name, type, parent, position);
         this.resourceType = resourceType;
         this.links = links;
     }

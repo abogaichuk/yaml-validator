@@ -24,7 +24,7 @@ import static org.snakeyaml.engine.v2.nodes.NodeType.SEQUENCE;
 
 public class YamlMapper {
     public Definition toDefinition(Node root) {
-        var definition = new Definition("root", Parameter.ParameterType.MAPPING, null, null, null,
+        var definition = new Definition("root", Parameter.ParameterType.MAPPING, null, null,
                 getScalarValueFrom((MappingNode) root, "ResourceType"), null);
         var parameters = toParameters((MappingNode) root, definition);
         definition.addChildren(parameters);
@@ -94,7 +94,7 @@ public class YamlMapper {
     }
 
     private ObjectParameter toObjectParameter(String name, ObjectParameter parent, Parameter.ParameterType type, Position start) {
-        return new ObjectParameter(name, type, parent, start, null);
+        return new ObjectParameter(name, type, parent, start);
     }
 
     private Position getPosition(final Node node) {

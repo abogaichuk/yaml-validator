@@ -9,7 +9,7 @@ import static com.example.yamlvalidator.rules.ParameterRuleFactory.stringRules;
 
 @Getter
 public class StringParameter extends Parameter {
-    private String value;
+    private final String value;
 
     public StringParameter(String name, ParameterType type, Parameter parent, Position position, String value) {
         super(name, type, parent, position);

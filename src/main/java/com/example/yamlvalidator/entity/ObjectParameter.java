@@ -10,13 +10,11 @@ import static com.example.yamlvalidator.rules.ParameterRuleFactory.objectRules;
 import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
 @Getter
-//@Setter
 public class ObjectParameter extends Parameter {
     private final List<Parameter> children = new ArrayList<>();
 
-    public ObjectParameter(String name, ParameterType type, Parameter parent, Position position, List<Parameter> children) {
+    public ObjectParameter(String name, ParameterType type, Parameter parent, Position position) {
         super(name, type, parent, position);
-//        this.children = new ArrayList<>();
     }
 
     @Override

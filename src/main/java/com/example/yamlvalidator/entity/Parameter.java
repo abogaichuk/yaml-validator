@@ -12,10 +12,10 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 @Getter
 @ToString
 public abstract class Parameter {
-    private String name;
-    private ParameterType type;
-    private Parameter parent;
-    private Position position;
+    private final String name;
+    private final ParameterType type;
+    private final Parameter parent;
+    private final Position position;
 
     public enum ParameterType {
         SCALAR, SEQUENCE, MAPPING

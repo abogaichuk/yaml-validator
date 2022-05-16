@@ -17,7 +17,7 @@ public class PadmGrammar {
     public static final String OR_TYPE_SPLITTER = " or ";
 
     public enum StandardType implements ParameterRule<ObjectParameter> {
-        OBJECT(secrets()),
+        OBJECT(p -> valid()),
         STRING(strings()),
         DATETIME(datetime()),
         NUMBER(numbers()),
@@ -105,7 +105,7 @@ public class PadmGrammar {
 
         @Override
         public ValidationResult validate(Parameter parameter) {
-            return predicate.negate().test(parameter) ? invalid(toErrorMessage(parameter, message)) : valid();
+            return predicate.test(parameter) ? valid() : invalid(toErrorMessage(parameter, message));
         }
     }
 }
