@@ -59,13 +59,13 @@ public abstract class Parameter {
     }
 
     public boolean isNotASequenceType() {
-        return !type.equals(ParameterType.SEQUENCE);
+        return !ParameterType.SEQUENCE.equals(type);
     }
 
     //if name == type or name != keyword, so it's a new type definition (Test: Manual or Auto)
-    //todo if name is empty == collection type
+    //if parent type == sequence, paramname == index in collection
     public boolean isTypeOrNotAKeyword() {
-        return isNotEmpty(name) && (isType() || isNotAKeyword());
+        return isType() || (isNotAKeyword() && parent.isNotASequenceType());
     }
 
     protected boolean isNotAType(final String type) {
@@ -77,11 +77,13 @@ public abstract class Parameter {
     }
 
     private boolean isNotAKeyword() {
-        return !isKeyWord();
+        return getKeyWord().isEmpty();
     }
 
-    private boolean isKeyWord() {
-        return Stream.of(PadmGrammar.KeyWord.values()).anyMatch(keyWord -> keyWord.name().equalsIgnoreCase(name));
+    public Optional<PadmGrammar.KeyWord> getKeyWord() {
+        return Stream.of(PadmGrammar.KeyWord.values())
+                .filter(keyWord -> keyWord.name().equalsIgnoreCase(name))
+                .findAny();
     }
 
     private boolean isNotACustomType(final String type) {

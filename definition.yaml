@@ -36,19 +36,21 @@
 #  example: 2016-03-04 11:30
 #  before: 1999-03-04 11:30
 #  after: 2005-03-04 11:30
-#AutoTest:
-#  id:
-#    type: number
-#    description: test id
-#  testType:
-#    type: string
-#    Validatos:
-#      List:
-#        - unit
-#        - integration
 
-#ResourceName: string
-#Test: ManualTest or AutoTest
+AutoTest:
+  id:
+    type: number
+    description: test id
+  testType:
+    type: string
+    list:
+      - unit
+      - integration
+
+ManualTest: string
+
+Test: ManualTest or AutoTest
+
 #Port2:
 #  type: Port or number or datetime
 #  default: 5
@@ -97,10 +99,11 @@
 #    - UDP
 #    - HTTP
 #CiscoProtocol: Protocoll
-Test:
-  description:
-    cc: "cc"
-    dd: "dd"
+#Test:
+#  description:
+#    cc: "cc"
+#    dd: "dd"
+#  oneof: "asas"
 #  description: "asdasdass"
 #  bypass: false
 #  type:
@@ -170,8 +173,6 @@ Test:
 #    OneOf:
 #      - cisco
 #      - datetime
-
-
 
 
 #Links:

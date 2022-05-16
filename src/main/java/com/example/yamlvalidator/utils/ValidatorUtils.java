@@ -151,8 +151,4 @@ public class ValidatorUtils {
         }
         return s;
     }
-
-    public static boolean isKeyWordIncorrect(Parameter p, PadmGrammar.KeyWord keyWord) {
-        return keyWord.name().equalsIgnoreCase(p.getName()) && keyWord.paramType.predicate.negate().test(p);
-    }
 }

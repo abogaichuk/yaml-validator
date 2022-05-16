@@ -4,32 +4,32 @@ import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
-import com.example.yamlvalidator.utils.ValidatorUtils;
 
-import java.util.Arrays;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.entity.ValidationResult.valid;
 import static com.example.yamlvalidator.rules.Conditions.*;
-import static com.example.yamlvalidator.rules.PadmGrammar.*;
+import static com.example.yamlvalidator.rules.PadmGrammar.KeyWord;
+import static com.example.yamlvalidator.rules.PadmGrammar.StandardType;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
 public class ParameterRuleFactory {
 
     public static ParameterRule<ObjectParameter> objectRules() {
-//        return bypass()
-//                .or(custom().and(numbers()).and(datetime()).and(strings()).and(secrets()).and(booleans()));
+        //if bypass == skip validation
+        //if keyword has incorrect type, does not make sense to proceed validation into parameter
         return bypass()
-                .or(custom().or(standardTypeRule()));
-//                .or(custom().and(standardTypeRule()));
+                .or(noDuplicates()
+                        .and((ParameterRule<ObjectParameter>) keyWordRule())
+                        .or(children())
+                        .or(standardTypeRule()));
     }
 
     public static ParameterRule<StringParameter> stringRules() {
         return correctType()
-                .and((ParameterRule<StringParameter>) keyWordRule());//.and(keyWordRule());
+                .and((ParameterRule<StringParameter>) keyWordRule());
     }
 
     public static ParameterRule<ObjectParameter> enumRules() {
@@ -54,13 +54,6 @@ public class ParameterRuleFactory {
         return singleFieldValidation(KeyWord.BYPASS.name(), PARAMETER_BYPASS, isByPass);
     }
 
-    public static ParameterRule<ObjectParameter> custom() {
-        return noDuplicates()
-//                .and(keyWordRuleO()
-                .and((ParameterRule<ObjectParameter>) keyWordRule())
-                        .or(children());
-    }
-
     private static ParameterRule<ObjectParameter> noDuplicates() {
         return parameter -> hasDuplicates.test(parameter) ? invalid(toErrorMessage(parameter, HAS_DUPLICATES)) : valid();
     }
@@ -74,53 +67,19 @@ public class ParameterRuleFactory {
 
     //keywords have specific type value: oneOf is object(mapping node), description is string(scalar node)
     private static ParameterRule<? extends Parameter> keyWordRule() {
-        return parameter -> Stream.of(PadmGrammar.KeyWord.values())
-                .filter(keyWord -> isKeyWordIncorrect(parameter, keyWord))
-                .findAny()
-                .map(keyWord -> invalid(toErrorMessage(parameter, keyWord.paramType.message)))
+        return parameter -> parameter.getKeyWord()
+                .map(keyWord -> keyWord.paramType.validate(parameter))
                 .orElseGet(ValidationResult::valid);
     }
 
-    //todo datetime custom pattern
-    public static ParameterRule<ObjectParameter> datetime() {
-        return singleFieldValidation(KeyWord.AFTER.name(), IS_NOT_A_DATETIME, isDateTime.negate())
-                .and(singleFieldValidation(KeyWord.BEFORE.name(), IS_NOT_A_DATETIME, isDateTime.negate()))
-                .and(singleFieldValidation(KeyWord.DEFAULT.name(), IS_NOT_A_DATETIME, isDateTime.negate()))
-                .and(doubleFieldsValidation(KeyWord.AFTER.name(), KeyWord.BEFORE.name(), IS_BEFORE, compareDates))
-                .and(doubleFieldsValidation(KeyWord.BEFORE.name(), KeyWord.DEFAULT.name(), IS_AFTER, compareDates.negate()))
-                .and(doubleFieldsValidation(KeyWord.AFTER.name(), KeyWord.DEFAULT.name(), IS_BEFORE, compareDates));
-    }
-
-    public static ParameterRule<ObjectParameter> numbers() {
-        return singleFieldValidation(KeyWord.MIN.name(), IS_NAN, isNAN)
-                .and(singleFieldValidation(KeyWord.MAX.name(), IS_NAN, isNAN))
-                .and(singleFieldValidation(KeyWord.DEFAULT.name(), IS_NAN, isNAN))
-                .and(doubleFieldsValidation(KeyWord.MIN.name(), KeyWord.MAX.name(), LESS_THAN, compareNums))
-                .and(doubleFieldsValidation(KeyWord.MIN.name(), KeyWord.DEFAULT.name(), LESS_THAN, compareNums))
-                .and(doubleFieldsValidation(KeyWord.MAX.name(), KeyWord.DEFAULT.name(), MORE_THAN, compareNums.negate()))
-                .and(doubleFieldsValidation(KeyWord.LIST.name(), KeyWord.DEFAULT.name(), DEFAULT_WRONG, listContains.negate()));
-    }
-
-    public static ParameterRule<ObjectParameter> booleans() {
-        return singleFieldValidation(KeyWord.DEFAULT.name(), IS_NOT_A_BOOLEAN, isBoolean);
-    }
-
-    public static ParameterRule<ObjectParameter> secrets() {
-        return parameter -> ValidationResult.valid();
-    }
-
-    public static ParameterRule<ObjectParameter> strings() {
-        return doubleFieldsValidation(KeyWord.LIST.name(), KeyWord.DEFAULT.name(), DEFAULT_WRONG, listContains.negate());
-    }
-
-    private static ParameterRule<ObjectParameter> singleFieldValidation(String child, String message, Predicate<Parameter> predicate) {
+    public static ParameterRule<ObjectParameter> singleFieldValidation(String child, String message, Predicate<Parameter> predicate) {
         return parameter -> parameter.findChild(child)
                 .filter(predicate)
                 .map(p -> invalid(toErrorMessage(p, message)))
                 .orElseGet(ValidationResult::valid);
     }
 
-    private static ParameterRule<ObjectParameter> doubleFieldsValidation(String child1, String child2, String message,
+    public static ParameterRule<ObjectParameter> doubleFieldsValidation(String child1, String child2, String message,
                                                BiPredicate<Parameter, Parameter> comparator) {
         return parameter ->  parameter.findChild(child1)
                 .map(p1 -> parameter.findChild(child2)
