@@ -66,7 +66,8 @@ public class YamlMapper {
         return toStringParameter(paramName, parent, value, start);
     }
 
-    private ObjectParameter sequenceParsing(String paramName, ObjectParameter parent, SequenceNode node, Position start) {
+    private ObjectParameter sequenceParsing(String paramName, ObjectParameter parent,
+                                            SequenceNode node, Position start) {
         ObjectParameter parameter = toObjectParameter(paramName, parent, Parameter.ParameterType.SEQUENCE, start);
         AtomicInteger index = new AtomicInteger(0);
 
@@ -81,9 +82,9 @@ public class YamlMapper {
         var position = getPosition(node);
 
         if (node instanceof MappingNode) {
-            ObjectParameter parameter = toObjectParameter(valueOf(index), parent, Parameter.ParameterType.MAPPING, position);
-            parameter.addChildren(toParameters((MappingNode) node, parameter));
-            return parameter;
+            ObjectParameter p = toObjectParameter(valueOf(index), parent, Parameter.ParameterType.MAPPING, position);
+            p.addChildren(toParameters((MappingNode) node, p));
+            return p;
         } else {
             return toStringParameter(valueOf(index), parent, ((ScalarNode) node).getValue(), position);
         }
@@ -93,7 +94,8 @@ public class YamlMapper {
         return new StringParameter(name, Parameter.ParameterType.SCALAR, parent, start, value);
     }
 
-    private ObjectParameter toObjectParameter(String name, ObjectParameter parent, Parameter.ParameterType type, Position start) {
+    private ObjectParameter toObjectParameter(String name, ObjectParameter parent,
+                                              Parameter.ParameterType type, Position start) {
         return new ObjectParameter(name, type, parent, start);
     }
 
@@ -120,10 +122,10 @@ public class YamlMapper {
     }
 
     private String getKey(NodeTuple node) {
-        return ((ScalarNode)node.getKeyNode()).getValue();
+        return ((ScalarNode) node.getKeyNode()).getValue();
     }
 
     private String getScalarValue(NodeTuple node) {
-        return ((ScalarNode)node.getValueNode()).getValue();
+        return ((ScalarNode) node.getValueNode()).getValue();
     }
 }

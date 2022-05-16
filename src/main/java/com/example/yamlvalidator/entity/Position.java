@@ -5,12 +5,12 @@ import lombok.ToString;
 
 @Getter
 @ToString
-public class Position {
+public final class Position {
     private final int row;
     private final int column;
 
     public static Position of(int row, int column) {
-        return new Position(row +1, column);
+        return new Position(row + 1, column);
     }
 
     private Position(int row, int column) {

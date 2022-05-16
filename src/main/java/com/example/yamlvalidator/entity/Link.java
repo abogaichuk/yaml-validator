@@ -2,12 +2,11 @@ package com.example.yamlvalidator.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 public class Link {
-    private String resourceType, relation;
-    private boolean required;
+    private final String resourceType;
+    private final String relation;
+    private final boolean required;
 }

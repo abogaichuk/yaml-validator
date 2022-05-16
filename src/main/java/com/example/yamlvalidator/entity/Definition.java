@@ -13,7 +13,8 @@ public class Definition extends ObjectParameter {
 //    private final String description;
     private final List<Link> links;
 
-    public Definition(String name, ParameterType type, Parameter parent, Position position, String resourceType, List<Link> links) {
+    public Definition(String name, ParameterType type, Parameter parent, Position position,
+                      String resourceType, List<Link> links) {
         super(name, type, parent, position);
         this.resourceType = resourceType;
         this.links = links;

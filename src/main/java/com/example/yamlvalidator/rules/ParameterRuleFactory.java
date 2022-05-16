@@ -15,7 +15,7 @@ import static com.example.yamlvalidator.rules.PadmGrammar.KeyWord;
 import static com.example.yamlvalidator.rules.PadmGrammar.StandardType;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
-public class ParameterRuleFactory {
+public final class ParameterRuleFactory {
 
     private ParameterRuleFactory() {}
 
@@ -39,8 +39,8 @@ public class ParameterRuleFactory {
     }
 
     private static ParameterRule<StringParameter> correctType() {
-        return parameter -> isWrongTypeDefinition.test(parameter) ?
-                invalid(toErrorMessage(parameter, parameter.getValue(), UNKNOWN_TYPE)) : valid();
+        return parameter -> isWrongTypeDefinition.test(parameter)
+                ? invalid(toErrorMessage(parameter, parameter.getValue(), UNKNOWN_TYPE)) : valid();
     }
 
     private static ParameterRule<ObjectParameter> standardTypeRule() {
@@ -57,7 +57,8 @@ public class ParameterRuleFactory {
     }
 
     private static ParameterRule<ObjectParameter> noDuplicates() {
-        return parameter -> hasDuplicates.test(parameter) ? invalid(toErrorMessage(parameter, HAS_DUPLICATES)) : valid();
+        return parameter -> hasDuplicates.test(parameter)
+                ? invalid(toErrorMessage(parameter, HAS_DUPLICATES)) : valid();
     }
 
     private static ParameterRule<ObjectParameter> children() {
@@ -70,11 +71,12 @@ public class ParameterRuleFactory {
     //keywords have specific type value: oneOf is object(mapping node), description is string(scalar node)
     private static ParameterRule<? extends Parameter> keyWordRule() {
         return parameter -> parameter.getKeyWord()
-                .map(keyWord -> keyWord.paramType.validate(parameter))
+                .map(keyWord -> keyWord.getParamType().validate(parameter))
                 .orElseGet(ValidationResult::valid);
     }
 
-    public static ParameterRule<ObjectParameter> singleFieldValidation(String child, String message, Predicate<Parameter> predicate) {
+    public static ParameterRule<ObjectParameter> singleFieldValidation(String child, String message,
+                                                                       Predicate<Parameter> predicate) {
         return parameter -> parameter.findChild(child)
                 .filter(predicate)
                 .map(p -> invalid(toErrorMessage(p, message)))

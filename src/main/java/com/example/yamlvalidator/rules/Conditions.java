@@ -12,35 +12,23 @@ import java.util.function.Predicate;
 
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
-public interface Conditions extends Predicate<StringParameter> {
+public final class Conditions {
+    private Conditions() {}
 
-    Predicate<Parameter> isStringParameter = StringParameter.class::isInstance;
-    Predicate<Parameter> isObjectParameter = ObjectParameter.class::isInstance;
+    private static final Predicate<Parameter> isNumber = parameter -> toInt(parameter).isPresent();
+    static final Predicate<Parameter> isNAN = isNumber.negate();
+    static final Predicate<Parameter> isDateTime = parameter -> toDatetime(parameter).isPresent();
+    static final Predicate<Parameter> isBoolean = parameter -> toBoolean(parameter).isPresent();
 
-    Predicate<Parameter> isNumber = parameter -> toInt(parameter).isPresent();
-    Predicate<Parameter> isNAN = isNumber.negate();
-    Predicate<Parameter> isDateTime = parameter -> toDatetime(parameter).isPresent();
-    Predicate<Parameter> isBoolean = parameter -> toBoolean(parameter).isPresent();
+    static final Predicate<Parameter> isByPass = p -> toBoolean(p).filter(Boolean.TRUE::equals).isPresent();
 
-    Predicate<Parameter> isByPass = p -> toBoolean(p).filter(Boolean.TRUE::equals).isPresent();
+    static final Predicate<ObjectParameter> hasDuplicates = p -> p.isNotASequenceType() && p.containsDuplicates();
+    static final Predicate<StringParameter> isWrongTypeDefinition = p -> p.isTypeOrNotAKeyword() && p.isWrongType();
 
-    Predicate<ObjectParameter> hasDuplicates = p -> p.isNotASequenceType() && p.containsDuplicates();
-    Predicate<StringParameter> isWrongTypeDefinition = p -> p.isTypeOrNotAKeyword() && p.isWrongType();
-
-//    BiPredicate<Parameter, PadmGrammar.KeyWordType> isRightKeyWord = (parameter, keyWordType) ->
-    BiPredicate<Parameter, Parameter> compareNums = (min, max) -> compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
-    BiPredicate<Parameter, Parameter> compareDates = (before, after) -> compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
-    BiPredicate<Parameter, Parameter> listContains = (list, value) -> contains((ObjectParameter) list, value, ValidatorUtils::toList, ValidatorUtils::toString, List::contains);
-
-//    default Conditions negate() {
-//        return parameter -> !this.test(parameter);
-//    }
-//
-//    default Conditions and(final Conditions other) {
-//        return parameter -> this.test(parameter) && other.test(parameter);
-//    }
-//
-//    default Conditions or(final Conditions other) {
-//        return parameter -> this.test(parameter) || other.test(parameter);
-//    }
+    static final BiPredicate<Parameter, Parameter> compareNums = (min, max) ->
+        compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
+    static final BiPredicate<Parameter, Parameter> compareDates = (before, after) ->
+        compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
+    static final BiPredicate<Parameter, Parameter> listContains = (list, value) ->
+        contains((ObjectParameter) list, value, ValidatorUtils::toList, ValidatorUtils::toString, List::contains);
 }

@@ -7,7 +7,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 
 public interface ValidationResult {
-    ValidationResult merge(final ValidationResult right);
+    ValidationResult merge(ValidationResult right);
 
     boolean isValid();
 
@@ -27,7 +27,7 @@ public interface ValidationResult {
         return emptySet();
     }
 
-    class Invalid implements ValidationResult {
+    final class Invalid implements ValidationResult {
 
         private final Set<String> reasons;
 
@@ -54,7 +54,7 @@ public interface ValidationResult {
 
     }
 
-    class Valid implements ValidationResult {
+    final class Valid implements ValidationResult {
         private static final Valid instance = new Valid();
         private Valid() {}
 

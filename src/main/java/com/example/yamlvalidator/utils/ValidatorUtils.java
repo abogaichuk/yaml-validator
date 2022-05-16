@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 
 import static java.text.MessageFormat.format;
 
-public class ValidatorUtils {
+public final class ValidatorUtils {
     public static final String IS_NAN = "{0} is not a number";
     public static final String IS_NOT_A_BOOLEAN = "{0} is not a boolean";
-    public static final String IS_NOT_A_DATETIME= "{0} is not a datetime";
+    public static final String IS_NOT_A_DATETIME = "{0} is not a datetime";
     public static final String LESS_THAN = "{0} < {1}";
     public static final String MORE_THAN = "{0} > {1}";
     public static final String IS_BEFORE = "{0} is before {1}";
@@ -101,7 +101,8 @@ public class ValidatorUtils {
     public static Optional<Boolean> toBoolean(final Parameter parameter) {
         try {
             var value = getValue(parameter);
-            return "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value) ? Optional.of(Boolean.parseBoolean(value)) : Optional.empty();
+            return "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)
+                    ? Optional.of(Boolean.parseBoolean(value)) : Optional.empty();
         } catch (ClassCastException e) {
             e.printStackTrace();
             return Optional.empty();
@@ -129,7 +130,8 @@ public class ValidatorUtils {
 
     public static String toErrorMessage(Parameter p1, Parameter p2, String message) {
         message = format(message, p1.getName(), p2.getName());
-        return format("{0}, paramname: {1} (row #{2}), paramname: {3} (row #{4})", message, p1.getPath(), p1.getRow(), p2.getPath(), p2.getRow());
+        return format("{0}, paramname: {1} (row #{2}), paramname: {3} (row #{4})",
+                message, p1.getPath(), p1.getRow(), p2.getPath(), p2.getRow());
     }
 
     public static String toErrorMessage(Parameter p, String incorrectValue, String message) {

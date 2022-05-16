@@ -70,8 +70,8 @@ public abstract class Parameter {
         return isType() || (isNotAKeyword() && parent.isNotASequenceType());
     }
 
-    protected boolean isNotAType(final String type) {
-        return isNotAStandardType(type) && isNotACustomType(type);
+    protected boolean isNotAType(final String splittedType) {
+        return isNotAStandardType(splittedType) && isNotACustomType(splittedType);
     }
 
     private boolean isType() {
@@ -88,21 +88,21 @@ public abstract class Parameter {
                 .findAny();
     }
 
-    private boolean isNotACustomType(final String type) {
-        return !isCustomType(type);
+    private boolean isNotACustomType(final String splittedType) {
+        return !isCustomType(splittedType);
     }
 
-    private boolean isCustomType(final String type) {
+    private boolean isCustomType(final String splittedType) {
         return getRoot().getCustomTypes().stream()
-                .anyMatch(t -> t.equalsIgnoreCase(type));
+                .anyMatch(t -> t.equalsIgnoreCase(splittedType));
     }
 
-    private boolean isNotAStandardType(String type) {
-        return !isStandardType(type);
+    private boolean isNotAStandardType(final String splittedType) {
+        return !isStandardType(splittedType);
     }
 
-    private boolean isStandardType(String type) {
+    private boolean isStandardType(String splittedType) {
         return Stream.of(PadmGrammar.StandardType.values())
-                .anyMatch(t -> t.name().equalsIgnoreCase(type));
+                .anyMatch(t -> t.name().equalsIgnoreCase(splittedType));
     }
 }
