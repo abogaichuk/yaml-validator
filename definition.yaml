@@ -39,7 +39,7 @@
 
 AutoTest:
   id:
-    type: numberr
+    type: number
     description: test id
   testType:
     type: string
@@ -48,8 +48,7 @@ AutoTest:
       - integration
 
 #ManualTest: string
-#
-#Test: ManualTest or AutoTest
+Test: ManualTest or AutoTest
 
 #Port2:
 #  type: Port or number or datetime
@@ -109,7 +108,7 @@ AutoTest:
 #  type:
 #    aa: "aa"
 #    bb: "bb"
-Protocol: string or aaa
+#Protocol: string or aaa
 #Port:
 #  oneOf: "ccc"
 #  description:

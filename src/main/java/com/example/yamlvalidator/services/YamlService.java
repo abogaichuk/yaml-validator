@@ -1,6 +1,8 @@
 package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.MyStreamToStringWriter;
+import com.example.yamlvalidator.entity.ObjectParameter;
+import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
@@ -19,6 +21,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -29,13 +33,17 @@ public class YamlService {
     public void execute(String definitionFile, String resourceFile) throws IOException {
         try {
             var defNode = readFile(definitionFile);
-//            Optional<Node> resource = readFile(resourceFile);
-            var result = defNode
-                .map(root -> new YamlMapper().toDefinition(root))
-                .map(definition -> validationService.validate(definition))
-                .orElseGet(ValidationResult::valid);
-            result.getReasons().forEach(System.out::println);
+            var resourceNode = readFile(resourceFile);
 
+            List<Parameter> resources = resourceNode
+                    .map(root -> new YamlMapper().toResources(root))
+                    .orElseGet(Collections::emptyList);
+
+            ValidationResult result = defNode
+                    .map(rootDefNode -> new YamlMapper().toDefinition(rootDefNode))
+                    .map(definition -> validationService.validate(definition, resources))
+                    .orElseGet(ValidationResult::valid);
+            result.getReasons().forEach(System.out::println);
 
 //            save(defNode.get(), "definition1.yaml");
 //            save(resource.get(), "resource1.yaml");

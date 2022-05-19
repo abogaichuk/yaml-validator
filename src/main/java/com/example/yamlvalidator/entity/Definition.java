@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -24,5 +25,19 @@ public class Definition extends ObjectParameter {
         return getChildren().stream()
                 .map(Parameter::getName)
                 .collect(Collectors.toList());
+    }
+
+    public ValidationResult validate(List<Parameter> resources) {
+        ValidationResult result = this.validate();
+
+//        getChildren().stream()
+//                .map(child ->  {
+//                    Optional<Parameter> resourceO = resources.stream()
+//                            .filter(resource -> resource.getPath().equalsIgnoreCase(child.getPath()))
+//                            .findAny()
+//                            .map(res -> child);
+//                })
+
+        return result;
     }
 }

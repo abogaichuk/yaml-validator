@@ -123,6 +123,7 @@ public final class PadmGrammar {
                     .and(doubleFieldsValidation(MAX.name(), DEFAULT.name(), MORE_THAN, compareNums.negate()));
         }
 
+        //todo listRule almost the same with oneOf or anyOf rule
         private static ParameterRule<ObjectParameter> listContainDefaultRule() {
             return doubleFieldsValidation(LIST.name(), DEFAULT.name(), DEFAULT_WRONG, listContains.negate());
         }

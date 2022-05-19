@@ -31,6 +31,10 @@ public class YamlMapper {
         return definition;
     }
 
+    public List<Parameter> toResources(Node root) {
+        return toParameters((MappingNode) root);
+    }
+
     private List<Parameter> toParameters(MappingNode node) {
         return toParameters(node, null);
     }
