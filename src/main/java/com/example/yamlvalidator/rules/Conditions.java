@@ -26,9 +26,11 @@ public final class Conditions {
     static final Predicate<StringParameter> isWrongTypeDefinition = p -> p.isTypeOrNotAKeyword() && p.isWrongType();
 
     static final BiPredicate<Parameter, Parameter> compareNums = (min, max) ->
-        compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
+            compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
     static final BiPredicate<Parameter, Parameter> compareDates = (before, after) ->
-        compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
+            compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
     static final BiPredicate<Parameter, Parameter> listContains = (list, value) ->
-        contains((ObjectParameter) list, value, ValidatorUtils::toList, ValidatorUtils::toString, List::contains);
+            contains((ObjectParameter) list, value, ValidatorUtils::toList, ValidatorUtils::toString, List::contains);
+    static final BiPredicate<Parameter, Parameter> toDateTime = (pattern, parameter) ->
+            toDatetime(pattern, parameter).isPresent();
 }

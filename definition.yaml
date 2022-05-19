@@ -39,7 +39,7 @@
 
 AutoTest:
   id:
-    type: number
+    type: numberr
     description: test id
   testType:
     type: string
@@ -47,9 +47,9 @@ AutoTest:
       - unit
       - integration
 
-ManualTest: string
-
-Test: ManualTest or AutoTest
+#ManualTest: string
+#
+#Test: ManualTest or AutoTest
 
 #Port2:
 #  type: Port or number or datetime

@@ -1,11 +1,11 @@
 package com.example.yamlvalidator.entity;
 
+import com.example.yamlvalidator.rules.ParameterRule;
 import lombok.Getter;
 
 import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.rules.PadmGrammar.OR_TYPE_SPLITTER;
-import static com.example.yamlvalidator.rules.ParameterRuleFactory.stringRules;
+import static com.example.yamlvalidator.rules.PadmGrammar.*;
 
 @Getter
 public class StringParameter extends Parameter {
@@ -18,7 +18,9 @@ public class StringParameter extends Parameter {
 
     @Override
     public ValidationResult validate() {
-        return stringRules().validate(this);
+        return correctType()
+                .and((ParameterRule<StringParameter>) keyWordRule())
+                .validate(this);
     }
 
     public boolean isWrongType() {
