@@ -12,14 +12,14 @@ import java.util.stream.Stream;
 public abstract class Parameter {
     private final String name;
     private final ParameterType type;
-    private final Parameter parent;
+    private final ObjectParameter parent;
     private final Position position;
 
     public enum ParameterType {
         SCALAR, SEQUENCE, MAPPING
     }
 
-    protected Parameter(String name, ParameterType type, Parameter parent, Position position) {
+    protected Parameter(String name, ParameterType type, ObjectParameter parent, Position position) {
         this.name = name;
         this.type = type;
         this.parent = parent;
@@ -27,6 +27,7 @@ public abstract class Parameter {
     }
 
     public abstract ValidationResult validate();
+//    public abstract ValidationResult validate(Parameter resource);
 
     public int getRow() {
         return Optional.ofNullable(position)
@@ -39,7 +40,7 @@ public abstract class Parameter {
     }
 
     public Definition getRoot() {
-        Parameter p = getParent();
+        ObjectParameter p = getParent();
         while (p.getParent() != null) {
             p = p.getParent();
         }

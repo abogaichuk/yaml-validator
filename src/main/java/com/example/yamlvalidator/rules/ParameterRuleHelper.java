@@ -2,12 +2,15 @@ package com.example.yamlvalidator.rules;
 
 import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;
+import com.example.yamlvalidator.entity.StringParameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
+import static com.example.yamlvalidator.entity.ValidationResult.valid;
+import static com.example.yamlvalidator.utils.ValidatorUtils.MANDATORY_PARAMETER;
 import static com.example.yamlvalidator.utils.ValidatorUtils.toErrorMessage;
 
 public final class ParameterRuleHelper {
@@ -31,4 +34,15 @@ public final class ParameterRuleHelper {
                         .orElseGet(ValidationResult::valid))
                 .orElseGet(ValidationResult::valid);
     }
+
+    public static ValidationRule<ObjectParameter, Parameter> mandatoryResource() {
+        return (definition, resource) -> Conditions.mandatoryParam.test(definition, resource) ?
+                invalid(toErrorMessage(definition, MANDATORY_PARAMETER)) :valid();
+    }
+
+    //todo how to check resource type
+    //todo usage after validation? final result?
+//    public static ValidationRule<StringParameter, Parameter> resourceHasRightType() {
+//        return (definition, resource) ->
+//    }
 }

@@ -33,4 +33,7 @@ public final class Conditions {
             contains((ObjectParameter) list, value, ValidatorUtils::toList, ValidatorUtils::toString, List::contains);
     static final BiPredicate<Parameter, Parameter> toDateTime = (pattern, parameter) ->
             toDatetime(pattern, parameter).isPresent();
+
+    static final BiPredicate<ObjectParameter, Parameter> mandatoryParam = (schema, resource) ->
+            schema.isRequired() && resource == null;
 }

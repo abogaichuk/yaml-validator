@@ -23,6 +23,10 @@ public final class PadmGrammar {
 
     private PadmGrammar() {}
 
+//    public static ValidationRule mandatoryResource() {
+//        return (definition, resource) ->
+//    }
+
     public static ParameterRule<StringParameter> correctType() {
         return parameter -> isWrongTypeDefinition.test(parameter)
                 ? invalid(toErrorMessage(parameter, parameter.getValue(), UNKNOWN_TYPE)) : valid();
@@ -175,7 +179,7 @@ public final class PadmGrammar {
         OBJECT(OBJECT_KEYWORD, ObjectParameter.class::isInstance);
 
         private final String message;
-        private final Predicate<Parameter> predicate;
+        public final Predicate<Parameter> predicate;
         KeyWordType(String message, Predicate<Parameter> predicate) {
             this.message = message;
             this.predicate = predicate;

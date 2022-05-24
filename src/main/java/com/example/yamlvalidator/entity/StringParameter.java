@@ -11,7 +11,7 @@ import static com.example.yamlvalidator.rules.PadmGrammar.*;
 public class StringParameter extends Parameter {
     private final String value;
 
-    public StringParameter(String name, ParameterType type, Parameter parent, Position position, String value) {
+    public StringParameter(String name, ParameterType type, ObjectParameter parent, Position position, String value) {
         super(name, type, parent, position);
         this.value = value;
     }
@@ -22,6 +22,12 @@ public class StringParameter extends Parameter {
                 .and((ParameterRule<StringParameter>) keyWordRule())
                 .validate(this);
     }
+
+//    @Override
+//    public ValidationResult validate(Parameter resource) {
+//        return validate();
+//    }
+
 
     public boolean isWrongType() {
         return Stream.of(value.split(OR_TYPE_SPLITTER))

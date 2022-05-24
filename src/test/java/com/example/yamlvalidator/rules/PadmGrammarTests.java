@@ -62,14 +62,14 @@ public class PadmGrammarTests {
         return parent;
     }
 
-    private List<Parameter> createChildren(Parameter parent, Map<String, List<String>> params) {
+    private List<Parameter> createChildren(ObjectParameter parent, Map<String, List<String>> params) {
         var index = new AtomicInteger(1);
         return params.entrySet().stream()
                 .map(entry -> createChild(parent, entry.getKey(), entry.getValue(), index.getAndIncrement()))
                 .collect(Collectors.toList());
     }
 
-    private Parameter createChild(Parameter parent, String name, List<String> values, int column) {
+    private Parameter createChild(ObjectParameter parent, String name, List<String> values, int column) {
         if (values.size() > 1) {
             return createObjectParam(parent, name, values, column);
         } else {
@@ -77,7 +77,7 @@ public class PadmGrammarTests {
         }
     }
 
-    private ObjectParameter createObjectParam(Parameter parent, String name, List<String> values, int column) {
+    private ObjectParameter createObjectParam(ObjectParameter parent, String name, List<String> values, int column) {
         var parameter = new ObjectParameter(name, Parameter.ParameterType.MAPPING, parent, Position.of(0, column));
         var columnIndex = new AtomicInteger(column);
         var nameIndex = new AtomicInteger(1);
@@ -88,7 +88,7 @@ public class PadmGrammarTests {
         return parameter;
     }
 
-    private StringParameter createStringParam(String name, String value, int column, Parameter parent) {
+    private StringParameter createStringParam(String name, String value, int column, ObjectParameter parent) {
         return new StringParameter(name, Parameter.ParameterType.SCALAR, parent, Position.of(0, column), value);
     }
 
