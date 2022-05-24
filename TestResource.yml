@@ -1,0 +1,13 @@
+ResourceType: CTI-Interface
+JTAPI:
+  password: 12345
+  CiscoPassword: cisco_password1
+  ServerIPs: 172.21.13.105
+  user: olgag12
+Genesys:
+  password: 12345565
+  Cisco:
+    Server: number
+    User:
+      Name: User
+      Password: 12345

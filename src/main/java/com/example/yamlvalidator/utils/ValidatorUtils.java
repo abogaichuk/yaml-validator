@@ -4,6 +4,7 @@ import com.example.yamlvalidator.entity.ObjectParameter;
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.StringParameter;
 
+import com.example.yamlvalidator.validators.error.ValidationError;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -15,6 +16,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.snakeyaml.engine.v2.exceptions.Mark;
 
 import static java.text.MessageFormat.format;
 
@@ -137,6 +139,14 @@ public final class ValidatorUtils {
     public static String toErrorMessage(Parameter p, String incorrectValue, String message) {
         message = format(message, incorrectValue);
         return format("{0}, paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
+    }
+
+    public static String toErrorMessage(String problem, Mark problemMark) {
+        ValidationError error = ValidationError.of(problemMark.getLine(), problemMark.getColumn(), problem);
+        return format("Found problem in line: {0}, column: {1}, cause: {2}",
+            error.getLine(),
+            error.getColumn(),
+            error.getCause());
     }
 
     public static String replaceHolder(String s, String placeholder) {
