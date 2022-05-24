@@ -49,10 +49,9 @@
 
 #ManualTest: string
 #Test: ManualTest or AutoTest
-
-#Port2:
-#  type: Port or number or datetime
-#  default: 5
+Port2:
+  type: Port or number or datetime
+  default: 5
 #Test:
 #  type: object
 #  oneOf:
@@ -109,6 +108,7 @@
 #Autotest:
 #  id: number
 #  executedDate: datetime
+Test: Test2
 Protocol:
   Type: string
   default: aaa
@@ -123,33 +123,33 @@ Port:
   Type: number
   min: 1025
   max: 65535
-#Genesys:
-#  SwitchName:
-#    Default: "Genesys SIP server"
-#    Description: "The name of the switch connected to the Genesys SIP server."
-#    Description: "aaa"
-#    Type: string
-#    List:
-#      - Avaya
-#      - Cisco
-#      - Genesys SIP server
-#      - Nortel
-#      - Aspect Call Center
-#      - Aspect Spectrum
-#      - Ericsson
-#      - NEC
-#      - Alcatel-Lucent
-#  RTPMonitoringStyle:
-#    Default: "Private Servicess"
-#    Description: "bbbb"
-#    Description: "Request sent as Monitor Style to Genesys in order to receive RTP events."
-#    Type: string
-#    List:
-#      - Private Service
-#      - On Monitor
-#      - Both
-#      - Default
-#  Tested: ManualTest
+Genesys:
+  SwitchName:
+    Default: "Genesys SIP server"
+    Description: "The name of the switch connected to the Genesys SIP server."
+    Description: "aaa"
+    Type: string
+    List:
+      - Avaya
+      - Cisco
+      - Genesys SIP server
+      - Nortel
+      - Aspect Call Center
+      - Aspect Spectrum
+      - Ericsson
+      - NEC
+      - Alcatel-Lucent
+  RTPMonitoringStyle:
+    Default: "Private Servicess"
+    Description: "bbbb"
+    Description: "Request sent as Monitor Style to Genesys in order to receive RTP events."
+    Type: string
+    List:
+      - Private Service
+      - On Monitor
+      - Both
+      - Default
+  Tested: ManualTest
 #  Admin:
 #    type: User
 #    description: Cisco admin

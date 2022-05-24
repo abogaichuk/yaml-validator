@@ -1,7 +1,30 @@
 #ResourceType: GeneralTest
 #Name: Valid name for valid resource
+
+Recorder:
+  type: Genesys
+  SwitchName: 123
+  RTPMonitoringStyle: 321
 Protocol: HTTP
 Port: 8080
+Database:
+  Credentials:
+    User: ${Connection.User}
+Connection:
+  User: {Database.Credentials.User}
+datasource:
+  url: jdbc://${padm.SqlServer.Address}:{padm.SqlServer.Port} #lib-config - parser placeholders, cycle resolver,
+  #Resources: query-param in API 1. "resolve-placeholders" and in CLI, 2. includeDefaults, 3. json and yaml, includeSecrets
+  #Problems:
+  # 1. Port: ${Db.Port} - validation through definition
+  # 2. Lists. ClusterNodes: ${RabbitMQ.Nodes}
+  # 3. List memeber is placeholder:
+  # Cluster:
+  # - {padm.Rabbit1.Address}
+  # 4. Placeholder to complex object ????? - do we need it? There are no shared t types between definitions
+#SQL SERVER resource
+Address: MY-SERVER
+Port: 1433
 #Authentication: false
 #ThreadsNo: 6
 #StorageAccessKey: pwd_number_one
