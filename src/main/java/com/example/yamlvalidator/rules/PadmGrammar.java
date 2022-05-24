@@ -118,7 +118,8 @@ public final class PadmGrammar {
         private static ParameterRule<ObjectParameter> isNotNan() {
             return singleFieldValidation(MIN.name(), IS_NAN, isNAN)
                     .and(singleFieldValidation(MAX.name(), IS_NAN, isNAN))
-                    .and(singleFieldValidation(DEFAULT.name(), IS_NAN, isNAN));
+                    .and(singleFieldValidation(DEFAULT.name(), IS_NAN, isNAN))
+                    .and(singleFieldValidation(EXAMPLE.name(), IS_NAN, isNAN));
         }
 
         private static ParameterRule<ObjectParameter> comparingNumbersRule() {
