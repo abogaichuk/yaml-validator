@@ -34,6 +34,9 @@ public final class ValidatorUtils {
     public static final String PARAMETER_BYPASS = "Parameter Bypass, validation is skipped";
     public static final String STRING_KEYWORD = "Keyword {0} must be a string";
     public static final String OBJECT_KEYWORD = "Keyword {0} must be an object";
+    public static final String DATETIME_PARSED_ERROR = "Can't parse parameter {0} using pattern {1}";
+
+    public static final String MANDATORY_PARAMETER = "Parameter {0} is required";
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final Pattern pattern = Pattern.compile(".*?\\$\\{(\\w+)\\}.*?");
@@ -94,6 +97,17 @@ public final class ValidatorUtils {
         try {
             var value = getValue(parameter);
             return Optional.of(LocalDateTime.parse(value, formatter));
+        } catch (DateTimeParseException | ClassCastException e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<LocalDateTime> toDatetime(final Parameter patternParam, final Parameter parameter) {
+        try {
+            var patternValue = getValue(patternParam);
+            var value = getValue(parameter);
+            return Optional.of(LocalDateTime.parse(value, DateTimeFormatter.ofPattern(patternValue)));
         } catch (DateTimeParseException | ClassCastException e) {
             e.printStackTrace();
             return Optional.empty();

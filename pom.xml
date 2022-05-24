@@ -41,11 +41,11 @@
 			<version>1.5.0</version>
 		</dependency>
 
-<!--		<dependency>-->
-<!--			<groupId>org.jooq</groupId>-->
-<!--			<artifactId>jool</artifactId>-->
-<!--			<version>0.9.14</version>-->
-<!--		</dependency>-->
+		<dependency>
+			<groupId>org.jooq</groupId>
+			<artifactId>jool</artifactId>
+			<version>0.9.14</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

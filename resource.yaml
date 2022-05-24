@@ -1,20 +1,20 @@
-ResourceType: GeneralTest
-Name: Valid name for valid resource
-Protocol: TCP
+#ResourceType: GeneralTest
+#Name: Valid name for valid resource
+Protocol: HTTP
 Port: 8080
 #Authentication: false
 #ThreadsNo: 6
 #StorageAccessKey: pwd_number_one
-FirstTest:
+#FirstTest:
 #  id: 100101
-  admin: aaa
+#  admin: aaa
 #Genesys:
 #  SwitchName: Cisco
 
-Links:
-  - type: cisco
-    port: 22
-    address: localhost
-  - datetime: "2222-10-10"
+#Links:
+#  - type: cisco
+#    port: 22
+#    address: localhost
+#  - datetime: "2222-10-10"
 
 

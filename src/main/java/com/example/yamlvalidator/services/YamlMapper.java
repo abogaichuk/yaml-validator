@@ -23,12 +23,17 @@ import static org.snakeyaml.engine.v2.nodes.NodeType.SCALAR;
 import static org.snakeyaml.engine.v2.nodes.NodeType.SEQUENCE;
 
 public class YamlMapper {
-    public Definition toDefinition(Node root) {
-        var definition = new Definition("root", Parameter.ParameterType.MAPPING, null, null,
-                getScalarValueFrom((MappingNode) root, "ResourceType"), null);
+    public ObjectParameter toDefinition(Node root) {
+//        var definition = new Definition("root", Parameter.ParameterType.MAPPING, null, null,
+//                getScalarValueFrom((MappingNode) root, "ResourceType"), null);
+        ObjectParameter definition = new ObjectParameter("", Parameter.ParameterType.MAPPING, null, Position.of(1, 1));
         var parameters = toParameters((MappingNode) root, definition);
         definition.addChildren(parameters);
         return definition;
+    }
+
+    public List<Parameter> toResources(Node root) {
+        return toParameters((MappingNode) root);
     }
 
     private List<Parameter> toParameters(MappingNode node) {
