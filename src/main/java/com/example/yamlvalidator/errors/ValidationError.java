@@ -1,4 +1,4 @@
-package com.example.yamlvalidator.validators.error;
+package com.example.yamlvalidator.errors;
 
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;

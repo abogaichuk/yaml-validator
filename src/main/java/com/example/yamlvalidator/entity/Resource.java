@@ -1,5 +1,11 @@
 package com.example.yamlvalidator.entity;
 
-public interface Resource {
-    String getName();
+public class Resource extends Param {
+    public Resource(String name, String value, Param parent, Position position) {
+        super(name, value, parent, position);
+    }
+
+    public ValidationResult validate(Schema schema) {
+        return ValidationResult.valid();
+    }
 }

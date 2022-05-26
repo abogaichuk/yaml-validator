@@ -2,7 +2,7 @@ package com.example.yamlvalidator.utils;
 
 import com.example.yamlvalidator.entity.Param;
 
-import com.example.yamlvalidator.validators.error.ValidationError;
+import com.example.yamlvalidator.errors.ValidationError;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;

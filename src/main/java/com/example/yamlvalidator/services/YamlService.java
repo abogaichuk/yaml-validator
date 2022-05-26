@@ -41,21 +41,15 @@ public class YamlService {
             var defNode = readFile(definitionFile);
             var resourceNode = readFile(resourceFile);
 
+            List<Param> resources = resourceNode
+                    .map(root -> new Mapper().mapToResources(root))
+                    .orElseGet(Collections::emptyList);
+
             ValidationResult result = defNode
-                    .map(root -> new Mapper().map(root))
+                    .map(root -> new Mapper().mapToSchema(root))
                     .map(schema -> validationService.validate(schema, Collections.emptyList()))
                     .orElse(ValidationResult.valid());
             System.out.println(result.getReasons());
-
-//            List<Parameter> resources = resourceNode
-//                    .map(root -> new YamlMapper().toResources(root))
-//                    .orElseGet(Collections::emptyList);
-//
-//            ValidationResult result = defNode
-//                    .map(rootDefNode -> new YamlMapper().toDefinition(rootDefNode))
-//                    .map(definition -> validationService.validate(definition, resources))
-//                    .orElseGet(ValidationResult::valid);
-//            result.getReasons().forEach(System.out::println);
 
 //            save(defNode.get(), "definition1.yaml");
 //            save(resource.get(), "resource1.yaml");

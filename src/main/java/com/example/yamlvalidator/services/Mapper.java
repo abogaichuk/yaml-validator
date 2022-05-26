@@ -6,7 +6,6 @@ import org.snakeyaml.engine.v2.nodes.*;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -14,15 +13,15 @@ import static java.lang.String.valueOf;
 import static org.snakeyaml.engine.v2.nodes.NodeType.*;
 
 public class Mapper {
-    public Schema map(Node root) {
+
+    public Schema mapToSchema(Node root) {
         var definition = new Schema(null, null, null, Position.of(1, 1));
-        var parameters = toParameters((MappingNode) root, definition);
-        definition.addChildren(parameters);
+        definition.addChildren(toParameters((MappingNode) root, definition));
         return definition;
     }
 
-    private List<Param> toParameters(MappingNode node) {
-        return toParameters(node, null);
+    public List<Param> mapToResources(Node root) {
+        return toParameters((MappingNode) root, null);
     }
 
     private List<Param> toParameters(final MappingNode node, final Param parent) {
@@ -37,15 +36,14 @@ public class Mapper {
         var position = getPosition(tuple.getKeyNode());
 
         if (tuple.getValueNode().getNodeType().equals(MAPPING)) {
-//            Param param = toParam(paramName, "", parent, position, Parameter.ParameterType.MAPPING);
-            Param param = new Param(paramName, "", parent, position);
+            Param param = parameterFactory(paramName, "", parent, position);
             param.addChildren(toParameters((MappingNode) tuple.getValueNode(), param));
             return param;
         } else if (tuple.getValueNode().getNodeType().equals(SCALAR)) {
             var value = getScalarValue(tuple);
 //            value = matchAndReplaceHolders(value);
 //            return scalarParsing(paramName, value, parent, position);
-            return new Param(paramName, value, parent, position);
+            return parameterFactory(paramName, value, parent, position);
         } else if (tuple.getValueNode().getNodeType().equals(SEQUENCE)) {
             return sequenceParsing(paramName, parent, (SequenceNode) tuple.getValueNode(), position);
         } else {
@@ -54,10 +52,15 @@ public class Mapper {
         }
     }
 
+    private Param parameterFactory(String name, String value, Param parent, Position position) {
+        return parent instanceof SchemaParam
+                ? new SchemaParam(name, value, parent, position)
+                : new Resource(name, value, parent, position);
+    }
+
     private Param sequenceParsing(String paramName, Param parent, SequenceNode node, Position start) {
-//        Param parameter = toObjectParameter(paramName, parent, Parameter.ParameterType.SEQUENCE, start);
-        Param parameter = new Param(paramName, "", parent, start);
-        AtomicInteger index = new AtomicInteger(0);
+        Param parameter = parameterFactory(paramName, "", parent, start);
+        var index = new AtomicInteger(0);
 
         var children = node.getValue().stream()
                 .map(n -> constructParameter(n, parameter, index.getAndIncrement()))
@@ -70,19 +73,13 @@ public class Mapper {
         var position = getPosition(node);
 
         if (node instanceof MappingNode) {
-//            Param p = toObjectParameter(valueOf(index), parent, Parameter.ParameterType.MAPPING, position);
-            Param p = new Param(valueOf(index), "", parent, position);
+            Param p = parameterFactory(valueOf(index), "", parent, position);
             p.addChildren(toParameters((MappingNode) node, p));
             return p;
         } else {
-            return new Param(valueOf(index), ((ScalarNode) node).getValue(), parent, position);
-//            return toStringParameter(valueOf(index), parent, ((ScalarNode) node).getValue(), position);
+            return parameterFactory(valueOf(index), ((ScalarNode) node).getValue(), parent, position);
         }
     }
-
-//    private Param toParam(String name, String value, Param parent, Position start, Parameter.ParameterType type) {
-//        return new Param(name, parent, start);
-//    }
 
     private Position getPosition(final Node node) {
         return node.getStartMark()
@@ -92,18 +89,6 @@ public class Mapper {
 
     private Position toPosition(Mark mark) {
         return Position.of(mark.getLine(), mark.getColumn());
-    }
-
-    private String getScalarValueFrom(MappingNode node, String param) {
-        return findParameter(node, param)
-                .map(this::getScalarValue)
-                .orElseGet(() -> "");
-    }
-
-    private Optional<NodeTuple> findParameter(MappingNode node, String key) {
-        return node.getValue().stream()
-                .filter(nodeTuple -> getKey(nodeTuple).equals(key))
-                .findAny();
     }
 
     private String getKey(NodeTuple node) {

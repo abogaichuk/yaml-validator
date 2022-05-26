@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.grammar;
 
 import com.example.yamlvalidator.entity.Param;
+import com.example.yamlvalidator.entity.SchemaParam;
 import com.example.yamlvalidator.entity.ValidationResult;
 import lombok.Getter;
 
@@ -35,7 +36,7 @@ public enum StandardType implements SchemaRule {
     }
 
     @Override
-    public ValidationResult validate(Param param) {
+    public ValidationResult validate(SchemaParam param) {
         return rule.validate(param);
     }
 
