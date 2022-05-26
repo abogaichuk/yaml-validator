@@ -36,6 +36,15 @@ public class YamlValidatorApplication implements CommandLineRunner {
         if (needHelp(cmdLine)) {
             printHelp(options());
         } else {
+
+//            Schema<?> root = Schema.mapping("root", null);
+//            Schema<?> scalar = Schema.scalar("child", "aaa", root);
+//            Schema<?> mapping = Schema.mapping("mapping", root);
+//            ((Schema.Mapping) root).addChildren(List.of(scalar, mapping));
+//
+//            root.getChildren().stream()
+//                    .map(schema -> schema.)
+
             yamlService.execute(cmdLine.getOptionValue("d"), cmdLine.getOptionValue("r"));
         }
         exit(0);

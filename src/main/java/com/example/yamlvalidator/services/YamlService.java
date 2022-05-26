@@ -1,16 +1,11 @@
 package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.MyStreamToStringWriter;
-import com.example.yamlvalidator.entity.Definition;
-import com.example.yamlvalidator.entity.ObjectParameter;
-import com.example.yamlvalidator.entity.Parameter;
-import com.example.yamlvalidator.entity.ValidationResult;
+import com.example.yamlvalidator.entity.*;
 import com.example.yamlvalidator.utils.ValidatorUtils;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
+
+import java.util.*;
+
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
@@ -35,9 +30,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 @Component
 public class YamlService {
@@ -49,15 +41,21 @@ public class YamlService {
             var defNode = readFile(definitionFile);
             var resourceNode = readFile(resourceFile);
 
-            List<Parameter> resources = resourceNode
-                    .map(root -> new YamlMapper().toResources(root))
-                    .orElseGet(Collections::emptyList);
-
             ValidationResult result = defNode
-                    .map(rootDefNode -> new YamlMapper().toDefinition(rootDefNode))
-                    .map(definition -> validationService.validate(definition, resources))
-                    .orElseGet(ValidationResult::valid);
-            result.getReasons().forEach(System.out::println);
+                    .map(root -> new Mapper().map(root))
+                    .map(schema -> validationService.validate(schema, Collections.emptyList()))
+                    .orElse(ValidationResult.valid());
+            System.out.println(result.getReasons());
+
+//            List<Parameter> resources = resourceNode
+//                    .map(root -> new YamlMapper().toResources(root))
+//                    .orElseGet(Collections::emptyList);
+//
+//            ValidationResult result = defNode
+//                    .map(rootDefNode -> new YamlMapper().toDefinition(rootDefNode))
+//                    .map(definition -> validationService.validate(definition, resources))
+//                    .orElseGet(ValidationResult::valid);
+//            result.getReasons().forEach(System.out::println);
 
 //            save(defNode.get(), "definition1.yaml");
 //            save(resource.get(), "resource1.yaml");

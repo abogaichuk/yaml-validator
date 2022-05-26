@@ -49,9 +49,9 @@
 
 #ManualTest: string
 #Test: ManualTest or AutoTest
-Port2:
-  type: Port or number or datetime
-  default: 5
+#Port2:
+#  type: Port or number or datetime
+#  default: 5
 #Test:
 #  type: object
 #  oneOf:
@@ -108,48 +108,58 @@ Port2:
 #Autotest:
 #  id: number
 #  executedDate: datetime
-Test: Test2
+#Test:
+#  type: string or number
+#  default: aaa
 Protocol:
   Type: string
-  default: aaa
+  default: TCPd
   required: true
   List:
     - TCP
     - UDP
     - HTTP
-Port:
-  Default: 7002
-  Description: "${USER} of the secondary ${HOME11} Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
-  Type: number
-  min: 1025
-  max: 65535
-Genesys:
-  SwitchName:
-    Default: "Genesys SIP server"
-    Description: "The name of the switch connected to the Genesys SIP server."
-    Description: "aaa"
-    Type: string
-    List:
-      - Avaya
-      - Cisco
-      - Genesys SIP server
-      - Nortel
-      - Aspect Call Center
-      - Aspect Spectrum
-      - Ericsson
-      - NEC
-      - Alcatel-Lucent
-  RTPMonitoringStyle:
-    Default: "Private Servicess"
-    Description: "bbbb"
-    Description: "Request sent as Monitor Style to Genesys in order to receive RTP events."
-    Type: string
-    List:
-      - Private Service
-      - On Monitor
-      - Both
-      - Default
-  Tested: ManualTest
+#Port:
+#  default: 7002sad
+#  bypass: true
+#  Description: "${USER} of the secondary ${HOME11} Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
+#  Type: number
+#  min: 1025
+#  max: 65535
+#Genesys:
+#  SwitchName:
+#    SwitchLastName: string
+#    SwitchFirstName:
+#      SwitchFirstFirstName:
+#        AAA: aaa
+#        AAA: bbb
+#        BBB: bbb
+#      SwitchSecondSecond: bbb
+#    Default: "Genesys SIP server"
+#    Description: "The name of the switch connected to the Genesys SIP server."
+#    Description: "aaa"
+#    Type: string
+#    List:
+#      - Avaya
+#      - Cisco
+#      - Genesys SIP server
+#      - Nortel
+#      - Aspect Call Center
+#      - Aspect Spectrum
+#      - Ericsson
+#      - NEC
+#      - Alcatel-Lucent
+#  RTPMonitoringStyle:
+#    Default: "Private Servicess"
+#    Description: "bbbb"
+#    Description: "Request sent as Monitor Style to Genesys in order to receive RTP events."
+#    Type: string
+#    List:
+#      - Private Service
+#      - On Monitor
+#      - Both
+#      - Default
+#  Tested: ManualTest
 #  Admin:
 #    type: User
 #    description: Cisco admin

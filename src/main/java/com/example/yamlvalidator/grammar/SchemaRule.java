@@ -1,13 +1,13 @@
-package com.example.yamlvalidator.rules;
+package com.example.yamlvalidator.grammar;
 
-import com.example.yamlvalidator.entity.Parameter;
+import com.example.yamlvalidator.entity.Param;
 import com.example.yamlvalidator.entity.ValidationResult;
 
 @FunctionalInterface
-public interface ParameterRule<T extends Parameter> {
-    ValidationResult validate(T parameter);
+public interface SchemaRule {
+    ValidationResult validate(Param param);
 
-    default ParameterRule<T> and(final ParameterRule<T> other) {
+    default SchemaRule and(final SchemaRule other) {
         return parameter -> {
             final ValidationResult left = this.validate(parameter);
             final ValidationResult right = other.validate(parameter);
@@ -16,7 +16,7 @@ public interface ParameterRule<T extends Parameter> {
         };
     }
 
-    default ParameterRule<T> or(final ParameterRule<T> other) {
+    default SchemaRule or(final SchemaRule other) {
         return parameter -> {
             final ValidationResult left = this.validate(parameter);
 
