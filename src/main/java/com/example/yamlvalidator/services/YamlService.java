@@ -54,7 +54,8 @@ public class YamlService {
 //            save(defNode.get(), "definition1.yaml");
 //            save(resource.get(), "resource1.yaml");
         } catch (ParserException | ScannerException e) {
-            e.getProblemMark().ifPresent(problemMark -> System.out.println(ValidatorUtils.toErrorMessage(e.getProblem(), problemMark)));
+            e.getProblemMark().ifPresent(
+                    problemMark -> System.out.println(ValidatorUtils.toErrorMessage(e.getProblem(), problemMark)));
         }
     }
 
@@ -87,7 +88,9 @@ public class YamlService {
         Node rootNode = node;
         while (iterator.hasNext()) {
             String currentTag = iterator.next();
-            proxy = ((MappingNode) rootNode).getValue().stream().filter(t -> getKeyValue(t).equals(currentTag)).findFirst();
+            proxy = ((MappingNode) rootNode).getValue().stream()
+                    .filter(t -> getKeyValue(t).equals(currentTag))
+                    .findFirst();
             if (proxy.isPresent() && proxy.get().getValueNode() instanceof MappingNode) {
                 rootNode = proxy.get().getValueNode();
                 nodeList.add(proxy.get());
@@ -165,7 +168,8 @@ public class YamlService {
 
     private List<Node> createSequenceValueList(List<String> newValues) {
         List<Node> nodeList = new ArrayList<>();
-        newValues.forEach(value -> nodeList.add(new ScalarNode(new Tag("tag:yaml.org,2002:str"), value, ScalarStyle.PLAIN)));
+        newValues.forEach(value -> nodeList.add(
+                new ScalarNode(new Tag("tag:yaml.org,2002:str"), value, ScalarStyle.PLAIN)));
         return nodeList;
     }
 

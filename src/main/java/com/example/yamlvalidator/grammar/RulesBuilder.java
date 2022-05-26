@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.utils.ValidatorUtils.toErrorMessage;
 
-public class RulesBuilder {
+public final class RulesBuilder {
     private RulesBuilder() {}
 
     public static SchemaRule singleFieldValidation(String child, String message,

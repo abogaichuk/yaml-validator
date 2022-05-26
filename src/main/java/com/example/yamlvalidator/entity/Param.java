@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
 @Getter
-@ToString(exclude={"parent"})
-public class Param {
+@ToString(exclude = {"parent"})
+public abstract class Param {
     private final String name;
     private final String value;
     private final Param parent;
@@ -44,18 +44,10 @@ public class Param {
                 .collect(Collectors.toSet());
     }
 
-    public Optional<Param> findChild(String name) {
-        return isNotEmpty(name) ? children.stream()
-                .filter(param -> name.equalsIgnoreCase(param.getName()))
+    public Optional<Param> findChild(String paramName) {
+        return isNotEmpty(paramName) ? children.stream()
+                .filter(param -> paramName.equalsIgnoreCase(param.getName()))
                 .findAny() : Optional.empty();
-    }
-
-    public Schema getRoot() {
-        Param p = getParent();
-        while (p.getParent() != null) {
-            p = p.getParent();
-        }
-        return (Schema) p;
     }
 
     @Override

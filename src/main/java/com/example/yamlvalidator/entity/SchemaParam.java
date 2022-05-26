@@ -93,4 +93,12 @@ public class SchemaParam extends Param {
                 .filter(keyWord -> keyWord.name().equalsIgnoreCase(getName()))
                 .findAny();
     }
+
+    private Schema getRoot() {
+        Param p = getParent();
+        while (p.getParent() != null) {
+            p = p.getParent();
+        }
+        return (Schema) p;
+    }
 }
