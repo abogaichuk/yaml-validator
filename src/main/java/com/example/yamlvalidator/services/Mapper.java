@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.lang.String.valueOf;
 import static org.snakeyaml.engine.v2.nodes.NodeType.*;
@@ -16,19 +17,21 @@ public class Mapper {
 
     public Schema mapToSchema(Node root) {
         var definition = new Schema(null, null, null, Position.of(1, 1));
-        definition.addChildren(toParameters((MappingNode) root, definition));
+        definition.addChildren(toParameters((MappingNode) root, definition).collect(Collectors.toList()));
         return definition;
     }
 
-    public List<Param> mapToResources(Node root) {
-        return toParameters((MappingNode) root, null);
+    public List<Resource> mapToResources(Node root) {
+        return toParameters((MappingNode) root, null)
+                .map(Resource.class::cast)
+                .collect(Collectors.toList());
     }
 
-    private List<Param> toParameters(final MappingNode node, final Param parent) {
+    private Stream<Param> toParameters(final MappingNode node, final Param parent) {
         return node.getValue().stream()
                 .map(n -> toParameter(n, parent))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull);
+//                .collect(Collectors.toList());
     }
 
     private Param toParameter(final NodeTuple tuple, final Param parent) {
@@ -37,7 +40,7 @@ public class Mapper {
 
         if (tuple.getValueNode().getNodeType().equals(MAPPING)) {
             Param param = parameterFactory(paramName, "", parent, position);
-            param.addChildren(toParameters((MappingNode) tuple.getValueNode(), param));
+            param.addChildren(toParameters((MappingNode) tuple.getValueNode(), param).collect(Collectors.toList()));
             return param;
         } else if (tuple.getValueNode().getNodeType().equals(SCALAR)) {
             var value = getScalarValue(tuple);
@@ -74,7 +77,7 @@ public class Mapper {
 
         if (node instanceof MappingNode) {
             Param p = parameterFactory(valueOf(index), "", parent, position);
-            p.addChildren(toParameters((MappingNode) node, p));
+            p.addChildren(toParameters((MappingNode) node, p).collect(Collectors.toList()));
             return p;
         } else {
             return parameterFactory(valueOf(index), ((ScalarNode) node).getValue(), parent, position);

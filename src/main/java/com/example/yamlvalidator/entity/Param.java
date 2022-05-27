@@ -24,7 +24,7 @@ public abstract class Param {
         this.position = position;
     }
 
-    public void addChildren(List<Param> list) {
+    public void addChildren(List<? extends Param> list) {
         children.addAll(list);
     }
 
@@ -35,7 +35,7 @@ public abstract class Param {
     }
 
     public String getPath() {
-        return parent != null ? parent.getPath() + "/" + name : name;
+        return parent != null && isNotEmpty(parent.getPath()) ? parent.getPath() + "/" + name : name;
     }
 
     public Set<Param> getDuplicates() {
@@ -48,6 +48,17 @@ public abstract class Param {
         return isNotEmpty(paramName) ? children.stream()
                 .filter(param -> paramName.equalsIgnoreCase(param.getName()))
                 .findAny() : Optional.empty();
+    }
+
+    protected Optional<Param> deepSearch(String path) {
+        if (isNotEmpty(path)) {
+            String[] parts = path.split("/", 2);
+            return parts.length > 1
+                    ? findChild(parts[0])
+                            .flatMap(child -> child.deepSearch(parts[1]))
+                    : findChild(path);
+        }
+        return Optional.empty();
     }
 
     @Override

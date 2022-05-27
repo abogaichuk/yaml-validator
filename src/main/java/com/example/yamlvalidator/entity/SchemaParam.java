@@ -3,17 +3,26 @@ package com.example.yamlvalidator.entity;
 import com.example.yamlvalidator.grammar.KeyWord;
 import com.example.yamlvalidator.grammar.SchemaRule;
 import com.example.yamlvalidator.grammar.StandardType;
+import lombok.Getter;
 
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
 public class SchemaParam extends Param {
+//    @Getter
+//    private final List<SchemaParam> children = new ArrayList<>();
+
     public SchemaParam(String name, String value, Param parent, Position position) {
         super(name, value, parent, position);
     }
+
+//    public void addChildren(List<SchemaParam> list) {
+//        children.addAll(list);
+//    }
 
     public final ValidationResult validate() {
         ValidationResult result = validateSelf();
@@ -24,6 +33,29 @@ public class SchemaParam extends Param {
                 .map(SchemaParam::validate)
                 .reduce(result, ValidationResult::merge) : result;
     }
+
+//    public Set<SchemaParam> getDuplicates() {
+//        return children.stream()
+//                .filter(parameter -> Collections.frequency(children, parameter) > 1)
+//                .collect(Collectors.toSet());
+//    }
+//
+//    public Optional<SchemaParam> findChild(String paramName) {
+//        return isNotEmpty(paramName) ? children.stream()
+//                .filter(param -> paramName.equalsIgnoreCase(param.getName()))
+//                .findAny() : Optional.empty();
+//    }
+//
+//    protected Optional<SchemaParam> deepSearch(String path) {
+//        if (isNotEmpty(path)) {
+//            String[] parts = path.split("/", 2);
+//            return parts.length > 1
+//                    ? findChild(parts[0])
+//                    .flatMap(child -> child.deepSearch(parts[1]))
+//                    : findChild(path);
+//        }
+//        return Optional.empty();
+//    }
 
     // get appropriate rules
     // if param has a child type - validate through the rules
