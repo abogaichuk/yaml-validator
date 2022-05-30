@@ -1,11 +1,20 @@
 package com.example.yamlvalidator.entity;
 
+import com.example.yamlvalidator.grammar.Conditions;
+import com.example.yamlvalidator.grammar.KeyWord;
+import com.example.yamlvalidator.grammar.StandardType;
+import com.example.yamlvalidator.grammar.ValidationRule;
+import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.apache.logging.log4j.util.Strings;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
 public class Schema extends SchemaParam {
@@ -24,35 +33,84 @@ public class Schema extends SchemaParam {
         return Strings.EMPTY;
     }
 
-//    public ValidationResult validate(List<Resource> resources) {
-//        getChildren().stream()
-//                .map(Schema.class::cast)
-//                .map(schemaParam -> findResource(schemaParam, resources))
-//
-//    }
-//
-//    private ValidationResult validate(SchemaParam param, List<Resource> resources) {
-//        findResource(param, resources)
-//                .map()
-//    }
-
-//    private ValidationResult validate(SchemaParam param, Optional<Resource> resourceOptional) {
-//
-//    }
-
-    private Optional<Resource> findResource(SchemaParam param, List<Resource> resources) {
-        return resources.stream()
-                .filter(resource -> deepSearch(param.getPath()).isPresent())
-                .findAny();
+    public Stream<ValidationResult> validateResources(List<Resource> resources) {
+        return getChildren().stream()
+                .map(schemaParam -> {
+                    return mandatoryParamValidator()
+                            .and(incorrectTypeValidator())
+                            .or(lessThenMinValidator().and(moreThenMaxValidator()))
+                            .validate(schemaParam, getResource(schemaParam.getName(), resources));
+                });
     }
 
-    //todo must validate all schema params because of resource can be missed for particular schema param
-//    public ValidationResult validate(Resource resource) {
-//        Optional<Param> schemaParam = deepSearch(resource.getPath());
+    private ValidationRule incorrectTypeValidator() {
+        return (schemaParam, resource) -> {
+//            String typeValue = schemaParam.findChild(KeyWord.TYPE.name())
+//                    .map(Param::getValue)
+//                    .orElse(schemaParam.getValue());
+//            Stream.of(typeValue.split(OR_TYPE_SPLITTER))
+//                    .map(String::trim)
+
+            return ValidationResult.valid();
+        };
+    }
+
+//    private boolean isTypeAcceptable(String splittedType, Resource resource) {
+//        //todo the same in schemaparam and StandardType.getOrDefault
+//        Optional<StandardType> standardType = Stream.of(StandardType.values())
+//                .filter(t -> t.name().equalsIgnoreCase(splittedType))
+//                .findFirst();
+//        standardType
+//                .map(t -> t.validate(resource))
+//                .filter(ValidationResult::isValid)
+//                .orElse(getCustomTypes().)
 //    }
 
-//    public Optional<SchemaParam> findSchemaParamForResource(Resource resource) {
-//        Optional<Param> schemaParam = deepSearch(resource.getPath());
-//        return Optional.empty();
-//    }
+    private ValidationRule lessThenMinValidator() {
+        return (schemaParam, resource) -> schemaParam.findChild(KeyWord.MIN.name())
+                .flatMap(ValidatorUtils::toInt)
+                .filter(min -> resource == null || toInt(resource)
+                        .map(value -> min >= value)
+                        .orElse(Boolean.TRUE))
+                .map(min -> ValidationResult.invalid(toErrorMessage(schemaParam, LESS_THAN)))
+                .orElseGet(ValidationResult::valid);
+    }
+
+    private ValidationRule moreThenMaxValidator() {
+        return (schemaParam, resource) -> schemaParam.findChild(KeyWord.MAX.name())
+                .flatMap(ValidatorUtils::toInt)
+                .filter(max -> resource == null || toInt(resource)
+                        .map(value -> max <= value)
+                        .orElse(Boolean.TRUE))
+                .map(min -> ValidationResult.invalid(toErrorMessage(schemaParam, MORE_THAN)))
+                .orElseGet(ValidationResult::valid);
+    }
+
+    private ValidationRule mandatoryParamValidator() {
+        return (schemaParam, resource) -> {
+            if (isMandatory(schemaParam) && !hasDefaultValue(schemaParam)) {
+                if (resource == null || isEmpty(resource.getValue()))
+                    return ValidationResult.invalid(toErrorMessage(schemaParam, MANDATORY_PARAMETER));
+            }
+            return ValidationResult.valid();
+        };
+    }
+
+    private Resource getResource(String name, List<Resource> resources) {
+        return resources.stream()
+                .filter(resource -> name.equalsIgnoreCase(resource.getName()))
+                .findAny().orElse(null);
+    }
+
+    private boolean hasDefaultValue(Param schemaParam) {
+        return schemaParam.findChild(KeyWord.DEFAULT.name())
+                .filter(defaultParam -> isNotEmpty(defaultParam.getValue()))
+                .isPresent();
+    }
+
+    private boolean isMandatory(Param schemaParam) {
+        return schemaParam.findChild(KeyWord.REQUIRED.name())
+                .filter(Conditions.boolValueIsTrue)
+                .isPresent();
+    }
 }

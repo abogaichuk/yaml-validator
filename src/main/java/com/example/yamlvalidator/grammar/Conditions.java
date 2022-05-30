@@ -18,7 +18,8 @@ public final class Conditions {
     static final Predicate<Param> isDateTime = parameter -> toDatetime(parameter).isPresent();
     static final Predicate<Param> isBoolean = parameter -> toBoolean(parameter).isPresent();
 
-    static final Predicate<Param> isByPass = p -> toBoolean(p).filter(Boolean.TRUE::equals).isPresent();
+//    static final Predicate<Param> isByPass = p -> toBoolean(p).filter(Boolean.TRUE::equals).isPresent();
+    public static final Predicate<Param> boolValueIsTrue = p -> toBoolean(p).filter(Boolean.TRUE::equals).isPresent();
 
 //    static final Predicate<Param> hasDuplicates = p -> p.isNotASequenceType() && p.containsDuplicates();
 //    static final Predicate<Param> isWrongTypeDefinition = p -> p.isTypeOrNotAKeyword() && p.isWrongType();

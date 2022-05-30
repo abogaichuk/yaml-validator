@@ -5,8 +5,12 @@
 #  type: Genesys
 #  SwitchName: 123
 #  RTPMonitoringStyle: 321
-Protocol: HTTP
-Port: 8080
+#Protocol: HTTP
+Port: 9000
+Cisco: 11
+#Cisco:
+#  type: Port
+#  value: 8080 #need new keyword for resource? default or value or?
 #Database:
 #  Credentials:
 #    User: ${Connection.User}

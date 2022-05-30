@@ -1,5 +1,6 @@
 package com.example.yamlvalidator.grammar;
 
+import com.example.yamlvalidator.entity.Param;
 import com.example.yamlvalidator.entity.SchemaParam;
 import com.example.yamlvalidator.entity.ValidationResult;
 

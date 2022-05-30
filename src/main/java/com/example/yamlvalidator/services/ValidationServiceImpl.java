@@ -16,21 +16,15 @@ public class ValidationServiceImpl implements ValidationService {
 
     @Override
     public ValidationResult validate(Schema schema, List<Resource> resources) {
-        ValidationResult schemaResult = schema.validate();
+        ValidationResult schemaValidationResult = schema.validate();
+        ValidationResult result = schema.validateResources(resources)
+                .reduce(schemaValidationResult, ValidationResult::merge);
 //        ValidationResult result = resources.stream()
 //                .map(schema::validate)
 //                .reduce(schemaResult, ValidationResult::merge);
 
 
-//        Stack<String> stack = new Stack<>();
-//        stack.add(0xcafebabe);
-//        List<Number> longs = new ArrayList<>();
-//        longs.add(111L);
-//        longs.add(222L);
-////        push(longs);
-//        pop(longs);
-//        longs.forEach(System.out::println);
-        return schemaResult;
+        return result;
     }
 
     private void push(Collection<? extends Number> numbers) {

@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.grammar;
 
 import com.example.yamlvalidator.entity.Param;
+import com.example.yamlvalidator.entity.Resource;
 import com.example.yamlvalidator.entity.SchemaParam;
 import com.example.yamlvalidator.entity.ValidationResult;
 import lombok.Getter;
@@ -45,7 +46,7 @@ public enum StandardType implements SchemaRule {
     }
 
     private static SchemaRule bypass() {
-        return singleFieldValidation(KeyWord.BYPASS.name(), PARAMETER_BYPASS, isByPass);
+        return singleFieldValidation(KeyWord.BYPASS.name(), PARAMETER_BYPASS, boolValueIsTrue);
     }
 
     private static SchemaRule noDuplicates() {

@@ -70,14 +70,16 @@ public class SchemaParam extends Param {
 
     private SchemaRule correctType() {
         return param -> {
-            //todo move to Mapper? Scheme type validation it's the difference between schema and resource
+            //todo move to Mapper?
             //todo + for move, because of placeholders which can modify the types too
+            //todo -, wi will validate resource type against schema
             Optional<String> incorrectValue = param.getTypeValue()
                     .flatMap(typeValue -> Stream.of(typeValue.split(OR_TYPE_SPLITTER))
                             .map(String::trim)
                             .filter(this::isNotAType)
                             .findAny());
-            return incorrectValue.map(s -> invalid(toErrorMessage(param, s, UNKNOWN_TYPE)))
+            return incorrectValue
+                    .map(s -> invalid(toErrorMessage(param, s, UNKNOWN_TYPE)))
                     .orElseGet(ValidationResult::valid);
         };
     }

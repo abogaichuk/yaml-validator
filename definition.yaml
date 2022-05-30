@@ -111,29 +111,31 @@
 #Test:
 #  type: string or number
 #  default: aaa
-Protocol:
-  Type: string
-  default: TCP
-  required: true
-  List:
-    - TCP
-    - UDP
-    - HTTP
+#Protocol:
+#  Type: string
+##  default: TCP
+#  required: true
+#  List:
+#    - TCP
+#    - UDP
+#    - HTTP
 Port:
-  default: 7002
+  default: 70020000
+#  required: true
   Description: "${USER} of the secondary ${HOME11} Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
   Type: number
   min: 1025
   max: 65535
-Genesys:
-  SwitchName:
-    SwitchLastName: string
-    SwitchFirstName:
-      SwitchFirstFirstName:
-        AAA: aaa
-        AAA: bbb
-        BBB: bbb
-      SwitchSecondSecond: bbb
+Cisco: Port or boolean
+#Genesys:
+#  SwitchName:
+#    SwitchLastName: string
+#    SwitchFirstName:
+#      SwitchFirstFirstName:
+#        AAA: aaa
+#        AAA: bbb
+#        BBB: bbb
+#      SwitchSecondSecond: bbb
 #    Default: "Genesys SIP server"
 #    Description: "The name of the switch connected to the Genesys SIP server."
 #    Description: "aaa"

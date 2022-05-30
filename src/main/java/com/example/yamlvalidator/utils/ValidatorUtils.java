@@ -16,6 +16,7 @@ import org.snakeyaml.engine.v2.exceptions.Mark;
 import static java.text.MessageFormat.format;
 
 public final class ValidatorUtils {
+    //todo error messages
     public static final String IS_NAN = "{0} is not a number";
     public static final String IS_NOT_A_BOOLEAN = "{0} is not a boolean";
     public static final String IS_NOT_A_DATETIME = "{0} is not a datetime";
@@ -31,7 +32,7 @@ public final class ValidatorUtils {
     public static final String OBJECT_KEYWORD = "Keyword {0} must be an object";
     public static final String DATETIME_PARSED_ERROR = "Can't parse parameter {0} using pattern {1}";
 
-    public static final String MANDATORY_PARAMETER = "Parameter {0} is required";
+    public static final String MANDATORY_PARAMETER = "Mandatory Parameter {0} is missed";
 
     public static final String OR_TYPE_SPLITTER = " or ";
 
