@@ -64,57 +64,57 @@ public abstract class Param {
         return Optional.empty();
     }
 
-//    protected Optional<String> getTypeValue() {
-//        //todo sequence indexes
-//        return isCustomTypeDeclaration() ? Optional.of(getValue()) : Optional.empty();
-//    }
-//
-//    //if name == type or name != keyword, so it's a new type definition (Test: Manual or Auto)
-//    //if parent type == sequence, paramname == index in collection
-//    private boolean isCustomTypeDeclaration() {
-//        return isNotEmpty(getName()) && isNotEmpty(getValue())
-//                && (KeyWord.TYPE.name().equalsIgnoreCase(getName()) || isNotAKeyword());
-//    }
-//
-//    protected boolean isNotAType(final String splittedType) {
-//        return isNotAStandardType(splittedType) && isNotACustomType(splittedType);
-//    }
-//
-//    private boolean isNotACustomType(final String splittedType) {
-//        return !isCustomType(splittedType);
-//    }
-//
-//    private boolean isCustomType(final String splittedType) {
-//        return getRoot().getCustomTypes().stream()
-//                .anyMatch(t -> t.equalsIgnoreCase(splittedType));
-//    }
-//
-//    private boolean isNotAStandardType(final String splittedType) {
-//        return !isStandardType(splittedType);
-//    }
-//
-//    private boolean isStandardType(String splittedType) {
-//        return Stream.of(StandardType.values())
-//                .anyMatch(t -> t.name().equalsIgnoreCase(splittedType));
-//    }
-//
-//    protected boolean isNotAKeyword() {
-//        return getKeyWord().isEmpty();
-//    }
-//
-//    public Optional<KeyWord> getKeyWord() {
-//        return Stream.of(KeyWord.values())
-//                .filter(keyWord -> keyWord.name().equalsIgnoreCase(getName()))
-//                .findAny();
-//    }
-//
-//    private Schema getRoot() {
-//        Param p = getParent();
-//        while (p.getParent() != null) {
-//            p = p.getParent();
-//        }
-//        return (Schema) p;
-//    }
+    protected Optional<String> getTypeValue() {
+        //todo sequence indexes
+        return isCustomTypeDeclaration() ? Optional.of(getValue()) : Optional.empty();
+    }
+
+    //if name == type or name != keyword, so it's a new type definition (Test: Manual or Auto)
+    //if parent type == sequence, paramname == index in collection
+    private boolean isCustomTypeDeclaration() {
+        return isNotEmpty(getName()) && isNotEmpty(getValue())
+                && (KeyWord.TYPE.name().equalsIgnoreCase(getName()) || isNotAKeyword());
+    }
+
+    protected boolean isNotAType(final String splittedType) {
+        return isNotAStandardType(splittedType) && isNotACustomType(splittedType);
+    }
+
+    private boolean isNotACustomType(final String splittedType) {
+        return !isCustomType(splittedType);
+    }
+
+    private boolean isCustomType(final String splittedType) {
+        return getRoot().getCustomTypes().stream()
+                .anyMatch(t -> t.equalsIgnoreCase(splittedType));
+    }
+
+    private boolean isNotAStandardType(final String splittedType) {
+        return !isStandardType(splittedType);
+    }
+
+    private boolean isStandardType(String splittedType) {
+        return Stream.of(StandardType.values())
+                .anyMatch(t -> t.name().equalsIgnoreCase(splittedType));
+    }
+
+    protected boolean isNotAKeyword() {
+        return getKeyWord().isEmpty();
+    }
+
+    public Optional<KeyWord> getKeyWord() {
+        return Stream.of(KeyWord.values())
+                .filter(keyWord -> keyWord.name().equalsIgnoreCase(getName()))
+                .findAny();
+    }
+
+    private Schema getRoot() {
+        Param p = getParent();
+        while (p.getParent() != null) {
+            p = p.getParent();
+        }
+        return (Schema) p;
+    }
 
     @Override
     public boolean equals(Object obj) {

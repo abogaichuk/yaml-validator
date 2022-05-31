@@ -34,6 +34,17 @@ public class SchemaParam extends Param {
                 .reduce(result, ValidationResult::merge) : result;
     }
 
+    public StandardType getType() {
+        String s = findChild(KeyWord.TYPE.name())
+                .map(Param::getValue)
+                .orElse(this.getValue());
+        return StandardType.getOrDefault(s);
+
+//        return Arrays.stream(StandardType.values())
+//                .filter(standardType -> standardType.name().equalsIgnoreCase(getValue()))
+//                .findAny().orElse(StandardType.OBJECT);
+    }
+
 //    public Set<SchemaParam> getDuplicates() {
 //        return children.stream()
 //                .filter(parameter -> Collections.frequency(children, parameter) > 1)
@@ -61,72 +72,74 @@ public class SchemaParam extends Param {
     // if param has a child type - validate through the rules
     // in other case, if param doesn't have a child, check the param through correctTypeRule
     private ValidationResult validateSelf() {
-        return findChild(KeyWord.TYPE.name())
-                .map(Param::getValue)
-                .map(typeName -> StandardType.getOrDefault(typeName).getRule())
-                .orElseGet(this::correctType) //only for scalar params
-                .validate(this);
+        return ValidationResult.valid();
+//        return findChild(KeyWord.TYPE.name())
+//                .map(Param::getValue)
+//                .map(typeName -> StandardType.getOrDefault(typeName).getRule())
+//                .orElseGet(this::correctType) //only for scalar params
+//                .validate(this);
+//        return getType().
     }
 
-    private SchemaRule correctType() {
-        return param -> {
-            //todo move to Mapper?
-            //todo + for move, because of placeholders which can modify the types too
-            //todo -, wi will validate resource type against schema
-            Optional<String> incorrectValue = param.getTypeValue()
-                    .flatMap(typeValue -> Stream.of(typeValue.split(OR_TYPE_SPLITTER))
-                            .map(String::trim)
-                            .filter(this::isNotAType)
-                            .findAny());
-            return incorrectValue
-                    .map(s -> invalid(toErrorMessage(param, s, UNKNOWN_TYPE)))
-                    .orElseGet(ValidationResult::valid);
-        };
-    }
+//    private SchemaRule correctType() {
+//        return param -> {
+//            //todo move to Mapper?
+//            //todo + for move, because of placeholders which can modify the types too
+//            //todo -, wi will validate resource type against schema
+//            Optional<String> incorrectValue = param.getTypeValue()
+//                    .flatMap(typeValue -> Stream.of(typeValue.split(OR_TYPE_SPLITTER))
+//                            .map(String::trim)
+//                            .filter(this::isNotAType)
+//                            .findAny());
+//            return incorrectValue
+//                    .map(s -> invalid(toErrorMessage(param, s, UNKNOWN_TYPE)))
+//                    .orElseGet(ValidationResult::valid);
+//        };
+//    }
 
-    private Optional<String> getTypeValue() {
-        //todo sequence indexes
-        return isCustomTypeDeclaration() ? Optional.of(getValue()) : Optional.empty();
-    }
-
-    //if name == type or name != keyword, so it's a new type definition (Test: Manual or Auto)
-    //if parent type == sequence, paramname == index in collection
-    private boolean isCustomTypeDeclaration() {
-        return isNotEmpty(getName()) && isNotEmpty(getValue())
-                && (KeyWord.TYPE.name().equalsIgnoreCase(getName()) || isNotAKeyword());
-    }
-
-    private boolean isNotAType(final String splittedType) {
-        return isNotAStandardType(splittedType) && isNotACustomType(splittedType);
-    }
-
-    private boolean isNotACustomType(final String splittedType) {
-        return !isCustomType(splittedType);
-    }
-
-    private boolean isCustomType(final String splittedType) {
-        return getRoot().getCustomTypes().stream()
-                .anyMatch(t -> t.equalsIgnoreCase(splittedType));
-    }
-
-    private boolean isNotAStandardType(final String splittedType) {
-        return !isStandardType(splittedType);
-    }
-
-    private boolean isStandardType(String splittedType) {
-        return Stream.of(StandardType.values())
-                .anyMatch(t -> t.name().equalsIgnoreCase(splittedType));
-    }
-
-    private boolean isNotAKeyword() {
-        return getKeyWord().isEmpty();
-    }
-
-    public Optional<KeyWord> getKeyWord() {
-        return Stream.of(KeyWord.values())
-                .filter(keyWord -> keyWord.name().equalsIgnoreCase(getName()))
-                .findAny();
-    }
+//    private Optional<String> getTypeValue() {
+//        //todo sequence indexes
+//        return isCustomTypeDeclaration() ? Optional.of(getValue()) : Optional.empty();
+//    }
+//
+//    //if name == type or name != keyword, so it's a new type definition (Test: Manual or Auto)
+//    //if parent type == sequence, paramname == index in collection
+//    private boolean isCustomTypeDeclaration() {
+//        return isNotEmpty(getName()) && isNotEmpty(getValue())
+//                && (KeyWord.TYPE.name().equalsIgnoreCase(getName()) || isNotAKeyword());
+//    }
+//
+//    private boolean isNotAType(final String splittedType) {
+//        return isNotAStandardType(splittedType) && isNotACustomType(splittedType);
+//    }
+//
+//    private boolean isNotACustomType(final String splittedType) {
+//        return !isCustomType(splittedType);
+//    }
+//
+//    private boolean isCustomType(final String splittedType) {
+//        return getRoot().getCustomTypes().stream()
+//                .anyMatch(t -> t.equalsIgnoreCase(splittedType));
+//    }
+//
+//    private boolean isNotAStandardType(final String splittedType) {
+//        return !isStandardType(splittedType);
+//    }
+//
+//    private boolean isStandardType(String splittedType) {
+//        return Stream.of(StandardType.values())
+//                .anyMatch(t -> t.name().equalsIgnoreCase(splittedType));
+//    }
+//
+//    private boolean isNotAKeyword() {
+//        return getKeyWord().isEmpty();
+//    }
+//
+//    public Optional<KeyWord> getKeyWord() {
+//        return Stream.of(KeyWord.values())
+//                .filter(keyWord -> keyWord.name().equalsIgnoreCase(getName()))
+//                .findAny();
+//    }
 
     private Schema getRoot() {
         Param p = getParent();

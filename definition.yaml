@@ -120,11 +120,11 @@
 #    - UDP
 #    - HTTP
 Port:
-  default: 70020000
+  default: 70020000s
 #  required: true
   Description: "${USER} of the secondary ${HOME11} Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
   Type: number
-  min: 1025
+  min: 1025s
   max: 65535
 Cisco: Port or boolean
 #Genesys:

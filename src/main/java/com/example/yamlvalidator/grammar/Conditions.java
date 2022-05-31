@@ -14,7 +14,7 @@ public final class Conditions {
     private Conditions() {}
 
     private static final Predicate<Param> isNumber = parameter -> toInt(parameter).isPresent();
-    static final Predicate<Param> isNAN = isNumber.negate();
+    public static final Predicate<Param> isNAN = isNumber.negate();
     static final Predicate<Param> isDateTime = parameter -> toDatetime(parameter).isPresent();
     static final Predicate<Param> isBoolean = parameter -> toBoolean(parameter).isPresent();
 

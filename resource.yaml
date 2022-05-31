@@ -6,7 +6,7 @@
 #  SwitchName: 123
 #  RTPMonitoringStyle: 321
 #Protocol: HTTP
-Port: 9000
+Port: 9000fs
 Cisco: 11
 #Cisco:
 #  type: Port

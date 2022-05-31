@@ -17,22 +17,39 @@ import static java.text.MessageFormat.format;
 
 public final class ValidatorUtils {
     //todo error messages
-    public static final String IS_NAN = "{0} is not a number";
-    public static final String IS_NOT_A_BOOLEAN = "{0} is not a boolean";
-    public static final String IS_NOT_A_DATETIME = "{0} is not a datetime";
-    public static final String LESS_THAN = "{0} < {1}";
-    public static final String MORE_THAN = "{0} > {1}";
-    public static final String IS_BEFORE = "{0} is before {1}";
-    public static final String IS_AFTER = "{0} is after {1}";
-    public static final String DEFAULT_WRONG = "List doesn't contains Default value";
-    public static final String HAS_DUPLICATES = "Parameter: {0} has duplicates";
-    public static final String UNKNOWN_TYPE = "Parameter: {0}, type {1} is not define";
-    public static final String PARAMETER_BYPASS = "Parameter Bypass, validation is skipped";
-    public static final String STRING_KEYWORD = "Keyword {0} must be a string";
-    public static final String OBJECT_KEYWORD = "Keyword {0} must be an object";
-    public static final String DATETIME_PARSED_ERROR = "Can't parse parameter {0} using pattern {1}";
+//    public static final String IS_NAN = "{0} is not a number";
+//    public static final String IS_NOT_A_BOOLEAN = "{0} is not a boolean";
+//    public static final String IS_NOT_A_DATETIME = "{0} is not a datetime";
+//    public static final String LESS_THAN = "{0} < {1}";
+//    public static final String MORE_THAN = "{0} > {1}";
+//    public static final String IS_BEFORE = "{0} is before {1}";
+//    public static final String IS_AFTER = "{0} is after {1}";
+//    public static final String DEFAULT_WRONG = "List doesn't contains Default value";
+//    public static final String HAS_DUPLICATES = "Parameter: {0} has duplicates";
+//    public static final String UNKNOWN_TYPE = "Parameter: {0}, type {1} is not define";
+//    public static final String PARAMETER_BYPASS = "Parameter Bypass, validation is skipped";
+//    public static final String STRING_KEYWORD = "Keyword {0} must be a string";
+//    public static final String OBJECT_KEYWORD = "Keyword {0} must be an object";
+//    public static final String DATETIME_PARSED_ERROR = "Can't parse parameter {0} using pattern {1}";
+//
+//    public static final String MANDATORY_PARAMETER = "Mandatory Parameter {0} is missed";
 
-    public static final String MANDATORY_PARAMETER = "Mandatory Parameter {0} is missed";
+    public static final String IS_NAN = "rule.is.nan";
+    public static final String IS_NOT_A_BOOLEAN = "rule.is.not.a.boolean";
+    public static final String IS_NOT_A_DATETIME = "rule.is.not.a.datetime";
+    public static final String LESS_THAN = "rule.less.than";
+    public static final String MORE_THAN = "rule.more.than";
+    public static final String IS_BEFORE = "rule.is.before";
+    public static final String IS_AFTER = "rule.is.after";
+    public static final String DEFAULT_WRONG = "rule.default.wrong";
+    public static final String HAS_DUPLICATES = "rule.has.duplicates";
+    public static final String UNKNOWN_TYPE = "rule.unknown.type";
+    public static final String PARAMETER_BYPASS = "rule.parameter.bypass";
+    public static final String STRING_KEYWORD = "rule.string.keyword";
+    public static final String OBJECT_KEYWORD = "rule.object.keyword";
+    public static final String DATETIME_PARSED_ERROR = "rule.datetime.parsed.error";
+
+    public static final String MANDATORY_PARAMETER = "rule.mandatory.parameter";
 
     public static final String OR_TYPE_SPLITTER = " or ";
 
@@ -138,7 +155,7 @@ public final class ValidatorUtils {
     }
 
     public static String toErrorMessage(Param p, String message) {
-        message = format(message, p.getName());
+//        message = format(message, p.getName());
         return format("{0}, paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
     }
 
