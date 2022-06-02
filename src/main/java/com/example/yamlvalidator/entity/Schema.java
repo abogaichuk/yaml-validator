@@ -1,9 +1,6 @@
 package com.example.yamlvalidator.entity;
 
-import com.example.yamlvalidator.grammar.Conditions;
-import com.example.yamlvalidator.grammar.KeyWord;
-import com.example.yamlvalidator.grammar.StandardType;
-import com.example.yamlvalidator.grammar.ValidationRule;
+import com.example.yamlvalidator.grammar.*;
 import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.apache.logging.log4j.util.Strings;
 
@@ -27,6 +24,11 @@ public class Schema extends SchemaParam {
                 .map(Param::getName)
                 .collect(Collectors.toList());
     }
+
+//    public ValidationResult validate(RuleService rules, Resource resource) {
+//        var r = getAppropriateResource(getName(), resource.getChildren());
+//        return getType().ruleFunction.apply(rules).validate(this, r);
+//    }
 
     @Override
     public String getPath() {
@@ -72,7 +74,7 @@ public class Schema extends SchemaParam {
                 .filter(min -> resource == null || toInt(resource)
                         .map(value -> min >= value)
                         .orElse(Boolean.TRUE))
-                .map(min -> ValidationResult.invalid(toErrorMessage(schemaParam, LESS_THAN)))
+                .map(min -> ValidationResult.invalid(toErrorMessage(schemaParam, MESSAGE_LESS_THAN)))
                 .orElseGet(ValidationResult::valid);
     }
 
@@ -82,7 +84,7 @@ public class Schema extends SchemaParam {
                 .filter(max -> resource == null || toInt(resource)
                         .map(value -> max <= value)
                         .orElse(Boolean.TRUE))
-                .map(min -> ValidationResult.invalid(toErrorMessage(schemaParam, MORE_THAN)))
+                .map(min -> ValidationResult.invalid(toErrorMessage(schemaParam, MESSAGE_MORE_THAN)))
                 .orElseGet(ValidationResult::valid);
     }
 

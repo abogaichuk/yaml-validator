@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
-import static com.example.yamlvalidator.utils.ValidatorUtils.IS_NAN;
 
 @Service
 public class ValidationServiceImpl implements ValidationService {
@@ -21,7 +20,7 @@ public class ValidationServiceImpl implements ValidationService {
     private RuleService rules;
 
     @Override
-    public ValidationResult validate(Schema schema, List<Resource> resources) {
+    public ValidationResult validate(Schema schema, Resource resource) {
 //        ValidationResult schemaValidationResult = schema.validate();
 //        ValidationResult result = schema.validateResources(resources)
 //                .reduce(schemaValidationResult, ValidationResult::merge);
@@ -33,11 +32,18 @@ public class ValidationServiceImpl implements ValidationService {
 //        return schema.getChildren().stream()
 //                .map(SchemaParam.class::cast)
 //                .map(rule::validate).reduce(ValidationResult.valid(), ValidationResult::merge);
-        return schema.getChildren().stream()
-                .map(SchemaParam.class::cast)
-                .map(param -> rules.validate(param, resources))
-                .reduce(ValidationResult.valid(), ValidationResult::merge);
+//        return schema.getChildren().stream()
+//                .map(SchemaParam.class::cast)
+//                .map(param -> rules.validate(param, resources))
+//                .reduce(ValidationResult.valid(), ValidationResult::merge);
+        return schema.validate(rules, resource);
     }
+
+//    private Resource getAppropriateResource(String name, List<Resource> resources) {
+//        return resources.stream()
+//                .filter(resource -> name.equalsIgnoreCase(resource.getName()))
+//                .findAny().orElse(null);
+//    }
 
 //    private SchemaRule isNANRule(KeyWord keyWord) {
 //        return param -> param.findChild(keyWord.name())

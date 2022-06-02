@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
 @Getter
-@ToString(exclude = {"parent"})
 public abstract class Param {
     private final String name;
     private final String value;
@@ -114,6 +113,11 @@ public abstract class Param {
             p = p.getParent();
         }
         return (Schema) p;
+    }
+
+    @Override
+    public String toString() {
+        return "Parameter: " + getName() + ", path: " + getPath() + ", (row #" + getRow() + ")";
     }
 
     @Override

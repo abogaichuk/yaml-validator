@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.entity;
 
 import com.example.yamlvalidator.grammar.KeyWord;
+import com.example.yamlvalidator.grammar.RuleService;
 import com.example.yamlvalidator.grammar.SchemaRule;
 import com.example.yamlvalidator.grammar.StandardType;
 import lombok.Getter;
@@ -32,6 +33,22 @@ public class SchemaParam extends Param {
                 .map(SchemaParam.class::cast)
                 .map(SchemaParam::validate)
                 .reduce(result, ValidationResult::merge) : result;
+    }
+
+    public ValidationResult validate(RuleService rules, Resource resource) {
+        return getChildren().stream()
+                .map(SchemaParam.class::cast)
+                .map(child -> {
+                    var res = getAppropriateResource(child.getName(), resource.getChildren());
+                    return child.getType().ruleFunction.apply(rules).validate(child, res);
+                }).reduce(ValidationResult.valid(), ValidationResult::merge);
+    }
+
+    protected Resource getAppropriateResource(String name, List<Param> resources) {
+        return resources.stream()
+                .filter(resource -> name.equalsIgnoreCase(resource.getName()))
+                .map(Resource.class::cast)
+                .findAny().orElse(null);
     }
 
     public StandardType getType() {

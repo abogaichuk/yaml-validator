@@ -16,15 +16,19 @@ import static org.snakeyaml.engine.v2.nodes.NodeType.*;
 public class Mapper {
 
     public Schema mapToSchema(Node root) {
-        var definition = new Schema(null, null, null, Position.of(1, 1));
+        var definition = new Schema("", "", null, Position.of(1, 1));
         definition.addChildren(toParameters((MappingNode) root, definition).collect(Collectors.toList()));
         return definition;
     }
 
-    public List<Resource> mapToResources(Node root) {
-        return toParameters((MappingNode) root, null)
-                .map(Resource.class::cast)
-                .collect(Collectors.toList());
+    public Resource mapToResources(Node root) {
+        var resource = new Resource("", "", null, Position.of(1, 1));
+        resource.addChildren(toParameters((MappingNode) root, null)
+                .collect(Collectors.toList()));
+        return resource;
+//        return toParameters((MappingNode) root, null)
+//                .map(Resource.class::cast)
+//                .collect(Collectors.toList());
     }
 
     private Stream<Param> toParameters(final MappingNode node, final Param parent) {

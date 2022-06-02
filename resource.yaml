@@ -5,9 +5,15 @@
 #  type: Genesys
 #  SwitchName: 123
 #  RTPMonitoringStyle: 321
-#Protocol: HTTP
-Port: 9000fs
+Protocol: HTTPs
+executedDate: 2900-03-04 11:30
+Port: 7000
 Cisco: 11
+#Genesys:
+#  SwitchName: Switchnameeeee
+#  SwitchFirstName:
+#    SwitchFirstFirstName: sdasdas
+#    SwitchSecondSecond: sadas
 #Cisco:
 #  type: Port
 #  value: 8080 #need new keyword for resource? default or value or?

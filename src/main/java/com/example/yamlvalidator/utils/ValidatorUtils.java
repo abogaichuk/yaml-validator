@@ -34,17 +34,17 @@ public final class ValidatorUtils {
 //
 //    public static final String MANDATORY_PARAMETER = "Mandatory Parameter {0} is missed";
 
-    public static final String IS_NAN = "rule.is.nan";
-    public static final String IS_NOT_A_BOOLEAN = "rule.is.not.a.boolean";
-    public static final String IS_NOT_A_DATETIME = "rule.is.not.a.datetime";
-    public static final String LESS_THAN = "rule.less.than";
-    public static final String MORE_THAN = "rule.more.than";
-    public static final String IS_BEFORE = "rule.is.before";
-    public static final String IS_AFTER = "rule.is.after";
-    public static final String DEFAULT_WRONG = "rule.default.wrong";
-    public static final String HAS_DUPLICATES = "rule.has.duplicates";
-    public static final String UNKNOWN_TYPE = "rule.unknown.type";
-    public static final String PARAMETER_BYPASS = "rule.parameter.bypass";
+    public static final String MESSAGE_IS_NAN = "rule.is.nan";
+    public static final String MESSAGE_IS_NOT_A_BOOLEAN = "rule.is.not.a.boolean";
+    public static final String MESSAGE_IS_NOT_A_DATETIME = "rule.is.not.a.datetime";
+    public static final String MESSAGE_LESS_THAN = "rule.less.than";
+    public static final String MESSAGE_MORE_THAN = "rule.more.than";
+    public static final String MESSAGE_IS_BEFORE = "rule.is.before";
+    public static final String MESSAGE_IS_AFTER = "rule.is.after";
+    public static final String MESSAGE_LIST_DOES_NOT_CONTAIN = "rule.list.does.not.contain";
+    public static final String MESSAGE_HAS_DUPLICATES = "rule.has.duplicates";
+    public static final String MESSAGE_UNKNOWN_TYPE = "rule.unknown.type";
+    public static final String MESSAGE_PARAMETER_BYPASS = "rule.parameter.bypass";
     public static final String STRING_KEYWORD = "rule.string.keyword";
     public static final String OBJECT_KEYWORD = "rule.object.keyword";
     public static final String DATETIME_PARSED_ERROR = "rule.datetime.parsed.error";

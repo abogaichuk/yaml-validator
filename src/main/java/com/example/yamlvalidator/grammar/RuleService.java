@@ -1,24 +1,20 @@
 package com.example.yamlvalidator.grammar;
 
 import com.example.yamlvalidator.entity.Param;
-import com.example.yamlvalidator.entity.Resource;
-import com.example.yamlvalidator.entity.SchemaParam;
 import com.example.yamlvalidator.entity.ValidationResult;
 import com.example.yamlvalidator.services.MessageProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.entity.ValidationResult.valid;
 import static com.example.yamlvalidator.grammar.Conditions.*;
-import static com.example.yamlvalidator.grammar.Conditions.isBoolean;
 import static com.example.yamlvalidator.grammar.KeyWord.*;
-import static com.example.yamlvalidator.grammar.RulesBuilder.doubleFieldsValidation;
-import static com.example.yamlvalidator.grammar.RulesBuilder.singleFieldValidation;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
 @Component
@@ -26,126 +22,151 @@ public class RuleService {
     @Autowired
     private MessageProvider messageProvider;
 
-    public ValidationResult validate(SchemaParam param, List<Resource> resources) {
-        var resource = getAppropriateResource(param.getName(), resources);
-        return param.getType().ruleFunction.apply(this).validate(param, resource);
-    }
-
-    private Resource getAppropriateResource(String name, List<Resource> resources) {
-        return resources.stream()
-                .filter(resource -> name.equalsIgnoreCase(resource.getName()))
-                .findAny().orElse(null);
-    }
-
     ValidationRule objects() {
         return bypass().or(noDuplicates());
-//        return bypass().or(noDuplicates());
     }
 
     ValidationRule customs() {
-        return (schema, resource) -> ValidationResult.valid();
+        return objects().or(validateChildren());
+    }
+
+    private ValidationRule validateChildren() {
+        return ValidationRule.of(
+                schema -> ValidationResult.valid(),
+                resource -> ValidationResult.valid()
+        );
+    }
+
+    ValidationRule datetime() {
+        return objects()
+                .or(validateDatetimeFields()
+                        .or(compareDatetimeFields()));
+    }
+
+    ValidationRule numbers() {
+        return objects()
+                .or(validateNumberFields())
+                .or(compareNumberFields()
+                        .and(listContainsRule()));
+    }
+
+    ValidationRule booleans() {
+        return ValidationRule.of(
+                schema -> groupValidationRule(isBoolean.negate(), MESSAGE_IS_NOT_A_BOOLEAN, DEFAULT.name())
+                        .validate(schema),
+                resource -> validationRule(isBoolean.negate(), MESSAGE_IS_NOT_A_BOOLEAN)
+                        .validate(resource)
+        );
+    }
+
+    ValidationRule strings() {
+        return listContainsRule();
     }
 
     private ValidationRule bypass() {
-//        return singleFieldValidation(KeyWord.BYPASS.name(), PARAMETER_BYPASS, boolValueIsTrue);
         return (schema, resource) -> schema.findChild(BYPASS.name())
                 .filter(boolValueIsTrue)
-                .map(p -> invalid(messageProvider.getMessage(PARAMETER_BYPASS, p)))
+                .map(p -> invalid(messageProvider.getMessage(MESSAGE_PARAMETER_BYPASS, schema.getName(), p)))
                 .orElseGet(ValidationResult::valid);
     }
 
     private ValidationRule noDuplicates() {
-        return (schema, resource) -> {
-            var duplicates = schema.getDuplicates();
+        return ValidationRule.of(hasDuplicates());
+    }
+
+    private ParameterRule hasDuplicates() {
+        return parameter -> {
+            var duplicates = parameter.getDuplicates();
             return duplicates.isEmpty() ? valid() : invalid(
                     messageProvider.getMessage(
-                            HAS_DUPLICATES,
-                            schema.getName(),
+                            MESSAGE_HAS_DUPLICATES,
+                            parameter,
                             duplicates.stream()
-                                    .map(Param::getName)
+                                    .map(Param::getPath)
                                     .findFirst().get())
             );
         };
     }
 
-    ValidationRule datetime() {
-        return (schema, resource) -> ValidationResult.valid();
-//        return  objects()
-//                .or(incorrectDatetimePatternRules()
-//                        .or(comparingDatesRule()));
+    private ValidationRule compareDatetimeFields() {
+        return (schema, resource) -> compareSchemaParams(AFTER.name(), BEFORE.name(), isLeftAfterRight, MESSAGE_IS_BEFORE)
+                .and(compareSchemaParams(BEFORE.name(), DEFAULT.name(), isLeftAfterRight.negate(), MESSAGE_IS_AFTER))
+                .and(compareSchemaParams(AFTER.name(), DEFAULT.name(), isLeftAfterRight, MESSAGE_IS_BEFORE))
+                .or(comparison(resource, AFTER.name(), isLeftAfterRight.negate(), MESSAGE_IS_AFTER)
+                        .and(comparison(resource, BEFORE.name(), isLeftAfterRight, MESSAGE_IS_BEFORE)))
+                .validate(schema);
     }
 
-//    //todo datetime custom pattern or default pattern value?
-//    private ValidationRule incorrectDatetimePatternRules() {
-//        return singleFieldValidation(AFTER.name(), IS_NOT_A_DATETIME, isDateTime.negate())
-//                .and(singleFieldValidation(BEFORE.name(), IS_NOT_A_DATETIME, isDateTime.negate()))
-//                .and(singleFieldValidation(DEFAULT.name(), IS_NOT_A_DATETIME, isDateTime.negate()));
-////            return doubleFieldsValidation(PATTERN.name(), DEFAULT.name(), DATETIME_PARSED_ERROR, toDateTime);
-//    }
-//
-//    private ValidationRule comparingDatesRule() {
-//        return doubleFieldsValidation(AFTER.name(), BEFORE.name(), IS_BEFORE, compareDates)
-//                .and(doubleFieldsValidation(BEFORE.name(), DEFAULT.name(), IS_AFTER, compareDates.negate()))
-//                .and(doubleFieldsValidation(AFTER.name(), DEFAULT.name(), IS_BEFORE, compareDates));
-//    }
-
-    ValidationRule numbers() {
-        return objects().or(isNotNan());
-//        return objects()
-//                .or(isNotNan());
-//                        .or(comparingNumbersRule().and(listContainsDefaultRule())));
+    private ValidationRule validateDatetimeFields() {
+        return ValidationRule.of(
+                schema -> groupValidationRule(isDateTime.negate(), MESSAGE_IS_NOT_A_DATETIME,
+                        AFTER.name(), BEFORE.name(), DEFAULT.name(), EXAMPLE.name())
+                        .validate(schema),
+                resource -> validationRule(isDateTime.negate(), MESSAGE_IS_NOT_A_DATETIME).validate(resource)
+        );
     }
 
-    private ValidationRule isNotNan() {
-//        return (schema, resource) ->  Stream.of(KeyWord.DEFAULT.name(), KeyWord.MIN.name(), KeyWord.MAX.name())
-//                .map(schema::findChild)
-//                .filter(Optional::isPresent)
-//                .map(Optional::get)
-//                .filter(Conditions.isNAN)
-//                .map(p -> invalid(messageProvider.getMessage(IS_NAN, p.getName(), p.getPath(), p.getRow())))
-//                .reduce(ValidationResult.valid(), ValidationResult::merge);
-        return (schema, resource) -> schemaParamsAreNAN().validate((SchemaParam) schema)
-                .merge(isNAN.test(resource)
-                        ? invalid(messageProvider.getMessage(IS_NAN, resource.getName(), resource.getPath(), resource.getRow()))
-                        : valid());
+    private ValidationRule validateNumberFields() {
+        return ValidationRule.of(
+                schema -> groupValidationRule(isNAN, MESSAGE_IS_NAN, MAX.name(),
+                        MIN.name(), DEFAULT.name(), EXAMPLE.name()).validate(schema),
+                resource -> validationRule(isNAN, MESSAGE_IS_NAN).validate(resource)
+        );
     }
 
-//    private ResourceRule isANumber() {
-//        return resource -> toInt(resource.getValue())
-//    }
-
-    private ValidationRule of(SchemaRule schemaRule) {
-        return (schema, resource) -> schemaRule.validate((SchemaParam) schema);
+    private ValidationRule compareNumberFields() {
+        return (schema, resource) -> compareSchemaParams(MAX.name(), MIN.name(), compareNums, MESSAGE_LESS_THAN)
+                .and(compareSchemaParams(DEFAULT.name(), MIN.name(), compareNums, MESSAGE_LESS_THAN))
+                .and(compareSchemaParams(DEFAULT.name(), MAX.name(), compareNums.negate(), MESSAGE_MORE_THAN))
+                .or(comparison(resource, MIN.name(), compareNums, MESSAGE_LESS_THAN)
+                        .and(comparison(resource, MAX.name(), compareNums.negate(), MESSAGE_MORE_THAN)))
+                .validate(schema);
     }
 
-    private SchemaRule schemaParamsAreNAN() {
-        return schema -> Stream.of(KeyWord.DEFAULT.name(), KeyWord.MIN.name(), KeyWord.MAX.name())
-                .map(schema::findChild)
+    private ValidationRule listContainsRule() {
+        return (schema, resource) ->
+                compareSchemaParams(DEFAULT.name(), LIST.name(), listContains.negate(), MESSAGE_LIST_DOES_NOT_CONTAIN)
+                        .or(comparison(resource, LIST.name(), listContains.negate(), MESSAGE_LIST_DOES_NOT_CONTAIN))
+                        .validate(schema);
+    }
+
+    private ParameterRule compareSchemaParams(String child1, String child2,
+                                        BiPredicate<Param, Param> comparator, String message) {
+        return param -> param.findChild(child1)
+                .map(p -> comparison(p, child2, comparator, message).validate(param))
+                .orElseGet(ValidationResult::valid);
+    }
+
+    private ParameterRule comparison(Param src, String child,
+                                     BiPredicate<Param, Param> comparator, String message) {
+        return schema -> schema.findChild(child)
+                .filter(threshold -> src != null && comparator.test(threshold, src))
+                .map(threshold -> invalid(messageProvider.getMessage(message, src, threshold)))
+                .orElseGet(ValidationResult::valid);
+    }
+
+    private ParameterRule validationRule(Predicate<Param> condition, String errorMessage) {
+        return param -> condition.test(param)
+                ? invalid(messageProvider.getMessage(errorMessage, param))
+                : valid();
+    }
+
+    private ParameterRule groupValidationRule(Predicate<Param> condition, String errorMessage, String ... children) {
+        return param -> Stream.of(children)
+                .map(param::findChild)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
-                .filter(Conditions.isNAN)
-                .map(p -> invalid(messageProvider.getMessage(IS_NAN, p.getName(), p.getPath(), p.getRow())))
+                .filter(condition)
+                .map(child -> invalid(messageProvider.getMessage(errorMessage, child)))
                 .reduce(ValidationResult.valid(), ValidationResult::merge);
     }
 
-    private SchemaRule comparingNumbersRule() {
-        return doubleFieldsValidation(MIN.name(), MAX.name(), LESS_THAN, compareNums)
-                .and(doubleFieldsValidation(MIN.name(), DEFAULT.name(), LESS_THAN, compareNums))
-                .and(doubleFieldsValidation(MAX.name(), DEFAULT.name(), MORE_THAN, compareNums.negate()));
-    }
-
-    private SchemaRule listContainsDefaultRule() {
-        return doubleFieldsValidation(LIST.name(), DEFAULT.name(), DEFAULT_WRONG, listContains.negate());
-    }
-
-    ValidationRule booleans() {
-        return (schema, resource) -> ValidationResult.valid();
-//        return objects()
-//                .or(singleFieldValidation(DEFAULT.name(), IS_NOT_A_BOOLEAN, isBoolean.negate()));
-    }
-
-    ValidationRule strings() {
-        return (schema, resource) -> ValidationResult.valid();
-//        return listContainsDefaultRule();
-    }
+//    class ParameterRuleBuilder {
+//         SchemaRule isNan(String child) {
+//            return param -> param.findChild(child)
+//                    .filter(isNAN)
+//                    .map(p -> invalid(messageProvider.getMessage(IS_NAN, p.getName(), p.getPath(), p.getRow())))
+//                    .orElseGet(ValidationResult::valid);
+//        }
+//    }
 }

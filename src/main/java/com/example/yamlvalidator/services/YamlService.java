@@ -41,13 +41,13 @@ public class YamlService {
             var defNode = readFile(definitionFile);
             var resourceNode = readFile(resourceFile);
 
-            List<Resource> resources = resourceNode
+            Resource resource = resourceNode
                     .map(root -> new Mapper().mapToResources(root))
-                    .orElseGet(Collections::emptyList);
+                    .orElseGet(null);
 
             ValidationResult result = defNode
                     .map(root -> new Mapper().mapToSchema(root))
-                    .map(schema -> validationService.validate(schema, resources))
+                    .map(schema -> validationService.validate(schema, resource))
                     .orElse(ValidationResult.valid());
             System.out.println(result.getReasons());
 
