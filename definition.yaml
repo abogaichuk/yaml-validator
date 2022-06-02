@@ -126,19 +126,20 @@
 #  Type: number
 #  min: 1026
 #  max: 65535
-#Cisco: Port or boolean
-Genesys:
-  SwitchName: bbb
-  SwitchName:
-    SwitchLastName: string
-    SwitchLastName: stringdas
-    SwitchFirstName:
-      SwitchFirstFirstName:
-        type: string
-        default: aaa
-        default: bbb
-      SwitchSecondSecond: string
-    Default: "Genesys SIP server"
+Cisco: Port or boolean
+#Genesys:
+#  type: Port
+#Genesys:
+#  SwitchName:
+#    SwitchLastName: string
+#    description: i'm a description
+#    SwitchFirstName:
+#      SwitchFirstFirstName:
+#        type: stringg
+#        default: aaa
+#        default: bbb
+#      SwitchSecondSecond: string
+#    Default: "Genesys SIP server"
 #    Description: "The name of the switch connected to the Genesys SIP server."
 #    Description: "aaa"
 #    Type: string

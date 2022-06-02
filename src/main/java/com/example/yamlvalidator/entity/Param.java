@@ -2,13 +2,14 @@ package com.example.yamlvalidator.entity;
 
 import com.example.yamlvalidator.grammar.KeyWord;
 import com.example.yamlvalidator.grammar.StandardType;
+import com.example.yamlvalidator.utils.ValidatorUtils;
 import lombok.Getter;
-import lombok.ToString;
 
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.example.yamlvalidator.utils.ValidatorUtils.OR_TYPE_SPLITTER;
 import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
 @Getter
@@ -63,9 +64,19 @@ public abstract class Param {
         return Optional.empty();
     }
 
-    protected Optional<String> getTypeValue() {
-        //todo sequence indexes
-        return isCustomTypeDeclaration() ? Optional.of(getValue()) : Optional.empty();
+    public String getTypeValue() {
+//        //todo sequence indexes
+        return findChild(KeyWord.TYPE.name())
+                .map(Param::getValue)
+                .orElse(this.getValue());
+    }
+
+    public Optional<String> findIncorrectTypeValue() {
+        return isCustomTypeDeclaration() ? Stream.of(getTypeValue().split(OR_TYPE_SPLITTER))
+                .map(String::trim)
+                .filter(ValidatorUtils::isNotEmpty)
+                .filter(this::isNotAType)
+                .findAny() : Optional.empty();
     }
 
     //if name == type or name != keyword, so it's a new type definition (Test: Manual or Auto)
@@ -107,12 +118,18 @@ public abstract class Param {
                 .findAny();
     }
 
-    private Schema getRoot() {
-        Param p = getParent();
+    private Param getRoot() {
+        Param p = this;
         while (p.getParent() != null) {
             p = p.getParent();
         }
-        return (Schema) p;
+        return p;
+    }
+
+    private List<String> getCustomTypes() {
+        return getChildren().stream()
+                .map(Param::getName)
+                .collect(Collectors.toList());
     }
 
     @Override

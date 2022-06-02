@@ -27,12 +27,14 @@ public class RuleService {
     }
 
     ValidationRule customs() {
-        return objects().or(validateChildren());
+        return objects().or(hasCorrectTypeRule());
     }
 
-    private ValidationRule validateChildren() {
+    private ValidationRule hasCorrectTypeRule() {
         return ValidationRule.of(
-                schema -> ValidationResult.valid(),
+                schema -> schema.findIncorrectTypeValue()
+                        .map(s -> invalid(messageProvider.getMessage(MESSAGE_UNKNOWN_TYPE, schema, s)))
+                        .orElseGet(ValidationResult::valid),
                 resource -> ValidationResult.valid()
         );
     }
@@ -52,7 +54,7 @@ public class RuleService {
 
     ValidationRule booleans() {
         return ValidationRule.of(
-                schema -> groupValidationRule(isBoolean.negate(), MESSAGE_IS_NOT_A_BOOLEAN, DEFAULT.name())
+                schema -> groupValidationRule(isBoolean.negate(), MESSAGE_IS_NOT_A_BOOLEAN, DEFAULT)
                         .validate(schema),
                 resource -> validationRule(isBoolean.negate(), MESSAGE_IS_NOT_A_BOOLEAN)
                         .validate(resource)
@@ -60,7 +62,7 @@ public class RuleService {
     }
 
     ValidationRule strings() {
-        return listContainsRule();
+        return objects().or(listContainsRule());
     }
 
     private ValidationRule bypass() {
@@ -89,57 +91,56 @@ public class RuleService {
     }
 
     private ValidationRule compareDatetimeFields() {
-        return (schema, resource) -> compareSchemaParams(AFTER.name(), BEFORE.name(), isLeftAfterRight, MESSAGE_IS_BEFORE)
-                .and(compareSchemaParams(BEFORE.name(), DEFAULT.name(), isLeftAfterRight.negate(), MESSAGE_IS_AFTER))
-                .and(compareSchemaParams(AFTER.name(), DEFAULT.name(), isLeftAfterRight, MESSAGE_IS_BEFORE))
-                .or(comparison(resource, AFTER.name(), isLeftAfterRight.negate(), MESSAGE_IS_AFTER)
-                        .and(comparison(resource, BEFORE.name(), isLeftAfterRight, MESSAGE_IS_BEFORE)))
+        return (schema, resource) -> compareSchemaParams(AFTER, BEFORE, isLeftAfterRight, MESSAGE_IS_BEFORE)
+                .and(compareSchemaParams(BEFORE, DEFAULT, isLeftAfterRight.negate(), MESSAGE_IS_AFTER))
+                .and(compareSchemaParams(AFTER, DEFAULT, isLeftAfterRight, MESSAGE_IS_BEFORE))
+                .or(comparison(resource, AFTER, isLeftAfterRight.negate(), MESSAGE_IS_AFTER)
+                        .and(comparison(resource, BEFORE, isLeftAfterRight, MESSAGE_IS_BEFORE)))
                 .validate(schema);
     }
 
     private ValidationRule validateDatetimeFields() {
         return ValidationRule.of(
                 schema -> groupValidationRule(isDateTime.negate(), MESSAGE_IS_NOT_A_DATETIME,
-                        AFTER.name(), BEFORE.name(), DEFAULT.name(), EXAMPLE.name())
-                        .validate(schema),
+                        AFTER, BEFORE, DEFAULT, EXAMPLE).validate(schema),
                 resource -> validationRule(isDateTime.negate(), MESSAGE_IS_NOT_A_DATETIME).validate(resource)
         );
     }
 
     private ValidationRule validateNumberFields() {
         return ValidationRule.of(
-                schema -> groupValidationRule(isNAN, MESSAGE_IS_NAN, MAX.name(),
-                        MIN.name(), DEFAULT.name(), EXAMPLE.name()).validate(schema),
+                schema -> groupValidationRule(isNAN, MESSAGE_IS_NAN, MAX, MIN, DEFAULT, EXAMPLE)
+                        .validate(schema),
                 resource -> validationRule(isNAN, MESSAGE_IS_NAN).validate(resource)
         );
     }
 
     private ValidationRule compareNumberFields() {
-        return (schema, resource) -> compareSchemaParams(MAX.name(), MIN.name(), compareNums, MESSAGE_LESS_THAN)
-                .and(compareSchemaParams(DEFAULT.name(), MIN.name(), compareNums, MESSAGE_LESS_THAN))
-                .and(compareSchemaParams(DEFAULT.name(), MAX.name(), compareNums.negate(), MESSAGE_MORE_THAN))
-                .or(comparison(resource, MIN.name(), compareNums, MESSAGE_LESS_THAN)
-                        .and(comparison(resource, MAX.name(), compareNums.negate(), MESSAGE_MORE_THAN)))
+        return (schema, resource) -> compareSchemaParams(MAX, MIN, compareNums, MESSAGE_LESS_THAN)
+                .and(compareSchemaParams(DEFAULT, MIN, compareNums, MESSAGE_LESS_THAN))
+                .and(compareSchemaParams(DEFAULT, MAX, compareNums.negate(), MESSAGE_MORE_THAN))
+                .or(comparison(resource, MIN, compareNums, MESSAGE_LESS_THAN)
+                        .and(comparison(resource, MAX, compareNums.negate(), MESSAGE_MORE_THAN)))
                 .validate(schema);
     }
 
     private ValidationRule listContainsRule() {
         return (schema, resource) ->
-                compareSchemaParams(DEFAULT.name(), LIST.name(), listContains.negate(), MESSAGE_LIST_DOES_NOT_CONTAIN)
-                        .or(comparison(resource, LIST.name(), listContains.negate(), MESSAGE_LIST_DOES_NOT_CONTAIN))
+                compareSchemaParams(DEFAULT, LIST, listContains.negate(), MESSAGE_LIST_DOES_NOT_CONTAIN)
+                        .or(comparison(resource, LIST, listContains.negate(), MESSAGE_LIST_DOES_NOT_CONTAIN))
                         .validate(schema);
     }
 
-    private ParameterRule compareSchemaParams(String child1, String child2,
+    private ParameterRule compareSchemaParams(KeyWord child1, KeyWord child2,
                                         BiPredicate<Param, Param> comparator, String message) {
-        return param -> param.findChild(child1)
+        return param -> param.findChild(child1.name())
                 .map(p -> comparison(p, child2, comparator, message).validate(param))
                 .orElseGet(ValidationResult::valid);
     }
 
-    private ParameterRule comparison(Param src, String child,
+    private ParameterRule comparison(Param src, KeyWord child,
                                      BiPredicate<Param, Param> comparator, String message) {
-        return schema -> schema.findChild(child)
+        return schema -> schema.findChild(child.name())
                 .filter(threshold -> src != null && comparator.test(threshold, src))
                 .map(threshold -> invalid(messageProvider.getMessage(message, src, threshold)))
                 .orElseGet(ValidationResult::valid);
@@ -151,8 +152,9 @@ public class RuleService {
                 : valid();
     }
 
-    private ParameterRule groupValidationRule(Predicate<Param> condition, String errorMessage, String ... children) {
+    private ParameterRule groupValidationRule(Predicate<Param> condition, String errorMessage, KeyWord ... children) {
         return param -> Stream.of(children)
+                .map(KeyWord::name)
                 .map(param::findChild)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -160,13 +162,4 @@ public class RuleService {
                 .map(child -> invalid(messageProvider.getMessage(errorMessage, child)))
                 .reduce(ValidationResult.valid(), ValidationResult::merge);
     }
-
-//    class ParameterRuleBuilder {
-//         SchemaRule isNan(String child) {
-//            return param -> param.findChild(child)
-//                    .filter(isNAN)
-//                    .map(p -> invalid(messageProvider.getMessage(IS_NAN, p.getName(), p.getPath(), p.getRow())))
-//                    .orElseGet(ValidationResult::valid);
-//        }
-//    }
 }

@@ -2,6 +2,7 @@ package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.MyStreamToStringWriter;
 import com.example.yamlvalidator.entity.*;
+import com.example.yamlvalidator.grammar.RuleService;
 import com.example.yamlvalidator.utils.ValidatorUtils;
 
 import java.util.*;
@@ -34,7 +35,7 @@ import java.nio.file.Paths;
 @Component
 public class YamlService {
     @Autowired
-    private ValidationServiceImpl validationService;
+    private RuleService rules;
 
     public void execute(String definitionFile, String resourceFile) throws IOException {
         try {
@@ -47,7 +48,7 @@ public class YamlService {
 
             ValidationResult result = defNode
                     .map(root -> new Mapper().mapToSchema(root))
-                    .map(schema -> validationService.validate(schema, resource))
+                    .map(schema -> schema.validate(rules, resource))
                     .orElse(ValidationResult.valid());
             System.out.println(result.getReasons());
 

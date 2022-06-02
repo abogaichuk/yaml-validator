@@ -1,168 +1,30 @@
 package com.example.yamlvalidator.entity;
 
-import com.example.yamlvalidator.grammar.KeyWord;
 import com.example.yamlvalidator.grammar.RuleService;
-import com.example.yamlvalidator.grammar.SchemaRule;
 import com.example.yamlvalidator.grammar.StandardType;
-import lombok.Getter;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.example.yamlvalidator.entity.ValidationResult.invalid;
-import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
 public class SchemaParam extends Param {
-//    @Getter
-//    private final List<SchemaParam> children = new ArrayList<>();
 
     public SchemaParam(String name, String value, Param parent, Position position) {
         super(name, value, parent, position);
     }
 
-//    public void addChildren(List<SchemaParam> list) {
-//        children.addAll(list);
-//    }
-
-    public final ValidationResult validate() {
-        ValidationResult result = validateSelf();
-
-        //temporary fix, skip validation for keyword children
-        return isNotAKeyword() ? getChildren().stream()
-                .map(SchemaParam.class::cast)
-                .map(SchemaParam::validate)
-                .reduce(result, ValidationResult::merge) : result;
-    }
-
     public ValidationResult validate(RuleService rules, Resource resource) {
+        ValidationResult self = getType().ruleFunction.apply(rules).validate(this, resource);
         return getChildren().stream()
                 .map(SchemaParam.class::cast)
-                .map(child -> {
-                    var res = getAppropriateResource(child.getName(), resource.getChildren());
-                    return child.getType().ruleFunction.apply(rules).validate(child, res);
-                }).reduce(ValidationResult.valid(), ValidationResult::merge);
+                .map(param -> param.validate(rules, getAppropriateResource(param.getName(), resource)))
+                .reduce(self, ValidationResult::merge);
     }
 
-    protected Resource getAppropriateResource(String name, List<Param> resources) {
-        return resources.stream()
-                .filter(resource -> name.equalsIgnoreCase(resource.getName()))
+    protected Resource getAppropriateResource(String name, Param resource) {
+        return resource == null ? null : resource.getChildren().stream()
+                .filter(child -> name.equalsIgnoreCase(child.getName()))
                 .map(Resource.class::cast)
                 .findAny().orElse(null);
     }
 
     public StandardType getType() {
-        String s = findChild(KeyWord.TYPE.name())
-                .map(Param::getValue)
-                .orElse(this.getValue());
-        return StandardType.getOrDefault(s);
-
-//        return Arrays.stream(StandardType.values())
-//                .filter(standardType -> standardType.name().equalsIgnoreCase(getValue()))
-//                .findAny().orElse(StandardType.OBJECT);
-    }
-
-//    public Set<SchemaParam> getDuplicates() {
-//        return children.stream()
-//                .filter(parameter -> Collections.frequency(children, parameter) > 1)
-//                .collect(Collectors.toSet());
-//    }
-//
-//    public Optional<SchemaParam> findChild(String paramName) {
-//        return isNotEmpty(paramName) ? children.stream()
-//                .filter(param -> paramName.equalsIgnoreCase(param.getName()))
-//                .findAny() : Optional.empty();
-//    }
-//
-//    protected Optional<SchemaParam> deepSearch(String path) {
-//        if (isNotEmpty(path)) {
-//            String[] parts = path.split("/", 2);
-//            return parts.length > 1
-//                    ? findChild(parts[0])
-//                    .flatMap(child -> child.deepSearch(parts[1]))
-//                    : findChild(path);
-//        }
-//        return Optional.empty();
-//    }
-
-    // get appropriate rules
-    // if param has a child type - validate through the rules
-    // in other case, if param doesn't have a child, check the param through correctTypeRule
-    private ValidationResult validateSelf() {
-        return ValidationResult.valid();
-//        return findChild(KeyWord.TYPE.name())
-//                .map(Param::getValue)
-//                .map(typeName -> StandardType.getOrDefault(typeName).getRule())
-//                .orElseGet(this::correctType) //only for scalar params
-//                .validate(this);
-//        return getType().
-    }
-
-//    private SchemaRule correctType() {
-//        return param -> {
-//            //todo move to Mapper?
-//            //todo + for move, because of placeholders which can modify the types too
-//            //todo -, wi will validate resource type against schema
-//            Optional<String> incorrectValue = param.getTypeValue()
-//                    .flatMap(typeValue -> Stream.of(typeValue.split(OR_TYPE_SPLITTER))
-//                            .map(String::trim)
-//                            .filter(this::isNotAType)
-//                            .findAny());
-//            return incorrectValue
-//                    .map(s -> invalid(toErrorMessage(param, s, UNKNOWN_TYPE)))
-//                    .orElseGet(ValidationResult::valid);
-//        };
-//    }
-
-//    private Optional<String> getTypeValue() {
-//        //todo sequence indexes
-//        return isCustomTypeDeclaration() ? Optional.of(getValue()) : Optional.empty();
-//    }
-//
-//    //if name == type or name != keyword, so it's a new type definition (Test: Manual or Auto)
-//    //if parent type == sequence, paramname == index in collection
-//    private boolean isCustomTypeDeclaration() {
-//        return isNotEmpty(getName()) && isNotEmpty(getValue())
-//                && (KeyWord.TYPE.name().equalsIgnoreCase(getName()) || isNotAKeyword());
-//    }
-//
-//    private boolean isNotAType(final String splittedType) {
-//        return isNotAStandardType(splittedType) && isNotACustomType(splittedType);
-//    }
-//
-//    private boolean isNotACustomType(final String splittedType) {
-//        return !isCustomType(splittedType);
-//    }
-//
-//    private boolean isCustomType(final String splittedType) {
-//        return getRoot().getCustomTypes().stream()
-//                .anyMatch(t -> t.equalsIgnoreCase(splittedType));
-//    }
-//
-//    private boolean isNotAStandardType(final String splittedType) {
-//        return !isStandardType(splittedType);
-//    }
-//
-//    private boolean isStandardType(String splittedType) {
-//        return Stream.of(StandardType.values())
-//                .anyMatch(t -> t.name().equalsIgnoreCase(splittedType));
-//    }
-//
-//    private boolean isNotAKeyword() {
-//        return getKeyWord().isEmpty();
-//    }
-//
-//    public Optional<KeyWord> getKeyWord() {
-//        return Stream.of(KeyWord.values())
-//                .filter(keyWord -> keyWord.name().equalsIgnoreCase(getName()))
-//                .findAny();
-//    }
-
-    private Schema getRoot() {
-        Param p = getParent();
-        while (p.getParent() != null) {
-            p = p.getParent();
-        }
-        return (Schema) p;
+        return StandardType.getOrDefault(getTypeValue());
     }
 }
