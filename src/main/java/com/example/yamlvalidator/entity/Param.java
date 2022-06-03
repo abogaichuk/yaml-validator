@@ -73,7 +73,7 @@ public abstract class Param {
     }
 
     public Optional<String> findIncorrectTypeValue() {
-        return isCustomTypeDeclaration() ? Stream.of(getTypeValue().split(OR_TYPE_SPLITTER))
+        return isCustomTypeDefinition() ? Stream.of(getTypeValue().split(OR_TYPE_SPLITTER))
                 .map(String::trim)
                 .filter(ValidatorUtils::isNotEmpty)
                 .filter(this::isNotAType)
@@ -82,12 +82,12 @@ public abstract class Param {
 
     //if name == type or name != keyword, so it's a new type definition (Test: Manual or Auto)
     //if parent type == sequence, paramname == index in collection
-    private boolean isCustomTypeDeclaration() {
+    public boolean isCustomTypeDefinition() {
         return isNotEmpty(getName()) && isNotEmpty(getValue())
                 && (KeyWord.TYPE.name().equalsIgnoreCase(getName()) || isNotAKeyword());
     }
 
-    protected boolean isNotAType(final String splittedType) {
+    public boolean isNotAType(final String splittedType) {
         return isNotAStandardType(splittedType) && isNotACustomType(splittedType);
     }
 
@@ -109,7 +109,7 @@ public abstract class Param {
                 .anyMatch(t -> t.name().equalsIgnoreCase(splittedType));
     }
 
-    protected boolean isNotAKeyword() {
+    public boolean isNotAKeyword() {
         return getKeyWord().isEmpty();
     }
 

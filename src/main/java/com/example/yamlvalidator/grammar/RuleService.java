@@ -1,13 +1,12 @@
 package com.example.yamlvalidator.grammar;
 
 import com.example.yamlvalidator.entity.Param;
-import com.example.yamlvalidator.entity.Resource;
 import com.example.yamlvalidator.entity.ValidationResult;
 import com.example.yamlvalidator.services.MessageProvider;
+import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -30,16 +29,43 @@ public class RuleService {
     }
 
     ValidationRule customs() {
+        //todo all scalar params here and custom params without type child
         return objects().or(hasCorrectTypeRule());
     }
 
     private ValidationRule hasCorrectTypeRule() {
-        return ValidationRule.of(
-                schema -> schema.findIncorrectTypeValue()
+        return (schema, resource) -> schemaTypeRule().validate(schema).merge(resourceTypeRule(schema, resource));
+    }
+
+    private ValidationResult resourceTypeRule(Param schema, Param resource) {
+        if (resource == null)
+            return valid();
+        if (isNotEmpty(schema.getName()) && (KeyWord.TYPE.name().equalsIgnoreCase(schema.getName()) || schema.isNotAKeyword())) {
+
+            String typeValue = schema.getTypeValue();
+            if (isNotEmpty(typeValue)) {
+                boolean match = Stream.of(schema.getTypeValue().split(OR_TYPE_SPLITTER))
+                        .map(String::trim)
+                        .filter(ValidatorUtils::isNotEmpty)
+                        .anyMatch(possibleType -> {
+                            if (StandardType.NUMBER.name().equalsIgnoreCase(possibleType))
+                                return toInt(resource).isPresent();
+                            else if (StandardType.BOOLEAN.name().equalsIgnoreCase(possibleType)) {
+                                return toBoolean(resource).isPresent();
+                            } else
+                                return true;
+                            //todo else if(isCustomType("ManualTest"))
+                        });
+                return match ? valid() : invalid(messageProvider.getMessage(MESSAGE_RESOURCE_UNKNOWN_TYPE, resource, resource.getValue(), typeValue));
+            }
+        }
+        return ValidationResult.valid();
+    }
+
+    private ParameterRule schemaTypeRule() {
+        return schema -> schema.findIncorrectTypeValue()
                         .map(s -> invalid(messageProvider.getMessage(MESSAGE_UNKNOWN_TYPE, schema, s)))
-                        .orElseGet(ValidationResult::valid),
-                resource -> ValidationResult.valid()
-        );
+                        .orElseGet(ValidationResult::valid);
     }
 
     ValidationRule datetime() {
@@ -102,6 +128,17 @@ public class RuleService {
             return ValidationResult.valid();
         };
     }
+
+//    private ValidationRule uniqueParameterRule() {
+//        return (schema, resource) -> {
+////            return isBoolean.test(schema.findChild(UNIQUE.name()))
+////                    ? valid()
+////                    : invalid();
+//            return schema.findChild(UNIQUE.name())
+//                    .map(param -> isBoolean.negate().test(param))
+//                    .map(invalid(messageProvider.getMessage()))
+//        };
+//    }
 
     private ValidationRule compareDatetimeFields() {
         return (schema, resource) -> compareSchemaParams(AFTER, BEFORE, isLeftAfterRight, MESSAGE_IS_BEFORE)

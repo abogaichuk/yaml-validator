@@ -4,6 +4,7 @@ public enum KeyWord {
     TYPE,
     ITEMS,
     ENUM,
+    UNIQUE,
     ONEOF,
     ANYOF,
     PROPERTIES,

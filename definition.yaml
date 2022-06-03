@@ -47,7 +47,8 @@
 #      - unit
 #      - integration
 
-#ManualTest: string
+#ManualTest: number
+#AutoTest: number
 #Test: ManualTest or AutoTest
 #Port2:
 #  type: Port or number or datetime
@@ -119,6 +120,7 @@
 #    - TCP
 #    - UDP
 #    - HTTP
+#aaa: number or boolean
 Port:
   default: 7002
 #  required: true
@@ -126,24 +128,20 @@ Port:
   Type: number
   min: 1026
   max: 65535
-Cisco:
-  type: Port or boolean
-  required: true
+#Cisco:
+#  type: Port or boolean
+#  required: true
 #Genesys:
 #  type: Port
 #Genesys:
 #  SwitchName:
 #    SwitchLastName: string
-#    description: i'm a description
 #    SwitchFirstName:
-#      SwitchFirstFirstName:
-#        type: stringg
-#        default: aaa
-#        default: bbb
-#      SwitchSecondSecond: string
+#      SwitchFirstFirstName: string
+#      SwitchSecondSecond:
+#        type: boolean or number
 #    Default: "Genesys SIP server"
 #    Description: "The name of the switch connected to the Genesys SIP server."
-#    Description: "aaa"
 #    Type: string
 #    List:
 #      - Avaya

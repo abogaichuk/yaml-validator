@@ -26,6 +26,7 @@ public final class ValidatorUtils {
     public static final String MESSAGE_LIST_DOES_NOT_CONTAIN = "rule.list.does.not.contain";
     public static final String MESSAGE_HAS_DUPLICATES = "rule.has.duplicates";
     public static final String MESSAGE_UNKNOWN_TYPE = "rule.unknown.type";
+    public static final String MESSAGE_RESOURCE_UNKNOWN_TYPE = "rule.unknown.resource.type";
     public static final String MESSAGE_PARAMETER_BYPASS = "rule.parameter.bypass";
     public static final String STRING_KEYWORD = "rule.string.keyword";
     public static final String OBJECT_KEYWORD = "rule.object.keyword";
