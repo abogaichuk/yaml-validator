@@ -1,5 +1,6 @@
 package com.example.yamlvalidator;
 
+import com.example.yamlvalidator.entity.Execution;
 import com.example.yamlvalidator.services.YamlService;
 import org.apache.commons.cli.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,15 @@ public class YamlValidatorApplication implements CommandLineRunner {
         if (needHelp(cmdLine)) {
             printHelp(options());
         } else {
-            yamlService.execute(cmdLine.getOptionValue("d"), cmdLine.getOptionValue("r"));
+            var execution = Execution.builder()
+                    .definition(cmdLine.getOptionValue("d"))
+                    .resource(cmdLine.getOptionValue("r"))
+                    .resolvePlaceholders(cmdLine.hasOption("resolve-placeholders"))
+                    .includeDefaults(cmdLine.hasOption("includeDefaults"))
+                    .includeSecrets(cmdLine.hasOption("includeSecrets"))
+                    .preview(cmdLine.hasOption("preview"))
+                    .build();
+            yamlService.execute(execution);
         }
         exit(0);
     }
@@ -53,6 +62,22 @@ public class YamlValidatorApplication implements CommandLineRunner {
                 .longOpt("definition")
                 .hasArg().numberOfArgs(1)
                 .desc("path to definition file, mandatory parameter")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("resolve-placeholders")
+                .desc("resolve placeholders or not")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("includeDefaults")
+                .desc("include defaults or not")
+                .build());
+        options.addOption(Option.builder()
+                .longOpt("includeSecrets")
+                .desc("include secrets or not, need admin privileges")
+                .build());
+        options.addOption(Option.builder("p")
+                .longOpt("preview")
+                .desc("by default preview in yaml, if set preview in json")
                 .build());
         options.addOption(Option.builder("e").desc("enrichment").build());
         return options;

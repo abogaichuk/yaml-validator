@@ -37,10 +37,10 @@ public class YamlService {
     @Autowired
     private RuleService rules;
 
-    public void execute(String definitionFile, String resourceFile) throws IOException {
+    public void execute(Execution execution) throws IOException {
         try {
-            var defNode = readFile(definitionFile);
-            var resourceNode = readFile(resourceFile);
+            var defNode = readFile(execution.getDefinition());
+            var resourceNode = readFile(execution.getResource());
 
             Resource resource = resourceNode
                     .map(root -> new Mapper().mapToResources(root))
