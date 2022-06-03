@@ -16,24 +16,6 @@ import org.snakeyaml.engine.v2.exceptions.Mark;
 import static java.text.MessageFormat.format;
 
 public final class ValidatorUtils {
-    //todo error messages
-//    public static final String IS_NAN = "{0} is not a number";
-//    public static final String IS_NOT_A_BOOLEAN = "{0} is not a boolean";
-//    public static final String IS_NOT_A_DATETIME = "{0} is not a datetime";
-//    public static final String LESS_THAN = "{0} < {1}";
-//    public static final String MORE_THAN = "{0} > {1}";
-//    public static final String IS_BEFORE = "{0} is before {1}";
-//    public static final String IS_AFTER = "{0} is after {1}";
-//    public static final String DEFAULT_WRONG = "List doesn't contains Default value";
-//    public static final String HAS_DUPLICATES = "Parameter: {0} has duplicates";
-//    public static final String UNKNOWN_TYPE = "Parameter: {0}, type {1} is not define";
-//    public static final String PARAMETER_BYPASS = "Parameter Bypass, validation is skipped";
-//    public static final String STRING_KEYWORD = "Keyword {0} must be a string";
-//    public static final String OBJECT_KEYWORD = "Keyword {0} must be an object";
-//    public static final String DATETIME_PARSED_ERROR = "Can't parse parameter {0} using pattern {1}";
-//
-//    public static final String MANDATORY_PARAMETER = "Mandatory Parameter {0} is missed";
-
     public static final String MESSAGE_IS_NAN = "rule.is.nan";
     public static final String MESSAGE_IS_NOT_A_BOOLEAN = "rule.is.not.a.boolean";
     public static final String MESSAGE_IS_NOT_A_DATETIME = "rule.is.not.a.datetime";

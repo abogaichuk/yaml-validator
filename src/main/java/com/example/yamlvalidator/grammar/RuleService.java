@@ -1,11 +1,13 @@
 package com.example.yamlvalidator.grammar;
 
 import com.example.yamlvalidator.entity.Param;
+import com.example.yamlvalidator.entity.Resource;
 import com.example.yamlvalidator.entity.ValidationResult;
 import com.example.yamlvalidator.services.MessageProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -23,7 +25,8 @@ public class RuleService {
     private MessageProvider messageProvider;
 
     ValidationRule objects() {
-        return bypass().or(noDuplicates());
+        return bypass()
+                .or(noDuplicates().and(mandatoryParameterRule()));
     }
 
     ValidationRule customs() {
@@ -87,6 +90,16 @@ public class RuleService {
                                     .map(Param::getPath)
                                     .findFirst().get())
             );
+        };
+    }
+
+    private ValidationRule mandatoryParameterRule() {
+        return (schema, resource) -> {
+            if (schema.isMandatory() && !schema.hasDefaultValue()) {
+                if (resource == null || isEmpty(resource.getValue()))
+                    return ValidationResult.invalid(messageProvider.getMessage(MANDATORY_PARAMETER, schema));
+            }
+            return ValidationResult.valid();
         };
     }
 

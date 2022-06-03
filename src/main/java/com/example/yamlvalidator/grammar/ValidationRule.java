@@ -9,19 +9,14 @@ public interface ValidationRule {
     ValidationResult validate(Param schema, Resource resource);
 
     static ValidationRule of(final ParameterRule parameterRule) {
-        return (schema, resource) -> {
-          final ValidationResult schemaResult = parameterRule.validate(schema);
-
-          return resource == null ? schemaResult : schemaResult.merge(parameterRule.validate(resource));
-        };
+        return (schema, resource) -> ValidationRule.of(parameterRule, parameterRule).validate(schema, resource);
     }
 
     static ValidationRule of(final ParameterRule schemaRule, final ParameterRule resourceRule) {
         return (schema, resource) -> {
             final ValidationResult schemaResult = schemaRule.validate(schema);
-            final ValidationResult resourceResult = resourceRule.validate(resource);
 
-            return schemaResult.merge(resourceResult);
+            return resource == null ? schemaResult : schemaResult.merge(resourceRule.validate(resource));
         };
     }
 

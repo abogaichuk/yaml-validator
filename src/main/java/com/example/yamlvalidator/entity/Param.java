@@ -1,5 +1,6 @@
 package com.example.yamlvalidator.entity;
 
+import com.example.yamlvalidator.grammar.Conditions;
 import com.example.yamlvalidator.grammar.KeyWord;
 import com.example.yamlvalidator.grammar.StandardType;
 import com.example.yamlvalidator.utils.ValidatorUtils;
@@ -116,6 +117,18 @@ public abstract class Param {
         return Stream.of(KeyWord.values())
                 .filter(keyWord -> keyWord.name().equalsIgnoreCase(getName()))
                 .findAny();
+    }
+
+    public boolean hasDefaultValue() {
+        return findChild(KeyWord.DEFAULT.name())
+                .filter(defaultParam -> isNotEmpty(defaultParam.getValue()))
+                .isPresent();
+    }
+
+    public boolean isMandatory() {
+        return findChild(KeyWord.REQUIRED.name())
+                .filter(Conditions.boolValueIsTrue)
+                .isPresent();
     }
 
     private Param getRoot() {
