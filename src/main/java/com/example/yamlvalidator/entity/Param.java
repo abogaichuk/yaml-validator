@@ -74,7 +74,7 @@ public abstract class Param {
 
     public Optional<Param> deepSearch(String path) {
         if (isNotEmpty(path)) {
-            String[] parts = path.split("/", 2);
+            var parts = path.split("/", 2);
             return parts.length > 1
                     ? findChild(parts[0])
                             .flatMap(child -> child.deepSearch(parts[1]))

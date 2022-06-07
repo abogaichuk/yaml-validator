@@ -16,40 +16,43 @@ import static java.util.stream.Stream.of;
 
 public class DefaultValueResolver {
 
-    public Resource fill(Schema schema, Resource resources) {
-        collectChildren(schema.getChildren())
-                .forEach(parameter -> {
-                    resources.deepSearch(parameter.getParent().getPath())
-                            .ifPresentOrElse(resource -> {
-                                if (isEmpty(resource.getValue())) {
-                                    var parent = resource.getParent();
-                                    var filled = new Resource(parameter.getParent().getName(), parameter.getValue(), parent,
-                                            resource.getPosition(), resource.getYamlType());
-                                    parent.deleteChild(resource);
-                                    parent.addChild(filled);
-                                }
-                            }, () -> {
-                                Optional.ofNullable(parameter.getParent().getParent().getPath())
-                                        .flatMap(resources::deepSearch)
-                                        .ifPresentOrElse(grandParentResource -> {
-                                            grandParentResource.addChild(
-                                                    new Resource(parameter.getParent().getName(), parameter.getValue(),
-                                                            grandParentResource, null,
-                                                            Param.YamlType.SCALAR));
-                                        }, () -> {
-                                            resources.addChild(new Resource(parameter.getParent().getName(), parameter.getValue(),
-                                                    resources, null,
-                                                    Param.YamlType.SCALAR));
-                                        });
-                            });
-                    System.out.println(parameter);
-                });
-        return resources;
+    public void fill(Schema schema, Resource resources) {
+        collectDefaults(schema.getChildren())
+                .forEach(paramDefault -> getAncestor(paramDefault)
+                        .map(Param::getPath)
+                        .flatMap(path -> findResourceByPath(path, resources))
+                        .ifPresent(parentResource -> setValueIfMissed(paramDefault, parentResource))
+                );
     }
 
-    private Stream<Param> collectChildren(List<Param> parameters) {
+    private Optional<Param> findResourceByPath(String path, Resource root) {
+        return isEmpty(path) ? Optional.of(root) : root.deepSearch(path);
+    }
+
+    private void setValueIfMissed(Param defaultValue, Param parentResource) {
+        parentResource
+                .findChild(defaultValue.getParent().getName())
+                .ifPresentOrElse(
+                        p -> {}, //do nothing if param is found
+                        () -> createResource(defaultValue, parentResource)
+                );
+    }
+
+    private void createResource(Param defaultValue, Param parent) {
+        var resource = new Resource(defaultValue.getParent().getName(), defaultValue.getValue(),
+                parent, null, Param.YamlType.SCALAR);
+        parent.addChild(resource);
+    }
+
+    private Optional<Param> getAncestor(Param param) {
+        return Optional.ofNullable(param)
+                .map(Param::getParent)
+                .map(Param::getParent);
+    }
+
+    private Stream<Param> collectDefaults(List<Param> parameters) {
         return parameters.stream()
-                .flatMap(parameter -> concat(of(parameter), collectChildren(parameter.getChildren())))
+                .flatMap(parameter -> concat(of(parameter), collectDefaults(parameter.getChildren())))
                 .map(parameter -> parameter.findChild(KeyWord.DEFAULT.name()))
                 .filter(Optional::isPresent)
                 .map(Optional::get);

@@ -58,9 +58,7 @@ public class YamlService {
                     var resourceMapper = new ResourceMapper(new PlaceHolderResolver());
                     var resource = resourceMapper.map(resourceNode.get());
 
-                    resource = new DefaultValueResolver().fill(definition, resource);
-//                    var cisco = resource.findChild("Cisco");
-//                    cisco.ifPresent(resource::deleteChild);
+                    new DefaultValueResolver().fill(definition, resource);
 
                     var resourcePreview = resourceMapper.map(resource);
                     System.out.println(preview(nodeToString(resourcePreview), false));
