@@ -20,16 +20,34 @@ public abstract class Param {
     private final Param parent;
     private final List<Param> children = new ArrayList<>();
     private final Position position;
+    private final YamlType yamlType;
 
-    public Param(String name, String value, Param parent, Position position) {
+    public enum YamlType{
+        SCALAR, SEQUENCE, MAPPING
+    }
+
+    public Param(String name, String value, Param parent, Position position, YamlType yamlType) {
         this.name = name;
         this.value = value;
         this.parent = parent;
         this.position = position;
+        this.yamlType = yamlType;
     }
 
     public void addChildren(List<Param> list) {
         children.addAll(list);
+    }
+
+    public void addChild(Param param) {
+        children.add(param);
+    }
+
+    public void deleteChild(Param param) {
+        getChildren().remove(param);
+    }
+
+    public String getGrandParentPath() {
+        return getParent() != null && getParent().getParent() != null ? getParent().getParent().getPath() : null;
     }
 
     public int getRow() {
@@ -54,7 +72,7 @@ public abstract class Param {
                 .findAny() : Optional.empty();
     }
 
-    protected Optional<Param> deepSearch(String path) {
+    public Optional<Param> deepSearch(String path) {
         if (isNotEmpty(path)) {
             String[] parts = path.split("/", 2);
             return parts.length > 1
@@ -132,7 +150,7 @@ public abstract class Param {
     }
 
     private Param getRoot() {
-        Param p = this;
+        var p = this;
         while (p.getParent() != null) {
             p = p.getParent();
         }
@@ -153,7 +171,7 @@ public abstract class Param {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof Param) {
-            Param p = (Param) obj;
+            var p = (Param) obj;
             return getPath().equals(p.getPath());
         }
         return false;

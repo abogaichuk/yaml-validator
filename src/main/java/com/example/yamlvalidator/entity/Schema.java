@@ -3,8 +3,8 @@ package com.example.yamlvalidator.entity;
 import org.apache.logging.log4j.util.Strings;
 
 public class Schema extends SchemaParam {
-    public Schema(String name, String value, Param parent, Position position) {
-        super(name, value, parent, position);
+    public Schema(String name, String value, Param parent, Position position, YamlType yamlType) {
+        super(name, value, parent, position, yamlType);
     }
 
     @Override

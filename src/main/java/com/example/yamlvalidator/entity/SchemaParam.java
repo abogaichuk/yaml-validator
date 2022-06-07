@@ -5,19 +5,32 @@ import com.example.yamlvalidator.grammar.StandardType;
 
 public class SchemaParam extends Param {
 
-    public SchemaParam(String name, String value, Param parent, Position position) {
-        super(name, value, parent, position);
+    public SchemaParam(String name, String value, Param parent, Position position, YamlType yamlType) {
+        super(name, value, parent, position, yamlType);
     }
 
     public ValidationResult validate(RuleService rules, Resource resource) {
-        ValidationResult self = getType().ruleFunction.apply(rules).validate(this, resource);
+        var result = getType().ruleFunction.apply(rules).validate(this, resource);
         return getChildren().stream()
                 .map(SchemaParam.class::cast)
                 .map(param -> param.validate(rules, getAppropriateResource(param.getName(), resource)))
-                .reduce(self, ValidationResult::merge);
+                .reduce(result, ValidationResult::merge);
     }
 
-    protected Resource getAppropriateResource(String name, Param resource) {
+//    public Resource fillDefaults(Resource resources) {
+//        getChildren().stream()
+//                .map(SchemaParam.class::cast)
+//                .forEach(schemaParam -> schemaParam.fillDefaults());
+//    }
+//
+//    private Resource update(SchemaParam param, Resource resource) {
+//        if (resource == null) {
+//
+//        }
+//
+//    }
+
+    public Resource getAppropriateResource(String name, Param resource) {
         return resource == null ? null : resource.getChildren().stream()
                 .filter(child -> name.equalsIgnoreCase(child.getName()))
                 .map(Resource.class::cast)

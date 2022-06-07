@@ -7,6 +7,9 @@ import com.example.yamlvalidator.utils.ValidatorUtils;
 
 import java.util.*;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.snakeyaml.engine.v2.api.Dump;
 import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
@@ -42,18 +45,54 @@ public class YamlService {
             var defNode = readFile(execution.getDefinition());
             var resourceNode = readFile(execution.getResource());
 
-            Resource resource = resourceNode
-                    .map(root -> new Mapper().mapToResources(root))
-                    .orElseGet(null);
+            if (defNode.isPresent()) {
+                var schemaMapper = new SchemaMapper(new PlaceHolderResolver());
+                var definition = schemaMapper.map(defNode.get());
 
-            ValidationResult result = defNode
-                    .map(root -> new Mapper().mapToSchema(root))
-                    .map(schema -> schema.validate(rules, resource))
-                    .orElse(ValidationResult.valid());
-            System.out.println(result.getReasons());
+                var schemaPreview = schemaMapper.map(definition);
+                System.out.println(preview(nodeToString(schemaPreview), false));
+
+                System.out.println("----------------------------------------------");
+
+                if (resourceNode.isPresent()) {
+                    var resourceMapper = new ResourceMapper(new PlaceHolderResolver());
+                    var resource = resourceMapper.map(resourceNode.get());
+
+                    resource = new DefaultValueResolver().fill(definition, resource);
+//                    var cisco = resource.findChild("Cisco");
+//                    cisco.ifPresent(resource::deleteChild);
+
+                    var resourcePreview = resourceMapper.map(resource);
+                    System.out.println(preview(nodeToString(resourcePreview), false));
+                }
+//                Definition newOne = definition.update();
+//                System.out.println(newOne);
+            }
+
+//            Resource resource = resourceNode
+//                    .map(root -> new Mapper().mapToResources(root))
+//                    .orElseGet(null);
+//
+//
+//            ValidationResult result = defNode
+//                    .map(root -> new Mapper().mapToSchema(root))
+//                    .map(schema -> schema.validate(rules, resource))
+//                    .orElse(ValidationResult.valid());
+//            System.out.println(result.getReasons());
 
 //            save(defNode.get(), "definition1.yaml");
 //            save(resource.get(), "resource1.yaml");
+
+
+
+//            String resourceString = nodeToString(resourceNode.get());
+//            String schemaString = nodeToString(defNode.get());
+//
+//            System.out.println(preview(resourceString, true));
+//            System.out.println(preview(resourceString, false));
+
+//            save("resource1.yaml", resourceString);
+//            save("definition1.yaml", schemaString);
         } catch (ParserException | ScannerException e) {
             e.getProblemMark().ifPresent(
                     problemMark -> System.out.println(ValidatorUtils.toErrorMessage(e.getProblem(), problemMark)));
@@ -72,13 +111,25 @@ public class YamlService {
         return composer.getSingleNode();
     }
 
-    private void save(Node root, String filename) throws IOException {
+    private String preview(String data, boolean format) throws JsonProcessingException {
+        var yamlReader = new ObjectMapper(new YAMLFactory());
+        var obj = yamlReader.readValue(data, Object.class);
+
+        var writer = format ? new ObjectMapper() : new ObjectMapper(new YAMLFactory());
+        return writer.writeValueAsString(obj);
+    }
+
+    private void save(String filename, String data) throws IOException {
+        Files.write(Paths.get(filename), data.getBytes());
+    }
+
+    private String nodeToString(Node root) {
         var settings = DumpSettings.builder().build();
         var yaml = new Dump(settings);
         var writer = new MyStreamToStringWriter();
         yaml.dumpNode(root, writer);
-//        System.out.println(writer);
-        Files.write(Paths.get(filename), writer.toString().getBytes());
+
+        return writer.toString();
     }
 
     public void updateNodeByPath(Node node, String path, String newValue) {

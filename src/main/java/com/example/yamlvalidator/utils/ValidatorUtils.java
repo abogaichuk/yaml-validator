@@ -11,6 +11,10 @@ import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.example.yamlvalidator.grammar.KeyWord;
+import com.example.yamlvalidator.grammar.StandardType;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 
 import static java.text.MessageFormat.format;
@@ -180,5 +184,24 @@ public final class ValidatorUtils {
             matcher = pattern.matcher(s);
         }
         return s;
+    }
+
+    public static boolean isNotAStandardType(final String type) {
+        return !isStandardType(type);
+    }
+
+    private static boolean isStandardType(String type) {
+        return Stream.of(StandardType.values())
+                .anyMatch(t -> t.name().equalsIgnoreCase(type));
+    }
+
+    public static boolean isNotAKeyword(String name) {
+        return getKeyWord(name).isEmpty();
+    }
+
+    public static Optional<KeyWord> getKeyWord(String name) {
+        return Stream.of(KeyWord.values())
+                .filter(keyWord -> keyWord.name().equalsIgnoreCase(name))
+                .findAny();
     }
 }

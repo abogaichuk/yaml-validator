@@ -38,41 +38,36 @@
 #  after: 2005-03-04 11:30
 
 #AutoTest:
-#  id:
-#    type: number
-#    description: test id
-#  testType:
-#    type: string
-#    list:
-#      - unit
-#      - integration
-
-#ManualTest: number
+#aaa: ${bbb}
 #AutoTest: number
+#Admin:
+#  type: string
+#  list:
+#    - system
+#    - devops
+#ManualTest:
+#  id: number
+#  executedDate: datetime
+#  user:
+#    type: Admin
+#    required: true
 #Test: ManualTest or AutoTest
-#Port2:
-#  type: Port or number or datetime
-#  default: 5
+#should become:
+#Test:
+#  oneOf:
+#    - id: number
+#      executedDate: datetime
+#      user:
+#        - type: string
+#          list:
+#            - system
+#            - devops
+#    - type: number
 #Test:
 #  type: object
 #  oneOf:
 #    - ManualTest
 #    - AutoTest
-#Test:
-#  type: object
-#  anyOf:
-#    - ManualTest
-#    - AutoTest
-#    - datetime
-#Test:
-#  type: object
-#  Validators:
-#    Oneof:
-#      - ManualTest
-#      - AutoTest
-#Greetings:
-#  type: string
-#  default: Hello Humans or Alliens or Predators, now you are in our list!!
 
 # params block
 # another one
@@ -112,14 +107,14 @@
 #Test:
 #  type: string or number
 #  default: aaa
-#Protocol:
-#  Type: string
-##  default: TCP
+Protocol:
+  Type: string
+  default: TCP
 #  required: true
-#  List:
-#    - TCP
-#    - UDP
-#    - HTTP
+  List:
+    - TCP
+    - UDP
+    - HTTP
 #aaa: number or boolean
 Port:
   default: 7002
@@ -168,6 +163,7 @@ Port:
 #    type: User
 #    description: Cisco admin
 #  Tested: ManualTest or AutoTest
+
 #cisco:
 #  port: Port
 #  address: string
