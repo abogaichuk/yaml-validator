@@ -1,12 +1,15 @@
 package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.entity.*;
+import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.grammar.KeyWord;
 import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 import org.snakeyaml.engine.v2.nodes.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -17,11 +20,15 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 import static java.lang.String.valueOf;
 import static org.snakeyaml.engine.v2.nodes.NodeType.*;
 
+@Component
 public class SchemaMapper {
     private PlaceHolderResolver placeHolderResolver;
+    private MessageProvider messageProvider;
 
-    public SchemaMapper(PlaceHolderResolver placeHolderResolver) {
+    @Autowired
+    public SchemaMapper(PlaceHolderResolver placeHolderResolver, MessageProvider messageProvider) {
         this.placeHolderResolver = placeHolderResolver;
+        this.messageProvider = messageProvider;
     }
 
     public Schema map(Node node) {
@@ -100,39 +107,12 @@ public class SchemaMapper {
                         return param;
                     }
                 } else {
-                    throw new IllegalArgumentException("placeholder error");
+                    throw new PadmGrammarException(messageProvider.getMessage(MESSAGE_UNKNOWN_TYPE, paramName, value));
                 }
             } else if (typeResolvingIsNeeded(paramName, value)) {
-                var types = value.split(OR_TYPE_SPLITTER);
-                if (types.length > 1) {
-                    var param = new SchemaParam(paramName, "", parent, position, Param.YamlType.MAPPING);
-                    var optionals = resolveTypes(types, root);
-
-                    var oneOf = new SchemaParam("oneOf", "", param, position, Param.YamlType.SEQUENCE);
-                    var params = new ArrayList<Param>();
-                    for (var node : optionals) {
-                        if (node.isPresent()) {
-                            params.add(toParameter(node.get(), oneOf, root));
-                        } else {
-                            throw new IllegalArgumentException("placeholder error");
-                        }
-                    }
-                    oneOf.addChildren(params);
-                    param.addChildren(Collections.singletonList(oneOf));
-                    return param;
-                } else {
-                    var node = resolveType(types[0], root);
-                    if (node.isPresent()) {
-                        var param = new SchemaParam(paramName, "", parent, position, Param.YamlType.MAPPING);
-                        param.addChildren(Collections.singletonList(toParameter(node.get(), param, root)));
-                        return param;
-                    } else {
-                        throw new IllegalArgumentException("placeholder error: " + paramName);
-                    }
-                }
+                var resolved = resolveTypes(paramName, parent, value.split(OR_TYPE_SPLITTER), root);
+                return resolved;
             }
-//            value = matchAndReplaceHolders(value);
-//            return scalarParsing(paramName, value, parent, position);
             return new SchemaParam(paramName, value, parent, position, Param.YamlType.SCALAR);
         } else if (tuple.getValueNode().getNodeType().equals(SEQUENCE)) {
             return sequenceParsing(paramName, parent, (SequenceNode) tuple.getValueNode(), position, root);
@@ -142,21 +122,124 @@ public class SchemaMapper {
         }
     }
 
-    private Optional<NodeTuple> resolveType(String type, MappingNode root) {
+    private SchemaParam resolveTypes(String name, SchemaParam parent, String[] types, MappingNode root) {
+        if (types.length > 1) {
+            if (KeyWord.TYPE.name().equalsIgnoreCase(name)) {
+                var oneOf = new SchemaParam("oneOf", "", parent, null, Param.YamlType.SEQUENCE);
+                var children = Stream.of(types)
+                        .map(String::trim)
+                        .map(type -> resolveType(name, oneOf, type, root))
+                        .map(Param.class::cast)
+                        .collect(Collectors.toList());
+                oneOf.addChildren(children);
+                parent.addChild(oneOf);
+                return null;
+            } else {
+                var param = new SchemaParam(name, "", parent, null, Param.YamlType.MAPPING);
+                var oneOf = new SchemaParam("oneOf", "", param, null, Param.YamlType.SEQUENCE);
+                var children = Stream.of(types)
+                        .map(String::trim)
+                        .map(type -> resolveType(name, oneOf, type, root))
+                        .map(Param.class::cast)
+                        .collect(Collectors.toList());
+                oneOf.addChildren(children);
+                param.addChild(oneOf);
+                return param;
+            }
+        } else {
+            if (KeyWord.TYPE.name().equalsIgnoreCase(name)) {
+                var children = resolveType(parent.getName(), (SchemaParam) parent.getParent(), types[0], root)
+                        .getChildren();
+                parent.addChildren(children);
+                return null;
+            } else {
+//                var param = new SchemaParam(name, "", parent, null, Param.YamlType.MAPPING);
+//                param.addChild(resolveType(name, param, types[0], root));
+//                return param;
+                SchemaParam param = resolveType(name, parent, types[0], root);
+                return param;
+            }
+        }
+    }
+
+    private SchemaParam resolveType(String name, SchemaParam parent, String type, MappingNode root) {
+        if (isStandardType(type)) {
+            return new SchemaParam("", type, parent, null, Param.YamlType.SCALAR);
+        } else {
+            Optional<NodeTuple> customType = findCustomType(type, root);
+            SchemaParam schemaParams = customType
+                    .map(nodeTuple -> {
+                        NodeTuple nodeTuple1 = new NodeTuple(new ScalarNode(
+                                new Tag("tag:yaml.org,2002:str"), name, ScalarStyle.PLAIN), nodeTuple.getValueNode());
+                        return toParameter(nodeTuple1, parent, root);
+                    })
+                    .orElseThrow(() -> new PadmGrammarException(
+                            messageProvider.getMessage(MESSAGE_UNKNOWN_TYPE, parent, type)));
+//            parent.addChildren(schemaParams);
+            return schemaParams;
+        }
+    }
+
+//    private void resolveTypes(SchemaParam param, String[] types, MappingNode root) {
+//        var oneOf = new SchemaParam("oneOf", "", param, null, Param.YamlType.SEQUENCE);
+//
+//        var children = Stream.of(types)
+//                .map(String::trim)
+//                .map(splittedType -> {
+//                    if (isStandardType(splittedType)) {
+//                        return new SchemaParam("", splittedType, oneOf, null, Param.YamlType.SCALAR);
+//                    } else {
+//                        return findCustomType(splittedType, root)
+//                                .map(nodeTuple -> toParameter(nodeTuple, oneOf, root))
+//                                .orElseThrow(() -> new PadmGrammarException(
+//                                        messageProvider.getMessage(MESSAGE_UNKNOWN_TYPE, param, splittedType)));
+//                    }
+//                }).map(Param.class::cast)
+//                .collect(Collectors.toList());
+//
+//        oneOf.addChildren(children);
+//        param.addChildren(Collections.singletonList(oneOf));
+//    }
+
+//    private Param resolveType(String type, MappingNode root, SchemaParam parent, Pos) {
+//        if (isStandardType(type)) {
+//            return new SchemaParam(paramName, type, parent, position, Param.YamlType.SCALAR);
+//        }
+//    }
+
+    private Optional<NodeTuple> findCustomType(String type, MappingNode root) {
         return root.getValue().stream()
                 .filter(nodeTuple -> getKey(nodeTuple).equalsIgnoreCase(type))
                 .findAny();
     }
 
-    private List<Optional<NodeTuple>> resolveTypes(String[] types, MappingNode root) {
-        return Stream.of(types)
-                .map(String::trim)
-                .map(splittedType -> resolveType(splittedType, root))
-                .collect(Collectors.toList());
-    }
 
+//    private List<Param> resolveCustomTypes(String[] types, MappingNode root, SchemaParam oneOf) {
+//        var params = new ArrayList<Param>();
+//        var optionals = Stream.of(types)
+//                .map(String::trim)
+//                .map(splittedType -> resolveCustomType(splittedType, root))
+//                .collect(Collectors.toList());
+//        for (var node : optionals) {
+//            if (node.isPresent()) {
+//                params.add(toParameter(node.get(), oneOf, root));
+//            } else {
+//                throw new PadmGrammarException(messageProvider.getMessage(MESSAGE_UNKNOWN_TYPE, param, value));
+//            }
+//        }
+//        return params;
+//    }
+//
+//    private List<Optional<NodeTuple>> resolveCustomTypes(String[] types, MappingNode root) {
+//        return Stream.of(types)
+//                .map(String::trim)
+//                .map(splittedType -> resolveCustomType(splittedType, root))
+//                .collect(Collectors.toList());
+//    }
+
+    //if paramname == type or paramname is not a keyword(custom type) and value is not a standard type
     private boolean typeResolvingIsNeeded(String paramName, String typeValue) {
-        return isNotAKeyword(paramName) && isNotAStandardType(typeValue);
+        return (isTypeKeyWord(paramName) || isNotAKeyword(paramName)) && isNotAStandardType(typeValue);
     }
 
     private SchemaParam sequenceParsing(String paramName, SchemaParam parent, SequenceNode node, Position start, MappingNode root) {

@@ -27,7 +27,7 @@ public class ResourceMapper {
     }
 
     public Node map(Resource resource) {
-        List<NodeTuple> tuples = toTuples(resource.getChildren());
+        var tuples = toTuples(resource.getChildren());
         return new MappingNode(new Tag("tag:yaml.org,2002:map"), tuples, FlowStyle.BLOCK);
     }
 

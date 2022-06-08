@@ -1,13 +1,14 @@
 #ResourceType: GeneralTest
 #Name: Valid name for valid resource
 
+Admin: devops
 #Recorder:
 #  type: Genesys
 #  SwitchName: 123
 #  RTPMonitoringStyle: 321
 #Protocol: HTTPs
 #executedDate: 2900-03-04 11:30
-#Port: 7000
+#Port: -1
 #Cisco: 11fsd
 #aaa: fsdfsd
 #Test: aaa
@@ -57,6 +58,6 @@
 #    address: localhost
 #  - datetime: "2222-10-10"
 #  value: 8080 #need new keyword for resource? default or value or?
-Cisco: ${cisco}
+#Cisco: ${cisco}
 
 

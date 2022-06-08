@@ -13,7 +13,7 @@ public enum StandardType {
     CUSTOM(RuleService::customs);
 
     public final Function<RuleService, ValidationRule> ruleFunction;
-    private StandardType(Function<RuleService, ValidationRule> ruleFunction) {
+    StandardType(Function<RuleService, ValidationRule> ruleFunction) {
         this.ruleFunction = ruleFunction;
     }
 

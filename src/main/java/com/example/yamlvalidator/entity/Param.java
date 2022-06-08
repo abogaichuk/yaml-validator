@@ -163,6 +163,11 @@ public abstract class Param {
                 .collect(Collectors.toList());
     }
 
+    public void print() {
+        System.out.println(this);
+        getChildren().forEach(Param::print);
+    }
+
     @Override
     public String toString() {
         return "Parameter: " + getName() + ", path: " + getPath() + ", (row #" + getRow() + ")";

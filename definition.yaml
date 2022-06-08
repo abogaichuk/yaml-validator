@@ -39,19 +39,42 @@
 
 #AutoTest:
 #aaa: ${bbb}
+Admin:
+  type: string
+  default: devops
+  list:
+    - system
+    - devops
+#Genesys:
+#  SwitchName:
+#    SwitchLastName: string
+#    SwitchFirstName:
+#      SwitchFirstFirstName: string
+#      SwitchSecondSecond:
+#        type: boolean or number
+#  user: Admin
 #AutoTest: number
-#Admin:
-#  type: string
-#  list:
-#    - system
-#    - devops
 #ManualTest:
 #  id: number
 #  executedDate: datetime
 #  user:
 #    type: Admin
 #    required: true
-#Test: ManualTest or AutoTest
+#Test:
+#  type: ManualTest or AutoTest
+#aaa:
+#  type: Admin
+#bbb:
+#  type: number or boolean
+#bbb:
+#  oneOf:
+#    - number
+#    - boolean
+#aaa:
+#  type: string
+#  list:
+#    - system
+#    - devops
 #should become:
 #Test:
 #  oneOf:
@@ -63,6 +86,14 @@
 #            - system
 #            - devops
 #    - type: number
+#Port:
+#  type: number
+#  min: 0
+#CiscoPort:
+#  type: number
+#  max: 100
+#  min: 1
+#aaa: Port or CiscoPort
 #Test:
 #  type: object
 #  oneOf:
@@ -104,25 +135,23 @@
 #Autotest:
 #  id: number
 #  executedDate: datetime
-#Test:
-#  type: string or number
+#Test: string or number
 #  default: aaa
-Protocol:
-  Type: string
-  default: TCP
-#  required: true
-  List:
-    - TCP
-    - UDP
-    - HTTP
-#aaa: number or boolean
-Port:
-  default: 7002
-#  required: true
-  Description: "${USER} of the secondary ${HOME11} Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
-  Type: number
-  min: 1026
-  max: 65535
+#Protocol:
+#  Type: string
+#  default: TCP
+##  required: true
+#  List:
+#    - TCP
+#    - UDP
+#    - HTTP
+#Port:
+#  default: 7002
+##  required: true
+## Description: "${USER} of the secondary ${HOME11} Genesys T-Server node. Valid only when UseRedundancyMechanism is set to true."
+#  Type: number
+#  min: 1026
+#  max: 65535
 #Cisco:
 #  type: Port or boolean
 #  required: true

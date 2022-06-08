@@ -2,6 +2,7 @@ package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.MyStreamToStringWriter;
 import com.example.yamlvalidator.entity.*;
+import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.grammar.RuleService;
 import com.example.yamlvalidator.utils.ValidatorUtils;
 
@@ -39,52 +40,26 @@ import java.nio.file.Paths;
 public class YamlService {
     @Autowired
     private RuleService rules;
+    @Autowired
+    private SchemaMapper schemaMapper;
 
     public void execute(Execution execution) throws IOException {
         try {
             var defNode = readFile(execution.getDefinition());
             var resourceNode = readFile(execution.getResource());
 
-            if (defNode.isPresent()) {
-                var schemaMapper = new SchemaMapper(new PlaceHolderResolver());
-                var definition = schemaMapper.map(defNode.get());
+            var optionalResource = resourceNode
+                    .map(resNode -> new ResourceMapper(new PlaceHolderResolver()).map(resNode));
+            optionalResource.ifPresent(resource -> printPreview(new ResourceMapper(new PlaceHolderResolver()).map(resource)));
 
-                var schemaPreview = schemaMapper.map(definition);
-                System.out.println(preview(nodeToString(schemaPreview), false));
-
-                System.out.println("----------------------------------------------");
-
-                if (resourceNode.isPresent()) {
-                    var resourceMapper = new ResourceMapper(new PlaceHolderResolver());
-                    var resource = resourceMapper.map(resourceNode.get());
-
-                    new DefaultValueResolver().fill(definition, resource);
-
-                    var resourcePreview = resourceMapper.map(resource);
-                    System.out.println(preview(nodeToString(resourcePreview), false));
-                }
-//                Definition newOne = definition.update();
-//                System.out.println(newOne);
-            }
-
-//            Resource resource = resourceNode
-//                    .map(root -> new Mapper().mapToResources(root))
-//                    .orElseGet(null);
-//
-//
-//            ValidationResult result = defNode
-//                    .map(root -> new Mapper().mapToSchema(root))
-//                    .map(schema -> schema.validate(rules, resource))
-//                    .orElse(ValidationResult.valid());
-//            System.out.println(result.getReasons());
-
-//            save(defNode.get(), "definition1.yaml");
-//            save(resource.get(), "resource1.yaml");
-
-
-
-//            String resourceString = nodeToString(resourceNode.get());
-//            String schemaString = nodeToString(defNode.get());
+            defNode
+                    .map(node -> schemaMapper.map(node))
+                    .ifPresent(schema -> {
+                        printPreview(schemaMapper.map(schema));
+//                        schema.print();
+                        var validationResult = schema.validate(rules, optionalResource.orElse(null));
+                        validationResult.getReasons().forEach(System.out::println);
+                    });
 //
 //            System.out.println(preview(resourceString, true));
 //            System.out.println(preview(resourceString, false));
@@ -94,6 +69,16 @@ public class YamlService {
         } catch (ParserException | ScannerException e) {
             e.getProblemMark().ifPresent(
                     problemMark -> System.out.println(ValidatorUtils.toErrorMessage(e.getProblem(), problemMark)));
+        } catch (PadmGrammarException pe) {
+            System.out.println("error: " + pe.getMessage());
+        }
+    }
+
+    private void printPreview(Node node) {
+        try {
+            System.out.println(preview(nodeToString(node), false));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
     }
 

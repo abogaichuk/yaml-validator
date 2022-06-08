@@ -69,7 +69,7 @@ public final class ValidatorUtils {
             var value = getValue(parameter);
             return Optional.of(Integer.parseInt(value));
         } catch (NumberFormatException | ClassCastException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return Optional.empty();
         }
     }
@@ -78,7 +78,7 @@ public final class ValidatorUtils {
         try {
             return Optional.of(getValue(parameter));
         } catch (ClassCastException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return Optional.empty();
         }
     }
@@ -89,7 +89,7 @@ public final class ValidatorUtils {
                     .map(Param::getValue)
                     .collect(Collectors.toList());
         } catch (ClassCastException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return Collections.emptyList();
         }
     }
@@ -99,7 +99,7 @@ public final class ValidatorUtils {
             var value = getValue(parameter);
             return Optional.of(LocalDateTime.parse(value, formatter));
         } catch (DateTimeParseException | ClassCastException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return Optional.empty();
         }
     }
@@ -110,7 +110,7 @@ public final class ValidatorUtils {
             var value = getValue(parameter);
             return Optional.of(LocalDateTime.parse(value, DateTimeFormatter.ofPattern(patternValue)));
         } catch (DateTimeParseException | ClassCastException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return Optional.empty();
         }
     }
@@ -122,7 +122,7 @@ public final class ValidatorUtils {
             return "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)
                     ? Optional.of(Boolean.parseBoolean(value)) : Optional.empty();
         } catch (ClassCastException e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             return Optional.empty();
         }
     }
@@ -190,9 +190,13 @@ public final class ValidatorUtils {
         return !isStandardType(type);
     }
 
-    private static boolean isStandardType(String type) {
+    public static boolean isStandardType(String type) {
         return Stream.of(StandardType.values())
                 .anyMatch(t -> t.name().equalsIgnoreCase(type));
+    }
+
+    public static boolean isTypeKeyWord(String name) {
+        return KeyWord.TYPE.name().equalsIgnoreCase(name);
     }
 
     public static boolean isNotAKeyword(String name) {

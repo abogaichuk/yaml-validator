@@ -108,7 +108,7 @@ public class RuleService {
     private ParameterRule hasDuplicates() {
         return parameter -> {
             var duplicates = parameter.getDuplicates();
-            return duplicates.isEmpty() ? valid() : invalid(
+            return duplicates.isEmpty() || Param.YamlType.SEQUENCE.equals(parameter.getYamlType()) ? valid() : invalid(
                     messageProvider.getMessage(
                             MESSAGE_HAS_DUPLICATES,
                             parameter,
