@@ -128,7 +128,7 @@ public class SchemaMapper {
                 var oneOf = new SchemaParam("oneOf", "", parent, null, Param.YamlType.SEQUENCE);
                 var children = Stream.of(types)
                         .map(String::trim)
-                        .map(type -> resolveType(name, oneOf, type, root))
+                        .map(type -> resolveType("", oneOf, type, root))
                         .map(Param.class::cast)
                         .collect(Collectors.toList());
                 oneOf.addChildren(children);
@@ -139,7 +139,7 @@ public class SchemaMapper {
                 var oneOf = new SchemaParam("oneOf", "", param, null, Param.YamlType.SEQUENCE);
                 var children = Stream.of(types)
                         .map(String::trim)
-                        .map(type -> resolveType(name, oneOf, type, root))
+                        .map(type -> resolveType("", oneOf, type, root))
                         .map(Param.class::cast)
                         .collect(Collectors.toList());
                 oneOf.addChildren(children);

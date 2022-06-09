@@ -37,14 +37,31 @@
 #  before: 1999-03-04 11:30
 #  after: 2005-03-04 11:30
 
-#AutoTest:
 #aaa: ${bbb}
-Admin:
-  type: string
-  default: devops
-  list:
-    - system
-    - devops
+#Admin:
+#  type: string
+#  list:
+#    - system
+#    - devops
+#User:
+#  type: Admin
+#  list: qa
+AutoTest: boolean
+ManualTest:
+  id: number
+#  executedDate: datetime
+#  required: true
+#Port:
+#  default: 7002
+#  Type: number
+#  min: 1026
+#    type: Admin
+#Cisco:
+#  port: number
+#  name: string
+#  required: true
+Test:
+  type: ManualTest or AutoTest
 #Genesys:
 #  SwitchName:
 #    SwitchLastName: string
@@ -52,20 +69,12 @@ Admin:
 #      SwitchFirstFirstName: string
 #      SwitchSecondSecond:
 #        type: boolean or number
-#  user: Admin
-#AutoTest: number
-#ManualTest:
-#  id: number
-#  executedDate: datetime
 #  user:
 #    type: Admin
-#    required: true
-#Test:
-#  type: ManualTest or AutoTest
+#    list: todo merging params?
+#      - qa
 #aaa:
 #  type: Admin
-#bbb:
-#  type: number or boolean
 #bbb:
 #  oneOf:
 #    - number

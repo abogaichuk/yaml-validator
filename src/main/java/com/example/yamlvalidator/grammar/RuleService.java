@@ -1,21 +1,27 @@
 package com.example.yamlvalidator.grammar;
 
 import com.example.yamlvalidator.entity.Param;
+import com.example.yamlvalidator.entity.SchemaParam;
 import com.example.yamlvalidator.entity.ValidationResult;
 import com.example.yamlvalidator.services.MessageProvider;
 import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.example.yamlvalidator.entity.ValidationResult.*;
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.entity.ValidationResult.valid;
 import static com.example.yamlvalidator.grammar.Conditions.*;
 import static com.example.yamlvalidator.grammar.KeyWord.*;
+import static com.example.yamlvalidator.grammar.StandardType.*;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
 @Component
@@ -24,8 +30,13 @@ public class RuleService {
     private MessageProvider messageProvider;
 
     ValidationRule objects() {
-        return bypass()
-                .or(noDuplicates().and(mandatoryParameterRule()));
+        return common()
+                .and(oneOfRule())
+                .and((schema, resource) -> valid());
+    }
+
+    ValidationRule common() {
+        return bypass().or(noDuplicates().and(mandatoryParameter()));
     }
 
     ValidationRule customs() {
@@ -33,6 +44,7 @@ public class RuleService {
         return objects().or(hasCorrectTypeRule());
     }
 
+    //todo rewrite
     private ValidationRule hasCorrectTypeRule() {
         return (schema, resource) -> schemaTypeRule().validate(schema).merge(resourceTypeRule(schema, resource));
     }
@@ -48,9 +60,9 @@ public class RuleService {
                         .map(String::trim)
                         .filter(ValidatorUtils::isNotEmpty)
                         .anyMatch(possibleType -> {
-                            if (StandardType.NUMBER.name().equalsIgnoreCase(possibleType))
+                            if (NUMBER.name().equalsIgnoreCase(possibleType))
                                 return toInt(resource).isPresent();
-                            else if (StandardType.BOOLEAN.name().equalsIgnoreCase(possibleType)) {
+                            else if (BOOLEAN.name().equalsIgnoreCase(possibleType)) {
                                 return toBoolean(resource).isPresent();
                             } else
                                 return true;
@@ -59,7 +71,7 @@ public class RuleService {
                 return match ? valid() : invalid(messageProvider.getMessage(MESSAGE_RESOURCE_UNKNOWN_TYPE, resource, resource.getValue(), typeValue));
             }
         }
-        return ValidationResult.valid();
+        return valid();
     }
 
     private ParameterRule schemaTypeRule() {
@@ -68,14 +80,27 @@ public class RuleService {
                         .orElseGet(ValidationResult::valid);
     }
 
+    private ValidationRule standardTypeRule() {
+        return (schema, resource) -> {
+            var customFields = schema.findCustomFields()
+                    .map(Param::getName)
+                    .collect(Collectors.toList());
+            return customFields.size() > 0
+                    ? invalid(messageProvider.getMessage(MESSAGE_SCHEMA_INCORRECT, schema, customFields))
+                    : valid();
+        };
+    }
+
     ValidationRule datetime() {
-        return objects()
+        return common()
+                .or(standardTypeRule())
                 .or(validateDatetimeFields()
                         .or(compareDatetimeFields()));
     }
 
     ValidationRule numbers() {
-        return objects()
+        return common()
+                .or(standardTypeRule())
                 .or(validateNumberFields())
                 .or(compareNumberFields()
                         .and(listContainsRule()));
@@ -91,7 +116,9 @@ public class RuleService {
     }
 
     ValidationRule strings() {
-        return objects().or(listContainsRule());
+        return common()
+                .or(standardTypeRule())
+                .or(listContainsRule());
     }
 
     private ValidationRule bypass() {
@@ -119,13 +146,47 @@ public class RuleService {
         };
     }
 
-    private ValidationRule mandatoryParameterRule() {
+    private ValidationRule oneOfRule() {
+        var service = this;
+        return (schema, resource) -> {
+            List<ValidationResult> validationResults = schema.findChild("oneOf")
+                    .map(oneOf -> oneOf.getChildren().stream()
+                            .map(SchemaParam.class::cast)
+                            .map(schemaParam -> schemaParam.validate(service, resource))
+//                            .map(schemaParam -> schemaParam.validate(service, resource))
+                            .collect(Collectors.toList()))
+                    .orElseGet(Collections::emptyList);
+
+            return validationResults.isEmpty() || validationResults.stream().anyMatch(ValidationResult::isValid)
+                    ? valid()
+                    : invalid(messageProvider.getMessage(MESSAGE_INVALID_RESOURCE, resource));
+        };
+    }
+
+    private ValidationRule mandatoryParameter() {
+        var service = this;
         return (schema, resource) -> {
             if (schema.isMandatory() && !schema.hasDefaultValue()) {
-                if (resource == null || isEmpty(resource.getValue()))
-                    return ValidationResult.invalid(messageProvider.getMessage(MANDATORY_PARAMETER, schema));
+                if (resource == null) {
+                    return invalid(messageProvider.getMessage(MANDATORY_PARAMETER, schema));
+                } else {
+                    var customFields = schema.findCustomFieldNames();
+                    if (customFields.size() > 0) {
+                        //at least one child must be present
+                        var resourceFields = resource.findCustomFieldNames();
+                        if (!Collections.disjoint(customFields, resourceFields)) {
+                            return valid();
+                        } else {
+                            return invalid(messageProvider.getMessage(MANDATORY_CUSTOM_CHILDREN, schema, customFields));
+                        }
+                    } else {
+                        if (isEmpty(resource.getValue())) {
+                            return invalid(messageProvider.getMessage(MANDATORY_PARAMETER, schema));
+                        }
+                    }
+                }
             }
-            return ValidationResult.valid();
+            return valid();
         };
     }
 
@@ -210,6 +271,6 @@ public class RuleService {
                 .map(Optional::get)
                 .filter(condition)
                 .map(child -> invalid(messageProvider.getMessage(errorMessage, child)))
-                .reduce(ValidationResult.valid(), ValidationResult::merge);
+                .reduce(valid(), ValidationResult::merge);
     }
 }

@@ -9,8 +9,8 @@ public enum StandardType {
     DATETIME(RuleService::datetime),
     NUMBER(RuleService::numbers),
     BOOLEAN(RuleService::booleans),
-    SECRET(RuleService::objects),
-    CUSTOM(RuleService::customs);
+    SECRET(RuleService::objects);
+//    CUSTOM(RuleService::customs);
 
     public final Function<RuleService, ValidationRule> ruleFunction;
     StandardType(Function<RuleService, ValidationRule> ruleFunction) {
@@ -20,6 +20,6 @@ public enum StandardType {
     public static StandardType getOrDefault(String name) {
         return Arrays.stream(StandardType.values())
                 .filter(value -> value.name().equalsIgnoreCase(name))
-                .findAny().orElse(CUSTOM);
+                .findAny().orElse(OBJECT);
     }
 }

@@ -1,7 +1,15 @@
 #ResourceType: GeneralTest
 #Name: Valid name for valid resource
 
-Admin: devops
+#bbb: asdasd
+#ManualTest: 7sd
+#AutoTest: asd
+#Cisco:
+#  port:  sdad
+Test: true
+#user: devopss
+#genesys:
+#  user: devops
 #Recorder:
 #  type: Genesys
 #  SwitchName: 123

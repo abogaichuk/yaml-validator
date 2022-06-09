@@ -72,6 +72,22 @@ public abstract class Param {
                 .findAny() : Optional.empty();
     }
 
+    public Stream<Param> findCustomFields() {
+        return getChildren().stream()
+                .filter(Param::isNotAKeyword);
+    }
+
+    public List<String> findCustomFieldNames() {
+        return findCustomFields()
+                .map(Param::getName)
+                .collect(Collectors.toList());
+    }
+
+    public boolean hasAtLeastOneCustomChild() {
+        return getChildren().stream()
+                .anyMatch(Param::isNotAKeyword);
+    }
+
     public Optional<Param> deepSearch(String path) {
         if (isNotEmpty(path)) {
             var parts = path.split("/", 2);
@@ -146,7 +162,12 @@ public abstract class Param {
     public boolean isMandatory() {
         return findChild(KeyWord.REQUIRED.name())
                 .filter(Conditions.boolValueIsTrue)
-                .isPresent();
+                .isPresent()
+                || KeyWord.ONEOF.name().equalsIgnoreCase(getParentName());
+    }
+
+    private String getParentName() {
+        return parent == null ? "" : parent.getName();
     }
 
     private Param getRoot() {
