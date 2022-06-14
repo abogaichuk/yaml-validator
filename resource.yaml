@@ -1,15 +1,15 @@
 #ResourceType: GeneralTest
 #Name: Valid name for valid resource
 
-Test: true
+#Test: true
 #bbb: asdasd
 #ManualTest: 7sd
 #AutoTest: asd
 #Cisco:
 #  port:  sdad
-#Test:
-#  id: 5
-#  user: devops
+Test:
+  id: 5
+  user: devops
 #  user: devops
 #Admin: devops
 #User: devops
@@ -26,12 +26,12 @@ Test: true
 #Cisco: 11fsd
 #aaa: fsdfsd
 #Test: aaa
-#Genesys:
-#  SwitchName:
-#    SwitchLastName: i'm a SwitchLastName
-#    SwitchFirstName:
-#      SwitchFirstFirstName: aaa
-#      SwitchSecondSecond: bbb
+Genesys:
+  SwitchName:
+    SwitchLastName: i'm a SwitchLastName
+    SwitchFirstName:
+      SwitchFirstFirstName: aaa
+      SwitchSecondSecond: bbb
 #Genesys:
 #  SwitchName: Switchnameeeee
 #  SwitchFirstName:

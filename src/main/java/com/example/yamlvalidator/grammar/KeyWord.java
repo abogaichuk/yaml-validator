@@ -2,6 +2,7 @@ package com.example.yamlvalidator.grammar;
 
 public enum KeyWord {
     TYPE,
+    TYPES,
     ITEMS,
     ENUM,
     UNIQUE,

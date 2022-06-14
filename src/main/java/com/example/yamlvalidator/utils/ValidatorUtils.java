@@ -1,8 +1,8 @@
 package com.example.yamlvalidator.utils;
 
 import com.example.yamlvalidator.MyStreamToStringWriter;
-import com.example.yamlvalidator.entity.Param;
 
+import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.errors.ValidationError;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -57,8 +57,8 @@ public final class ValidatorUtils {
 
     private ValidatorUtils() {}
 
-    public static <T> boolean compare(Param p1, Param p2,
-                                      Function<Param, Optional<T>> parser,
+    public static <T> boolean compare(Parameter p1, Parameter p2,
+                                      Function<Parameter, Optional<T>> parser,
                                       BiPredicate<T, T> comparator) {
         return parser.apply(p1)
             .map(v1 -> parser.apply(p2)
@@ -67,16 +67,16 @@ public final class ValidatorUtils {
             .orElse(Boolean.FALSE);
     }
 
-    public static <T> boolean contains(Param p1, Param p2,
-                                       Function<Param, List<T>> listParser,
-                                       Function<Param, Optional<T>> paramParser,
+    public static <T> boolean contains(Parameter p1, Parameter p2,
+                                       Function<Parameter, List<T>> listParser,
+                                       Function<Parameter, Optional<T>> paramParser,
                                        BiPredicate<List<T>, T> predicate) {
         return paramParser.apply(p2)
                 .map(value -> predicate.test(listParser.apply(p1), value))
                 .orElse(Boolean.FALSE);
     }
 
-    public static Optional<Integer> toInt(final Param parameter) {
+    public static Optional<Integer> toInt(final Parameter parameter) {
         try {
             var value = getValue(parameter);
             return Optional.of(Integer.parseInt(value));
@@ -86,7 +86,7 @@ public final class ValidatorUtils {
         }
     }
 
-    public static Optional<String> toString(final Param parameter) {
+    public static Optional<String> toString(final Parameter parameter) {
         try {
             return Optional.of(getValue(parameter));
         } catch (ClassCastException e) {
@@ -95,10 +95,10 @@ public final class ValidatorUtils {
         }
     }
 
-    public static List<String> toList(final Param parameter) {
+    public static List<String> toList(final Parameter parameter) {
         try {
-             return  parameter.getChildren().stream()
-                    .map(Param::getValue)
+             return  parameter.getChildren()
+                    .map(Parameter::getValue)
                     .collect(Collectors.toList());
         } catch (ClassCastException e) {
 //            e.printStackTrace();
@@ -106,7 +106,7 @@ public final class ValidatorUtils {
         }
     }
 
-    public static Optional<LocalDateTime> toDatetime(final Param parameter) {
+    public static Optional<LocalDateTime> toDatetime(final Parameter parameter) {
         try {
             var value = getValue(parameter);
             return Optional.of(LocalDateTime.parse(value, formatter));
@@ -116,7 +116,7 @@ public final class ValidatorUtils {
         }
     }
 
-    public static Optional<LocalDateTime> toDatetime(final Param patternParam, final Param parameter) {
+    public static Optional<LocalDateTime> toDatetime(final Parameter patternParam, final Parameter parameter) {
         try {
             var patternValue = getValue(patternParam);
             var value = getValue(parameter);
@@ -128,7 +128,7 @@ public final class ValidatorUtils {
     }
 
 
-    public static Optional<Boolean> toBoolean(final Param parameter) {
+    public static Optional<Boolean> toBoolean(final Parameter parameter) {
         try {
             var value = getValue(parameter);
             return "true".equalsIgnoreCase(value) || "false".equalsIgnoreCase(value)
@@ -140,7 +140,7 @@ public final class ValidatorUtils {
     }
 
     //todo refactor? inside Parameter?
-    public static String getValue(final Param p) {
+    public static String getValue(final Parameter p) {
         Objects.requireNonNull(p);
         return p.getValue();
     }
@@ -153,26 +153,26 @@ public final class ValidatorUtils {
         return !isEmpty(s);
     }
 
-    public static String toErrorMessage(Param p, String message) {
-//        message = format(message, p.getName());
-        return format("{0}, paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
-    }
-
-    public static String toErrorMessage(Param p1, Param p2, String message) {
-        message = format(message, p1.getName(), p2.getName());
-        return format("{0}, paramname: {1} (row #{2}), paramname: {3} (row #{4})",
-                message, p1.getPath(), p1.getRow(), p2.getPath(), p2.getRow());
-    }
-
-//    public static String toErrorMessage(Param p, String message, String ... params) {
-//        message = format(message, p.getName(), params);
+//    public static String toErrorMessage(Param p, String message) {
+////        message = format(message, p.getName());
 //        return format("{0}, paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
 //    }
-
-    public static String toErrorMessage(Param p, String incorrectValue, String message) {
-        message = format(message, p.getName(), incorrectValue);
-        return format("{0}, paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
-    }
+//
+//    public static String toErrorMessage(Param p1, Param p2, String message) {
+//        message = format(message, p1.getName(), p2.getName());
+//        return format("{0}, paramname: {1} (row #{2}), paramname: {3} (row #{4})",
+//                message, p1.getPath(), p1.getRow(), p2.getPath(), p2.getRow());
+//    }
+//
+////    public static String toErrorMessage(Param p, String message, String ... params) {
+////        message = format(message, p.getName(), params);
+////        return format("{0}, paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
+////    }
+//
+//    public static String toErrorMessage(Param p, String incorrectValue, String message) {
+//        message = format(message, p.getName(), incorrectValue);
+//        return format("{0}, paramname: {1} (row #{2})", message, p.getPath(), p.getRow());
+//    }
 
     public static String toErrorMessage(String problem, Mark problemMark) {
         ValidationError error = ValidationError.of(problemMark.getLine(), problemMark.getColumn(), problem);

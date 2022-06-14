@@ -1,6 +1,8 @@
 package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.entity.Execution;
+import com.example.yamlvalidator.entity.Resource;
+import com.example.yamlvalidator.entity.Schema;
 import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.grammar.RuleService;
 import com.example.yamlvalidator.utils.ValidatorUtils;
@@ -25,8 +27,8 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.printPreview;
 
 public class YamlService {
     private final RuleService rules = new RuleService();
-    private final SchemaMapper schemaMapper = new SchemaMapper(new PlaceHolderResolver());
-    private final ResourceMapper resourceMapper = new ResourceMapper(new PlaceHolderResolver());
+    private final YamlMapper<Schema> schemaMapper = new SchemaMapper(new PlaceHolderResolver());
+    private final YamlMapper<Resource> resourceMapper = new ResourceMapper(new PlaceHolderResolver());
 
     public void execute(Execution execution) throws IOException {
         try {
@@ -34,13 +36,13 @@ public class YamlService {
             var resourceNode = readFile(execution.getResource());
 
             var optionalResource = resourceNode
-                    .map(resourceMapper::map);
-            optionalResource.ifPresent(resource -> printPreview(resourceMapper.map(resource)));
+                    .map(resourceMapper::toParameter);
+            optionalResource.ifPresent(resource -> printPreview(resourceMapper.toNode(resource)));
 
             defNode
-                    .map(schemaMapper::map)
+                    .map(schemaMapper::toParameter)
                     .ifPresent(schema -> {
-                        printPreview(schemaMapper.map(schema));
+                        printPreview(schemaMapper.toNode(schema));
                         var validationResult = schema.validate(rules, optionalResource.orElse(null));
                         validationResult.getReasons().forEach(System.out::println);
                     });

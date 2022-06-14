@@ -42,24 +42,20 @@
 #  list:
 #    - qa
 #
+types:
+  Admin:
+    type: string
+    list:
+      - system
+      - devops
+  AutoTest: number
+  ManualTest:
+    id: number
+    executedDate: datetime
+    user: Admin
 # todo merging validator, optional > required
-#Admin:
-#  type: string
-#  list:
-#    - system
-#    - devops
-AutoTest: number
-#ManualTest:
-#  id: number
-#  executedDate: datetime
-#  user:
-#    type: Admin
-#    list:
-#      - qa
-#      - das
-
-#Test: AutoTest or ManualTest
-Test: AutoTest or boolean
+Test: AutoTest or ManualTest
+#Test: AutoTest or boolean
 #Port:
 #  default: 7002
 #  Type: number

@@ -1,16 +1,16 @@
 package com.example.yamlvalidator.grammar;
 
-import com.example.yamlvalidator.entity.Param;
+import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.ValidationResult;
 
 @FunctionalInterface
 public interface ParameterRule {
-    ValidationResult validate(Param param);
+    ValidationResult validate(Parameter param);
 
     default ParameterRule and(final ParameterRule other) {
         return parameter -> {
-            final ValidationResult left = this.validate(parameter);
-            final ValidationResult right = other.validate(parameter);
+            final var left = this.validate(parameter);
+            final var right = other.validate(parameter);
 
             return left.merge(right);
         };
@@ -18,7 +18,7 @@ public interface ParameterRule {
 
     default ParameterRule or(final ParameterRule other) {
         return parameter -> {
-            final ValidationResult left = this.validate(parameter);
+            final var left = this.validate(parameter);
 
             return left.isValid() ? other.validate(parameter) : left;
         };

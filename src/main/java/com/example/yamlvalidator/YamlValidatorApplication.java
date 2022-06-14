@@ -7,8 +7,6 @@ import org.apache.commons.cli.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import static java.lang.System.exit;
-
 public class YamlValidatorApplication {
     private static final int WIDTH = 80;
     private static final int LEFT_PAD = 3;
@@ -31,7 +29,7 @@ public class YamlValidatorApplication {
                     .build();
             new YamlService().execute(execution);
         }
-        exit(0);
+        System.exit(0);
     }
 
     private static Options options() {

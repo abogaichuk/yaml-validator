@@ -1,14 +1,119 @@
 package com.example.yamlvalidator.entity;
 
-import org.apache.logging.log4j.util.Strings;
+import com.example.yamlvalidator.grammar.KeyWord;
+import com.example.yamlvalidator.grammar.RuleService;
+import com.example.yamlvalidator.grammar.StandardType;
+import lombok.Builder;
 
-public class Schema extends SchemaParam {
-    public Schema(String name, String value, Param parent, Position position, YamlType yamlType) {
-        super(name, value, parent, position, yamlType);
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+//@Builder
+public class Schema implements Parameter {
+    private final String name;
+    private final String value;
+    private final Schema parent;
+    private final List<Parameter> children = new ArrayList<>();
+    private final Position position;
+    private final YamlType yamlType;
+
+    public Schema(String name, String value, Schema parent, Position position, YamlType yamlType) {
+        this.name = name;
+        this.value = value;
+        this.parent = parent;
+        this.position = position;
+        this.yamlType = yamlType;
     }
 
     @Override
-    public String getPath() {
-        return Strings.EMPTY;
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getValue() {
+        return value;
+    }
+
+    @Override
+    public Position getPosition() {
+        return position;
+    }
+
+    @Override
+    public Parameter getParent() {
+        return parent;
+    }
+
+    @Override
+    public Stream<Parameter> getChildren() {
+        return children.stream();
+    }
+
+    @Override
+    public YamlType getType() {
+        return yamlType;
+    }
+
+    public void addChild(Schema parameter) {
+        children.add(parameter);
+    }
+
+    public void addChildren(List<Schema> parameters) {
+        children.addAll(parameters);
+    }
+
+    public ValidationResult validate(RuleService rules, Resource resource) {
+        var result = validateSelf(rules, resource);
+
+        return getChildren()
+                .filter(Parameter::isNotAKeyword)
+                .map(Schema.class::cast)
+                .map(param -> param.validate(rules, getAppropriateResource(param.getName(), resource)))
+                .reduce(result, ValidationResult::merge);
+    }
+
+    private ValidationResult validateSelf(RuleService rules, Resource resource) {
+        return StandardType.getOrDefault(getTypeValue()).ruleFunction.apply(rules).validate(this, resource);
+    }
+
+    public String getTypeValue() {
+        return findChild(KeyWord.TYPE.name())
+                .map(Parameter::getValue)
+                .orElse(this.getValue());
+    }
+//
+//    public List<Schema> getCustomFields() {
+//        return getChildren()
+////                .map(SchemaParam.class::cast)
+//                .filter(Parameter::isCustomTypeDefinition)
+//                .collect(Collectors.toList());
+//    }
+
+    public Resource getAppropriateResource(String name, Resource resource) {
+        return resource == null ? null : resource.getChildren()
+                .filter(child -> name.equalsIgnoreCase(child.getName()))
+                .map(Resource.class::cast)
+                .findAny().orElse(null);
+    }
+
+    @Override
+    public String toString() {
+        return "Schema: " + getName() + ", path: " + getPath() + ", (row #" + getRow() + ")";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Schema) {
+            var p = (Schema) obj;
+            return getPath().equals(p.getPath());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return getPath().hashCode();
     }
 }

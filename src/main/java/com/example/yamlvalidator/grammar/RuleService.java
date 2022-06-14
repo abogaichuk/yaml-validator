@@ -1,7 +1,7 @@
 package com.example.yamlvalidator.grammar;
 
-import com.example.yamlvalidator.entity.Param;
-import com.example.yamlvalidator.entity.SchemaParam;
+import com.example.yamlvalidator.entity.Parameter;
+import com.example.yamlvalidator.entity.Schema;
 import com.example.yamlvalidator.entity.ValidationResult;
 
 import java.util.Collections;
@@ -57,13 +57,15 @@ public class RuleService {
     }
 
     ValidationRule common() {
-        return bypass().or(noDuplicates().and(mandatoryParameter()));
+        return bypass().or(noDuplicates()
+//                .and(mandatoryParameter())
+        );
     }
 
     private ValidationRule standardTypeRule() {
         return (schema, resource) -> {
             var customFields = schema.findCustomFields()
-                    .map(Param::getName)
+                    .map(Parameter::getName)
                     .collect(Collectors.toList());
             return customFields.size() > 0
                     ? invalid(getMessage(MESSAGE_SCHEMA_INCORRECT, schema, customFields))
@@ -85,12 +87,12 @@ public class RuleService {
     private ParameterRule hasDuplicates() {
         return parameter -> {
             var duplicates = parameter.getDuplicates();
-            return duplicates.isEmpty() || Param.YamlType.SEQUENCE.equals(parameter.getYamlType()) ? valid() : invalid(
+            return duplicates.isEmpty() || Parameter.YamlType.SEQUENCE.equals(parameter.getType()) ? valid() : invalid(
                     getMessage(
                             MESSAGE_HAS_DUPLICATES,
                             parameter,
                             duplicates.stream()
-                                    .map(Param::getPath)
+                                    .map(Parameter::getPath)
                                     .findFirst().get())
             );
         };
@@ -100,8 +102,8 @@ public class RuleService {
         var service = this;
         return (schema, resource) -> {
             var validationResults = schema.findChild("oneOf")
-                    .map(oneOf -> oneOf.getChildren().stream()
-                            .map(SchemaParam.class::cast)
+                    .map(oneOf -> oneOf.getChildren()
+                            .map(Schema.class::cast)
                             .map(schemaParam -> schemaParam.validate(service, resource))
                             .collect(Collectors.toList()))
                     .orElseGet(Collections::emptyList);
@@ -112,36 +114,36 @@ public class RuleService {
         };
     }
 
-    private ValidationRule mandatoryParameter() {
-        var service = this;
-        return (schema, resource) -> {
-            if ((schema.isMandatory() || KeyWord.ONEOF.name().equalsIgnoreCase(schema.getParentName())) && !schema.hasDefaultValue()) {
-                if (resource == null) {
-                    if (schema.getParent().isMandatory() || schema.getParent().getParent() == null) {
-                        return invalid(getMessage(MANDATORY_PARAMETER, schema));
-                    } else {
-                        return valid();
-                    }
-                } else {
-                    var customFields = schema.findCustomFieldNames();
-                    var resourceFields = resource.findCustomFieldNames();
-                    if (customFields.size() > 0) {
-                        //at least one child must be present
-                        if (!Collections.disjoint(customFields, resourceFields)) {
-                            return valid();
-                        } else {
-                            return invalid(getMessage(MANDATORY_CUSTOM_CHILDREN, schema, customFields));
-                        }
-                    } else {
-                        if (isEmpty(resource.getValue()) && resourceFields.isEmpty()) {
-                            return invalid(getMessage(MANDATORY_PARAMETER, schema));
-                        }
-                    }
-                }
-            }
-            return valid();
-        };
-    }
+//    private ValidationRule mandatoryParameter() {
+//        var service = this;
+//        return (schema, resource) -> {
+//            if ((schema.isMandatory() || KeyWord.ONEOF.name().equalsIgnoreCase(schema.getParentName())) && !schema.hasDefaultValue()) {
+//                if (resource == null) {
+//                    if (schema.getParent().isMandatory() || schema.getParent().getParent() == null) {
+//                        return invalid(getMessage(MANDATORY_PARAMETER, schema));
+//                    } else {
+//                        return valid();
+//                    }
+//                } else {
+//                    var customFields = schema.findCustomFieldNames();
+//                    var resourceFields = resource.findCustomFieldNames();
+//                    if (customFields.size() > 0) {
+//                        //at least one child must be present
+//                        if (!Collections.disjoint(customFields, resourceFields)) {
+//                            return valid();
+//                        } else {
+//                            return invalid(getMessage(MANDATORY_CUSTOM_CHILDREN, schema, customFields));
+//                        }
+//                    } else {
+//                        if (isEmpty(resource.getValue()) && resourceFields.isEmpty()) {
+//                            return invalid(getMessage(MANDATORY_PARAMETER, schema));
+//                        }
+//                    }
+//                }
+//            }
+//            return valid();
+//        };
+//    }
 
 //    private ValidationRule uniqueParameterRule() {
 //        return (schema, resource) -> {
@@ -196,27 +198,27 @@ public class RuleService {
     }
 
     private ParameterRule compareSchemaParams(KeyWord child1, KeyWord child2,
-                                        BiPredicate<Param, Param> comparator, String message) {
+                                        BiPredicate<Parameter, Parameter> comparator, String message) {
         return param -> param.findChild(child1.name())
                 .map(p -> comparison(p, child2, comparator, message).validate(param))
                 .orElseGet(ValidationResult::valid);
     }
 
-    private ParameterRule comparison(Param src, KeyWord child,
-                                     BiPredicate<Param, Param> comparator, String message) {
+    private ParameterRule comparison(Parameter src, KeyWord child,
+                                     BiPredicate<Parameter, Parameter> comparator, String message) {
         return schema -> schema.findChild(child.name())
                 .filter(threshold -> src != null && comparator.test(threshold, src))
                 .map(threshold -> invalid(getMessage(message, src, threshold)))
                 .orElseGet(ValidationResult::valid);
     }
 
-    private ParameterRule validationRule(Predicate<Param> condition, String errorMessage) {
+    private ParameterRule validationRule(Predicate<Parameter> condition, String errorMessage) {
         return param -> condition.test(param)
                 ? invalid(getMessage(errorMessage, param))
                 : valid();
     }
 
-    private ParameterRule groupValidationRule(Predicate<Param> condition, String errorMessage, KeyWord ... children) {
+    private ParameterRule groupValidationRule(Predicate<Parameter> condition, String errorMessage, KeyWord ... children) {
         return param -> Stream.of(children)
                 .map(KeyWord::name)
                 .map(param::findChild)
