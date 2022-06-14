@@ -1,8 +1,7 @@
 #ResourceType: GeneralTest
 #Name: Valid name for valid resource
 
-Test:
-  user: system
+Test: true
 #bbb: asdasd
 #ManualTest: 7sd
 #AutoTest: asd

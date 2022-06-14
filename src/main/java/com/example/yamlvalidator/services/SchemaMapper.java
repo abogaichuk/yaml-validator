@@ -1,32 +1,30 @@
 package com.example.yamlvalidator.services;
 
-import com.example.yamlvalidator.entity.*;
+import com.example.yamlvalidator.entity.Param;
+import com.example.yamlvalidator.entity.Position;
+import com.example.yamlvalidator.entity.Schema;
+import com.example.yamlvalidator.entity.SchemaParam;
 import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.grammar.KeyWord;
-import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 import org.snakeyaml.engine.v2.nodes.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.example.yamlvalidator.utils.MessagesUtils.MESSAGE_UNKNOWN_TYPE;
 import static com.example.yamlvalidator.utils.MessagesUtils.getMessage;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
-import static java.lang.String.valueOf;
 import static org.snakeyaml.engine.v2.nodes.NodeType.*;
 
-@Component
 public class SchemaMapper {
-    private PlaceHolderResolver placeHolderResolver;
+    private final PlaceHolderResolver placeHolderResolver;
 
-    @Autowired
     public SchemaMapper(PlaceHolderResolver placeHolderResolver) {
         this.placeHolderResolver = placeHolderResolver;
     }

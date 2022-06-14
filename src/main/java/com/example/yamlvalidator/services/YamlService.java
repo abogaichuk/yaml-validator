@@ -1,49 +1,32 @@
 package com.example.yamlvalidator.services;
 
-import com.example.yamlvalidator.MyStreamToStringWriter;
-import com.example.yamlvalidator.entity.*;
+import com.example.yamlvalidator.entity.Execution;
 import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.grammar.RuleService;
 import com.example.yamlvalidator.utils.ValidatorUtils;
-
-import java.util.*;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import org.snakeyaml.engine.v2.api.Dump;
-import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.composer.Composer;
 import org.snakeyaml.engine.v2.exceptions.ParserException;
 import org.snakeyaml.engine.v2.exceptions.ScannerException;
-import org.snakeyaml.engine.v2.nodes.MappingNode;
-import org.snakeyaml.engine.v2.nodes.Node;
-import org.snakeyaml.engine.v2.nodes.NodeTuple;
-import org.snakeyaml.engine.v2.nodes.ScalarNode;
-import org.snakeyaml.engine.v2.nodes.SequenceNode;
-import org.snakeyaml.engine.v2.nodes.Tag;
+import org.snakeyaml.engine.v2.nodes.*;
 import org.snakeyaml.engine.v2.parser.ParserImpl;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.*;
 
-import static com.example.yamlvalidator.utils.ValidatorUtils.nodeToString;
 import static com.example.yamlvalidator.utils.ValidatorUtils.printPreview;
 
-@Component
 public class YamlService {
     private final RuleService rules = new RuleService();
-    @Autowired
-    private SchemaMapper schemaMapper;
+    private final SchemaMapper schemaMapper = new SchemaMapper(new PlaceHolderResolver());
+    private final ResourceMapper resourceMapper = new ResourceMapper(new PlaceHolderResolver());
 
     public void execute(Execution execution) throws IOException {
         try {
@@ -51,14 +34,13 @@ public class YamlService {
             var resourceNode = readFile(execution.getResource());
 
             var optionalResource = resourceNode
-                    .map(resNode -> new ResourceMapper(new PlaceHolderResolver()).map(resNode));
-            optionalResource.ifPresent(resource -> printPreview(new ResourceMapper(new PlaceHolderResolver()).map(resource)));
+                    .map(resourceMapper::map);
+            optionalResource.ifPresent(resource -> printPreview(resourceMapper.map(resource)));
 
             defNode
-                    .map(node -> schemaMapper.map(node))
+                    .map(schemaMapper::map)
                     .ifPresent(schema -> {
                         printPreview(schemaMapper.map(schema));
-//                        schema.print();
                         var validationResult = schema.validate(rules, optionalResource.orElse(null));
                         validationResult.getReasons().forEach(System.out::println);
                     });
