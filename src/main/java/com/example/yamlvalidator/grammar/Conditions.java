@@ -26,8 +26,8 @@ public final class Conditions {
 
     static final BiPredicate<Param, Param> compareNums = (min, max) ->
             compare(min, max, ValidatorUtils::toInt, (a, b) -> a > b);
-    static final BiPredicate<Param, Param> isLeftAfterRight = (before, after) ->
-            compare(before, after, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
+    static final BiPredicate<Param, Param> isLeftAfterRight = (left, right) ->
+            compare(left, right, ValidatorUtils::toDatetime, LocalDateTime::isAfter);
     static final BiPredicate<Param, Param> listContains = (list, value) ->
             contains(list, value, ValidatorUtils::toList, ValidatorUtils::toString, List::contains);
     static final BiPredicate<Param, Param> toDateTime = (pattern, parameter) ->

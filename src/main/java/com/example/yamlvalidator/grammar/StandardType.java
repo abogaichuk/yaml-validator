@@ -10,7 +10,6 @@ public enum StandardType {
     NUMBER(RuleService::numbers),
     BOOLEAN(RuleService::booleans),
     SECRET(RuleService::objects);
-//    CUSTOM(RuleService::customs);
 
     public final Function<RuleService, ValidationRule> ruleFunction;
     StandardType(Function<RuleService, ValidationRule> ruleFunction) {

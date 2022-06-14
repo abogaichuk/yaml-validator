@@ -3,28 +3,20 @@ package com.example.yamlvalidator.grammar;
 import com.example.yamlvalidator.entity.Param;
 import com.example.yamlvalidator.entity.SchemaParam;
 import com.example.yamlvalidator.entity.ValidationResult;
-import com.example.yamlvalidator.services.MessageProvider;
-import com.example.yamlvalidator.utils.MessagesUtils;
-import com.example.yamlvalidator.utils.ValidatorUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.entity.ValidationResult.*;
 import static com.example.yamlvalidator.entity.ValidationResult.invalid;
 import static com.example.yamlvalidator.entity.ValidationResult.valid;
 import static com.example.yamlvalidator.grammar.Conditions.*;
 import static com.example.yamlvalidator.grammar.KeyWord.*;
-import static com.example.yamlvalidator.grammar.StandardType.*;
 import static com.example.yamlvalidator.utils.MessagesUtils.*;
-import static com.example.yamlvalidator.utils.ValidatorUtils.*;
+import static com.example.yamlvalidator.utils.ValidatorUtils.isEmpty;
 
 public class RuleService {
 
@@ -68,47 +60,6 @@ public class RuleService {
         return bypass().or(noDuplicates().and(mandatoryParameter()));
     }
 
-    ValidationRule customs() {
-        //todo all scalar params here and custom params without type child
-        return objects().or(hasCorrectTypeRule());
-    }
-
-    //todo rewrite
-    private ValidationRule hasCorrectTypeRule() {
-        return (schema, resource) -> schemaTypeRule().validate(schema).merge(resourceTypeRule(schema, resource));
-    }
-
-    private ValidationResult resourceTypeRule(Param schema, Param resource) {
-        if (resource == null)
-            return valid();
-        if (isNotEmpty(schema.getName()) && (KeyWord.TYPE.name().equalsIgnoreCase(schema.getName()) || schema.isNotAKeyword())) {
-
-            String typeValue = schema.getTypeValue();
-            if (isNotEmpty(typeValue)) {
-                boolean match = Stream.of(schema.getTypeValue().split(OR_TYPE_SPLITTER))
-                        .map(String::trim)
-                        .filter(ValidatorUtils::isNotEmpty)
-                        .anyMatch(possibleType -> {
-                            if (NUMBER.name().equalsIgnoreCase(possibleType))
-                                return toInt(resource).isPresent();
-                            else if (BOOLEAN.name().equalsIgnoreCase(possibleType)) {
-                                return toBoolean(resource).isPresent();
-                            } else
-                                return true;
-                            //todo else if(isCustomType("ManualTest"))
-                        });
-                return match ? valid() : invalid(getMessage(MESSAGE_RESOURCE_UNKNOWN_TYPE, resource, resource.getValue(), typeValue));
-            }
-        }
-        return valid();
-    }
-
-    private ParameterRule schemaTypeRule() {
-        return schema -> schema.findIncorrectTypeValue()
-                        .map(s -> invalid(getMessage(MESSAGE_UNKNOWN_TYPE, schema, s)))
-                        .orElseGet(ValidationResult::valid);
-    }
-
     private ValidationRule standardTypeRule() {
         return (schema, resource) -> {
             var customFields = schema.findCustomFields()
@@ -148,7 +99,7 @@ public class RuleService {
     private ValidationRule oneOfRule() {
         var service = this;
         return (schema, resource) -> {
-            List<ValidationResult> validationResults = schema.findChild("oneOf")
+            var validationResults = schema.findChild("oneOf")
                     .map(oneOf -> oneOf.getChildren().stream()
                             .map(SchemaParam.class::cast)
                             .map(schemaParam -> schemaParam.validate(service, resource))
@@ -204,9 +155,9 @@ public class RuleService {
 //    }
 
     private ValidationRule compareDatetimeFields() {
-        return (schema, resource) -> compareSchemaParams(AFTER, BEFORE, isLeftAfterRight, MESSAGE_IS_BEFORE)
-                .and(compareSchemaParams(BEFORE, DEFAULT, isLeftAfterRight.negate(), MESSAGE_IS_AFTER))
-                .and(compareSchemaParams(AFTER, DEFAULT, isLeftAfterRight, MESSAGE_IS_BEFORE))
+        return (schema, resource) -> compareSchemaParams(BEFORE, AFTER, isLeftAfterRight, MESSAGE_IS_BEFORE)
+                .and(compareSchemaParams(BEFORE, DEFAULT, isLeftAfterRight, MESSAGE_IS_AFTER))
+                .and(compareSchemaParams(DEFAULT, AFTER, isLeftAfterRight, MESSAGE_IS_BEFORE))
                 .or(comparison(resource, AFTER, isLeftAfterRight.negate(), MESSAGE_IS_AFTER)
                         .and(comparison(resource, BEFORE, isLeftAfterRight, MESSAGE_IS_BEFORE)))
                 .validate(schema);
