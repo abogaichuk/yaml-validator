@@ -14,11 +14,6 @@ import java.util.stream.Stream;
 public interface YamlMapper<T extends Parameter> {
     T map(Node node);
 
-    default Node map(T parameter) {
-        var tuples = toTuples(parameter.getChildren());
-        return new MappingNode(Tag.MAP, tuples, FlowStyle.BLOCK);
-    }
-
     default Position getPosition(final Node node) {
         return node.getStartMark()
                 .map(mark -> Position.of(mark.getLine(), mark.getColumn()))
@@ -29,49 +24,36 @@ public interface YamlMapper<T extends Parameter> {
         return ((ScalarNode) node.getKeyNode()).getValue();
     }
 
-    private List<NodeTuple> toTuples(Stream<Parameter> params) {
-        return params
-                .map(this::toNodeTuple)
-                .collect(Collectors.toList());
+    default Node map(T parameter) {
+        var tuples = toNodes(parameter.getChildren(), this::toNodeTuple);
+        return new MappingNode(Tag.MAP, tuples, FlowStyle.BLOCK);
     }
 
     private NodeTuple toNodeTuple(Parameter param) {
         var key = new ScalarNode(Tag.STR, param.getName(), ScalarStyle.PLAIN);
+
         Node value;
         if (Parameter.YamlType.SCALAR.equals(param.getType())) {
             value = new ScalarNode(Tag.STR, param.getValue() , ScalarStyle.PLAIN);
-        } else if (Parameter.YamlType.MAPPING.equals(param.getType())){
-            value = new MappingNode(Tag.MAP, toTuples(param.getChildren()), FlowStyle.BLOCK);
+        } else if (Parameter.YamlType.MAPPING.equals(param.getType())) {
+            var nodes = toNodes(param.getChildren(), this::toNodeTuple);
+            value = new MappingNode(Tag.MAP, nodes, FlowStyle.BLOCK);
         } else {
-            value = new SequenceNode(Tag.SEQ, toNodes(param.getChildren()), FlowStyle.BLOCK);
+            var nodes = toNodes(param.getChildren(), this::toNode);
+            value = new SequenceNode(Tag.SEQ, nodes, FlowStyle.BLOCK);
         }
         return new NodeTuple(key, value);
     }
 
-//    private <N> List<N> toNodes(Stream<Parameter> params, Function<Parameter, N> transformation) {
-//        return params
-//                .map(transformation)
-//                .collect(Collectors.toList());
-//    }
-
-    private List<Node> toNodes(Stream<Parameter> params) {
+    private <N> List<N> toNodes(Stream<Parameter> params, Function<Parameter, N> transformation) {
         return params
-                .map(this::toNode)
+                .map(transformation)
                 .collect(Collectors.toList());
     }
-//    Function<Parameter, Node> toNode = parameter -> {
-//        if (parameter.getChildren().findAny().isEmpty()) {
-//            return new ScalarNode(Tag.STR, parameter.getValue() , ScalarStyle.PLAIN);
-//        } else {
-//            return new MappingNode(Tag.MAP, toTuples(parameter.getChildren()), FlowStyle.BLOCK);
-//        }
-//    };
 
     private Node toNode(Parameter parameter) {
-        if (parameter.getChildren().findAny().isEmpty()) {
-            return new ScalarNode(Tag.STR, parameter.getValue() , ScalarStyle.PLAIN);
-        } else {
-            return new MappingNode(Tag.MAP, toTuples(parameter.getChildren()), FlowStyle.BLOCK);
-        }
+        return parameter.getChildren().findAny().isEmpty()
+                ? new ScalarNode(Tag.STR, parameter.getValue() , ScalarStyle.PLAIN)
+                : new MappingNode(Tag.MAP, toNodes(parameter.getChildren(), this::toNodeTuple), FlowStyle.BLOCK);
     }
 }
