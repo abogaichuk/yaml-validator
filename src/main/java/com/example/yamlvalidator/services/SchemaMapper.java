@@ -30,7 +30,7 @@ public class SchemaMapper implements YamlMapper<Schema> {
     }
 
     @Override
-    public Schema toParameter(Node node) {
+    public Schema map(Node node) {
         var root = (MappingNode) node;
         typesNode = root.getValue().stream()
                 .filter(nodeTuple -> TYPES.name().equalsIgnoreCase(getKey(nodeTuple)))
@@ -63,7 +63,7 @@ public class SchemaMapper implements YamlMapper<Schema> {
     //todo do we need the parent?
     private Stream<Schema> toParameters(final MappingNode node, final Schema parent) {
         return node.getValue().stream()
-                .filter(tuple -> !TYPES.name().equals(getKey(tuple)))
+                .filter(tuple -> !TYPES.name().equalsIgnoreCase(getKey(tuple)))
                 .map(n -> toParameter(n, parent))
                 .filter(Objects::nonNull);
     }
@@ -193,42 +193,5 @@ public class SchemaMapper implements YamlMapper<Schema> {
         } else {
             return build("", ((ScalarNode) node).getValue(), parent, position, Parameter.YamlType.SEQUENCE);
         }
-    }
-
-    @Override
-    public Node toNode(Schema schema) {
-        var tuples = toTuples(schema.getChildren().collect(Collectors.toList()));
-        return new MappingNode(Tag.MAP, tuples, FlowStyle.BLOCK);
-    }
-
-    private List<NodeTuple> toTuples(List<Parameter> params) {
-        return params.stream()
-                .map(this::toNodeTuple)
-                .collect(Collectors.toList());
-    }
-
-    private NodeTuple toNodeTuple(Parameter param) {
-        var key = new ScalarNode(Tag.STR, param.getName(), ScalarStyle.PLAIN);
-        Node value;
-        if (Parameter.YamlType.SCALAR.equals(param.getType())) {
-            value = new ScalarNode(Tag.STR, param.getValue() , ScalarStyle.PLAIN);
-        } else if (Parameter.YamlType.MAPPING.equals(param.getType())){
-            value = new MappingNode(Tag.MAP, toTuples(param.getChildren().collect(Collectors.toList())), FlowStyle.BLOCK);
-        } else {
-            value = new SequenceNode(Tag.SEQ, toNodes(param.getChildren().collect(Collectors.toList())), FlowStyle.BLOCK);
-        }
-        return new NodeTuple(key, value);
-    }
-
-    private List<Node> toNodes(List<Parameter> params) {
-        return params.stream()
-                .map(param -> {
-                    if (param.getChildren().findAny().isEmpty()) {
-                        return new ScalarNode(Tag.STR, param.getValue() , ScalarStyle.PLAIN);
-                    } else {
-                        return new MappingNode(Tag.MAP, toTuples(param.getChildren().collect(Collectors.toList())), FlowStyle.BLOCK);
-                    }
-                })
-                .collect(Collectors.toList());
     }
 }

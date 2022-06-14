@@ -36,13 +36,13 @@ public class YamlService {
             var resourceNode = readFile(execution.getResource());
 
             var optionalResource = resourceNode
-                    .map(resourceMapper::toParameter);
-            optionalResource.ifPresent(resource -> printPreview(resourceMapper.toNode(resource)));
+                    .map(resourceMapper::map);
+            optionalResource.ifPresent(resource -> printPreview(resourceMapper.map(resource)));
 
             defNode
-                    .map(schemaMapper::toParameter)
+                    .map(schemaMapper::map)
                     .ifPresent(schema -> {
-                        printPreview(schemaMapper.toNode(schema));
+                        printPreview(schemaMapper.map(schema));
                         var validationResult = schema.validate(rules, optionalResource.orElse(null));
                         validationResult.getReasons().forEach(System.out::println);
                     });

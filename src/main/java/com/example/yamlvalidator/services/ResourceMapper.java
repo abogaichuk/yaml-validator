@@ -22,7 +22,7 @@ public class ResourceMapper implements YamlMapper<Resource> {
     }
 
     @Override
-    public Resource toParameter(Node node) {
+    public Resource map(Node node) {
         return create("", "", null, Position.of(1, 1),
                 Parameter.YamlType.MAPPING, (MappingNode) node);
     }
@@ -95,41 +95,5 @@ public class ResourceMapper implements YamlMapper<Resource> {
         } else {
             return create("", ((ScalarNode) node).getValue(), parent, position, Parameter.YamlType.SEQUENCE);
         }
-    }
-
-    @Override
-    public Node toNode(Resource resource) {
-        var tuples = toTuples(resource.getChildren());
-        return new MappingNode(Tag.MAP, tuples, FlowStyle.BLOCK);
-    }
-
-    private List<NodeTuple> toTuples(Stream<Parameter> parameters) {
-        return parameters
-                .map(this::toNodeTuple)
-                .collect(Collectors.toList());
-    }
-
-    private NodeTuple toNodeTuple(Parameter parameter) {
-        var key = new ScalarNode(Tag.STR, parameter.getName(), ScalarStyle.PLAIN);
-        Node value;
-        if (Parameter.YamlType.SCALAR.equals(parameter.getType())) {
-            value = new ScalarNode(Tag.STR, parameter.getValue() , ScalarStyle.PLAIN);
-        } else {
-            parameter.getType();
-            value = new SequenceNode(Tag.SEQ, toNodes(parameter.getChildren()), FlowStyle.BLOCK);
-        }
-        return new NodeTuple(key, value);
-    }
-
-    private List<Node> toNodes(Stream<Parameter> params) {
-        return params
-                .map(param -> {
-                    if (param.getChildren().findAny().isEmpty()) {
-                        return new ScalarNode(Tag.STR, param.getValue() , ScalarStyle.PLAIN);
-                    } else {
-                        return new MappingNode(Tag.MAP, toTuples(param.getChildren()), FlowStyle.BLOCK);
-                    }
-                })
-                .collect(Collectors.toList());
     }
 }
