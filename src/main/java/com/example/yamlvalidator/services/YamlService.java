@@ -36,10 +36,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import static com.example.yamlvalidator.utils.ValidatorUtils.nodeToString;
+import static com.example.yamlvalidator.utils.ValidatorUtils.printPreview;
+
 @Component
 public class YamlService {
-    @Autowired
-    private RuleService rules;
+    private final RuleService rules = new RuleService();
     @Autowired
     private SchemaMapper schemaMapper;
 
@@ -74,13 +76,13 @@ public class YamlService {
         }
     }
 
-    private void printPreview(Node node) {
-        try {
-            System.out.println(preview(nodeToString(node), false));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void printPreview(Node node) {
+//        try {
+//            System.out.println(preview(nodeToString(node), false));
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private Optional<Node> readFile(String filename) throws FileNotFoundException {
         var loadSettings = LoadSettings.builder()
@@ -94,26 +96,26 @@ public class YamlService {
         return composer.getSingleNode();
     }
 
-    private String preview(String data, boolean format) throws JsonProcessingException {
-        var yamlReader = new ObjectMapper(new YAMLFactory());
-        var obj = yamlReader.readValue(data, Object.class);
-
-        var writer = format ? new ObjectMapper() : new ObjectMapper(new YAMLFactory());
-        return writer.writeValueAsString(obj);
-    }
+//    private String preview(String data, boolean format) throws JsonProcessingException {
+//        var yamlReader = new ObjectMapper(new YAMLFactory());
+//        var obj = yamlReader.readValue(data, Object.class);
+//
+//        var writer = format ? new ObjectMapper() : new ObjectMapper(new YAMLFactory());
+//        return writer.writeValueAsString(obj);
+//    }
 
     private void save(String filename, String data) throws IOException {
         Files.write(Paths.get(filename), data.getBytes());
     }
 
-    private String nodeToString(Node root) {
-        var settings = DumpSettings.builder().build();
-        var yaml = new Dump(settings);
-        var writer = new MyStreamToStringWriter();
-        yaml.dumpNode(root, writer);
-
-        return writer.toString();
-    }
+//    private String nodeToString(Node root) {
+//        var settings = DumpSettings.builder().build();
+//        var yaml = new Dump(settings);
+//        var writer = new MyStreamToStringWriter();
+//        yaml.dumpNode(root, writer);
+//
+//        return writer.toString();
+//    }
 
     public void updateNodeByPath(Node node, String path, String newValue) {
         List<String> paths = Arrays.asList(path.split("/"));

@@ -1,12 +1,19 @@
 #ResourceType: GeneralTest
 #Name: Valid name for valid resource
 
+Test:
+  user: system
 #bbb: asdasd
 #ManualTest: 7sd
 #AutoTest: asd
 #Cisco:
 #  port:  sdad
-Test: true
+#Test:
+#  id: 5
+#  user: devops
+#  user: devops
+#Admin: devops
+#User: devops
 #user: devopss
 #genesys:
 #  user: devops

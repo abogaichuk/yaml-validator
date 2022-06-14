@@ -37,20 +37,28 @@
 #  before: 1999-03-04 11:30
 #  after: 2005-03-04 11:30
 
-#aaa: ${bbb}
-#Admin:
-#  type: string
-#  list:
-#    - system
-#    - devops
-#User:
+#user:
 #  type: Admin
-#  list: qa
-AutoTest: boolean
+#  list:
+#    - qa
+#
+# todo merging validator, optional > required
+Admin:
+  type: string
+  list:
+    - system
+    - devops
+AutoTest: number
 ManualTest:
   id: number
-#  executedDate: datetime
-#  required: true
+  executedDate: datetime
+  user:
+    type: Admin
+    list:
+      - qa
+      - das
+
+Test: AutoTest or ManualTest
 #Port:
 #  default: 7002
 #  Type: number
@@ -60,8 +68,8 @@ ManualTest:
 #  port: number
 #  name: string
 #  required: true
-Test:
-  type: ManualTest or AutoTest
+#Test:
+#  type: ManualTest or AutoTest
 #Genesys:
 #  SwitchName:
 #    SwitchLastName: string

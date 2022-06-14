@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.example.yamlvalidator.utils.MessagesUtils.MESSAGE_UNKNOWN_TYPE;
+import static com.example.yamlvalidator.utils.MessagesUtils.getMessage;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 import static java.lang.String.valueOf;
 import static org.snakeyaml.engine.v2.nodes.NodeType.*;
@@ -23,12 +25,10 @@ import static org.snakeyaml.engine.v2.nodes.NodeType.*;
 @Component
 public class SchemaMapper {
     private PlaceHolderResolver placeHolderResolver;
-    private MessageProvider messageProvider;
 
     @Autowired
-    public SchemaMapper(PlaceHolderResolver placeHolderResolver, MessageProvider messageProvider) {
+    public SchemaMapper(PlaceHolderResolver placeHolderResolver) {
         this.placeHolderResolver = placeHolderResolver;
-        this.messageProvider = messageProvider;
     }
 
     public Schema map(Node node) {
@@ -107,7 +107,7 @@ public class SchemaMapper {
                         return param;
                     }
                 } else {
-                    throw new PadmGrammarException(messageProvider.getMessage(MESSAGE_UNKNOWN_TYPE, paramName, value));
+                    throw new PadmGrammarException(getMessage(MESSAGE_UNKNOWN_TYPE, paramName, value));
                 }
             } else if (typeResolvingIsNeeded(paramName, value)) {
                 var resolved = resolveTypes(paramName, parent, value.split(OR_TYPE_SPLITTER), root);
@@ -173,8 +173,7 @@ public class SchemaMapper {
                                 new Tag("tag:yaml.org,2002:str"), name, ScalarStyle.PLAIN), nodeTuple.getValueNode());
                         return toParameter(nodeTuple1, parent, root);
                     })
-                    .orElseThrow(() -> new PadmGrammarException(
-                            messageProvider.getMessage(MESSAGE_UNKNOWN_TYPE, parent, type)));
+                    .orElseThrow(() -> new PadmGrammarException(getMessage(MESSAGE_UNKNOWN_TYPE, parent, type)));
 //            parent.addChildren(schemaParams);
             return schemaParams;
         }

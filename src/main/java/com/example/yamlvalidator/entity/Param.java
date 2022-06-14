@@ -22,7 +22,7 @@ public abstract class Param {
     private final Position position;
     private final YamlType yamlType;
 
-    public enum YamlType{
+    public enum YamlType {
         SCALAR, SEQUENCE, MAPPING
     }
 
@@ -162,11 +162,10 @@ public abstract class Param {
     public boolean isMandatory() {
         return findChild(KeyWord.REQUIRED.name())
                 .filter(Conditions.boolValueIsTrue)
-                .isPresent()
-                || KeyWord.ONEOF.name().equalsIgnoreCase(getParentName());
+                .isPresent();
     }
 
-    private String getParentName() {
+    public String getParentName() {
         return parent == null ? "" : parent.getName();
     }
 

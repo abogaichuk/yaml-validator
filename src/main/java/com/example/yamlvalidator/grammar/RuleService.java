@@ -4,6 +4,7 @@ import com.example.yamlvalidator.entity.Param;
 import com.example.yamlvalidator.entity.SchemaParam;
 import com.example.yamlvalidator.entity.ValidationResult;
 import com.example.yamlvalidator.services.MessageProvider;
+import com.example.yamlvalidator.utils.MessagesUtils;
 import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,17 +23,45 @@ import static com.example.yamlvalidator.entity.ValidationResult.valid;
 import static com.example.yamlvalidator.grammar.Conditions.*;
 import static com.example.yamlvalidator.grammar.KeyWord.*;
 import static com.example.yamlvalidator.grammar.StandardType.*;
+import static com.example.yamlvalidator.utils.MessagesUtils.*;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 
-@Component
 public class RuleService {
-    @Autowired
-    private MessageProvider messageProvider;
 
     ValidationRule objects() {
         return common()
                 .and(oneOfRule())
                 .and((schema, resource) -> valid());
+    }
+
+    ValidationRule datetime() {
+        return common()
+                .or(standardTypeRule())
+                .or(validateDatetimeFields()
+                        .or(compareDatetimeFields()));
+    }
+
+    ValidationRule numbers() {
+        return common()
+                .or(standardTypeRule())
+                .or(validateNumberFields())
+                .or(compareNumberFields()
+                        .and(listContainsRule()));
+    }
+
+    ValidationRule booleans() {
+        return ValidationRule.of(
+                schema -> groupValidationRule(isBoolean.negate(), MESSAGE_IS_NOT_A_BOOLEAN, DEFAULT)
+                        .validate(schema),
+                resource -> validationRule(isBoolean.negate(), MESSAGE_IS_NOT_A_BOOLEAN)
+                        .validate(resource)
+        );
+    }
+
+    ValidationRule strings() {
+        return common()
+                .or(standardTypeRule())
+                .or(listContainsRule());
     }
 
     ValidationRule common() {
@@ -68,7 +97,7 @@ public class RuleService {
                                 return true;
                             //todo else if(isCustomType("ManualTest"))
                         });
-                return match ? valid() : invalid(messageProvider.getMessage(MESSAGE_RESOURCE_UNKNOWN_TYPE, resource, resource.getValue(), typeValue));
+                return match ? valid() : invalid(getMessage(MESSAGE_RESOURCE_UNKNOWN_TYPE, resource, resource.getValue(), typeValue));
             }
         }
         return valid();
@@ -76,7 +105,7 @@ public class RuleService {
 
     private ParameterRule schemaTypeRule() {
         return schema -> schema.findIncorrectTypeValue()
-                        .map(s -> invalid(messageProvider.getMessage(MESSAGE_UNKNOWN_TYPE, schema, s)))
+                        .map(s -> invalid(getMessage(MESSAGE_UNKNOWN_TYPE, schema, s)))
                         .orElseGet(ValidationResult::valid);
     }
 
@@ -86,45 +115,15 @@ public class RuleService {
                     .map(Param::getName)
                     .collect(Collectors.toList());
             return customFields.size() > 0
-                    ? invalid(messageProvider.getMessage(MESSAGE_SCHEMA_INCORRECT, schema, customFields))
+                    ? invalid(getMessage(MESSAGE_SCHEMA_INCORRECT, schema, customFields))
                     : valid();
         };
-    }
-
-    ValidationRule datetime() {
-        return common()
-                .or(standardTypeRule())
-                .or(validateDatetimeFields()
-                        .or(compareDatetimeFields()));
-    }
-
-    ValidationRule numbers() {
-        return common()
-                .or(standardTypeRule())
-                .or(validateNumberFields())
-                .or(compareNumberFields()
-                        .and(listContainsRule()));
-    }
-
-    ValidationRule booleans() {
-        return ValidationRule.of(
-                schema -> groupValidationRule(isBoolean.negate(), MESSAGE_IS_NOT_A_BOOLEAN, DEFAULT)
-                        .validate(schema),
-                resource -> validationRule(isBoolean.negate(), MESSAGE_IS_NOT_A_BOOLEAN)
-                        .validate(resource)
-        );
-    }
-
-    ValidationRule strings() {
-        return common()
-                .or(standardTypeRule())
-                .or(listContainsRule());
     }
 
     private ValidationRule bypass() {
         return (schema, resource) -> schema.findChild(BYPASS.name())
                 .filter(boolValueIsTrue)
-                .map(p -> invalid(messageProvider.getMessage(MESSAGE_PARAMETER_BYPASS, schema.getName(), p)))
+                .map(p -> invalid(getMessage(MESSAGE_PARAMETER_BYPASS, schema.getName(), p)))
                 .orElseGet(ValidationResult::valid);
     }
 
@@ -136,7 +135,7 @@ public class RuleService {
         return parameter -> {
             var duplicates = parameter.getDuplicates();
             return duplicates.isEmpty() || Param.YamlType.SEQUENCE.equals(parameter.getYamlType()) ? valid() : invalid(
-                    messageProvider.getMessage(
+                    getMessage(
                             MESSAGE_HAS_DUPLICATES,
                             parameter,
                             duplicates.stream()
@@ -153,35 +152,38 @@ public class RuleService {
                     .map(oneOf -> oneOf.getChildren().stream()
                             .map(SchemaParam.class::cast)
                             .map(schemaParam -> schemaParam.validate(service, resource))
-//                            .map(schemaParam -> schemaParam.validate(service, resource))
                             .collect(Collectors.toList()))
                     .orElseGet(Collections::emptyList);
 
             return validationResults.isEmpty() || validationResults.stream().anyMatch(ValidationResult::isValid)
                     ? valid()
-                    : invalid(messageProvider.getMessage(MESSAGE_INVALID_RESOURCE, resource));
+                    : invalid(getMessage(MESSAGE_INVALID_RESOURCE, resource));
         };
     }
 
     private ValidationRule mandatoryParameter() {
         var service = this;
         return (schema, resource) -> {
-            if (schema.isMandatory() && !schema.hasDefaultValue()) {
+            if ((schema.isMandatory() || KeyWord.ONEOF.name().equalsIgnoreCase(schema.getParentName())) && !schema.hasDefaultValue()) {
                 if (resource == null) {
-                    return invalid(messageProvider.getMessage(MANDATORY_PARAMETER, schema));
+                    if (schema.getParent().isMandatory() || schema.getParent().getParent() == null) {
+                        return invalid(getMessage(MANDATORY_PARAMETER, schema));
+                    } else {
+                        return valid();
+                    }
                 } else {
                     var customFields = schema.findCustomFieldNames();
+                    var resourceFields = resource.findCustomFieldNames();
                     if (customFields.size() > 0) {
                         //at least one child must be present
-                        var resourceFields = resource.findCustomFieldNames();
                         if (!Collections.disjoint(customFields, resourceFields)) {
                             return valid();
                         } else {
-                            return invalid(messageProvider.getMessage(MANDATORY_CUSTOM_CHILDREN, schema, customFields));
+                            return invalid(getMessage(MANDATORY_CUSTOM_CHILDREN, schema, customFields));
                         }
                     } else {
-                        if (isEmpty(resource.getValue())) {
-                            return invalid(messageProvider.getMessage(MANDATORY_PARAMETER, schema));
+                        if (isEmpty(resource.getValue()) && resourceFields.isEmpty()) {
+                            return invalid(getMessage(MANDATORY_PARAMETER, schema));
                         }
                     }
                 }
@@ -197,7 +199,7 @@ public class RuleService {
 ////                    : invalid();
 //            return schema.findChild(UNIQUE.name())
 //                    .map(param -> isBoolean.negate().test(param))
-//                    .map(invalid(messageProvider.getMessage()))
+//                    .map(invalid(getMessage()))
 //        };
 //    }
 
@@ -253,13 +255,13 @@ public class RuleService {
                                      BiPredicate<Param, Param> comparator, String message) {
         return schema -> schema.findChild(child.name())
                 .filter(threshold -> src != null && comparator.test(threshold, src))
-                .map(threshold -> invalid(messageProvider.getMessage(message, src, threshold)))
+                .map(threshold -> invalid(getMessage(message, src, threshold)))
                 .orElseGet(ValidationResult::valid);
     }
 
     private ParameterRule validationRule(Predicate<Param> condition, String errorMessage) {
         return param -> condition.test(param)
-                ? invalid(messageProvider.getMessage(errorMessage, param))
+                ? invalid(getMessage(errorMessage, param))
                 : valid();
     }
 
@@ -270,7 +272,7 @@ public class RuleService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .filter(condition)
-                .map(child -> invalid(messageProvider.getMessage(errorMessage, child)))
+                .map(child -> invalid(getMessage(errorMessage, child)))
                 .reduce(valid(), ValidationResult::merge);
     }
 }
