@@ -26,12 +26,8 @@ public class ResourceMapper {
     }
 
     public Resource map() {
-        var root = Resource.builder()
-                .position(Position.of(1, 1))
-                .yamlType(Parameter.YamlType.MAPPING)
-                .build();
-        root.addChildren(toParameters(rootNode, root));
-        return root;
+        return build(EMPTY, Parameter.YamlType.MAPPING,
+                Resource.builder().position(Position.of(1, 1)), rootNode);
     }
 
     private List<Resource> toParameters(final CollectionNode<?> node, final Resource parent) {
@@ -56,11 +52,11 @@ public class ResourceMapper {
                 .position(getPosition(keyNode))
                 .parent(parent);
 
-        if (valueNode.getNodeType().equals(MAPPING)) {
+        if (MAPPING.equals(valueNode.getNodeType())) {
             return build(EMPTY, Parameter.YamlType.MAPPING, builder, (MappingNode) valueNode);
-        } else if (valueNode.getNodeType().equals(SCALAR)) {
+        } else if (SCALAR.equals(valueNode.getNodeType())) {
             return scalarParsing(((ScalarNode) valueNode).getValue(), builder);
-        } else if (valueNode.getNodeType().equals(SEQUENCE)) {
+        } else if (SEQUENCE.equals(valueNode.getNodeType())) {
             return build(EMPTY, Parameter.YamlType.SEQUENCE, builder, (SequenceNode) valueNode);
         } else {
             throw new PadmGrammarException("unknown node type: " + valueNode.getNodeType());
@@ -73,8 +69,10 @@ public class ResourceMapper {
                     .map(node -> {
                         if (SCALAR.equals(node.getNodeType())) {
                             return build(((ScalarNode) node).getValue(), Parameter.YamlType.SCALAR, builder, null);
-                        } else {
+                        } else if (MAPPING.equals(node.getNodeType())) {
                             return build(EMPTY, Parameter.YamlType.MAPPING, builder, (MappingNode) node);
+                        } else {
+                            return build(EMPTY, Parameter.YamlType.SEQUENCE, builder, (MappingNode) node);
                         }
                     })
                     .orElseThrow(() -> new PadmGrammarException("placeholder error for value: " + value));

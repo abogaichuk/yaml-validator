@@ -48,16 +48,17 @@ types:
     list:
       - system
       - devops
-      - ${aaaa}
+#      - ${aaa} todo bug?
   AutoTest: number
   ManualTest:
     id: number
     executedDate: datetime
     user: Admin
+#user: Admin
 Test: AutoTest or ManualTest
-db:
-  user: string
-  password: string
+#db:
+#  user: string
+#  password: string
 # todo merging validator, optional > required
 #Test: AutoTest or boolean
 #Port:

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-//@Builder
+@Builder
 public class Schema implements Parameter {
     private final String name;
     private final String value;

@@ -23,7 +23,7 @@ public class PlaceHolderResolver {
         var yaml = "# value: 8080 #need new keyword for resource? default or value or?\n" +
                 "Database:\n" +
                 "  Credentials:\n" +
-                "    User: admin\n" +
+                "    Username: admin\n" +
                 "    Password: nimda";
 //        var yaml = "ccc";
         var loadSettings = LoadSettings.builder()
