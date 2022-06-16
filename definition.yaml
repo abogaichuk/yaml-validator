@@ -48,13 +48,17 @@ types:
     list:
       - system
       - devops
+      - ${aaaa}
   AutoTest: number
   ManualTest:
     id: number
     executedDate: datetime
     user: Admin
-# todo merging validator, optional > required
 Test: AutoTest or ManualTest
+db:
+  user: string
+  password: string
+# todo merging validator, optional > required
 #Test: AutoTest or boolean
 #Port:
 #  default: 7002

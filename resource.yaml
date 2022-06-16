@@ -30,8 +30,16 @@ Genesys:
   SwitchName:
     SwitchLastName: i'm a SwitchLastName
     SwitchFirstName:
-      SwitchFirstFirstName: aaa
+      SwitchFirstFirstName: {cisco}
       SwitchSecondSecond: bbb
+cisco: aaa
+ciscoList:
+  - ${aa}
+  - ${bb}
+db: ${cisco}
+#db: aaa
+
+#  host: localhost
 #Genesys:
 #  SwitchName: Switchnameeeee
 #  SwitchFirstName:

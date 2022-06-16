@@ -3,6 +3,7 @@ package com.example.yamlvalidator.utils;
 import com.example.yamlvalidator.MyStreamToStringWriter;
 
 import com.example.yamlvalidator.entity.Parameter;
+import com.example.yamlvalidator.entity.Position;
 import com.example.yamlvalidator.errors.ValidationError;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +26,7 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.composer.Composer;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 import org.snakeyaml.engine.v2.nodes.Node;
+import org.snakeyaml.engine.v2.nodes.ScalarNode;
 import org.snakeyaml.engine.v2.parser.ParserImpl;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
 
@@ -51,6 +53,7 @@ public final class ValidatorUtils {
 //    public static final String MANDATORY_CUSTOM_CHILDREN = "{0} is mandatory, and must have at least one custom field: {1}";
 
     public static final String OR_TYPE_SPLITTER = " or ";
+    public static final String EMPTY = "";
 
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final Pattern pattern = Pattern.compile(".*?\\$\\{(\\w+)\\}.*?");
@@ -220,6 +223,21 @@ public final class ValidatorUtils {
                 .filter(keyWord -> keyWord.name().equalsIgnoreCase(name))
                 .findAny();
     }
+
+//    public static Position getPosition(final Node node) {
+//        return Optional.ofNullable(node)
+//                .flatMap(Node::getStartMark)
+//                .map(mark -> Position.of(mark.getLine(), mark.getColumn()))
+//                .orElse(null);
+//    }
+//
+//    public static String getName(final Node keyNode) {
+//        return Optional.ofNullable(keyNode)
+//                .map(ScalarNode.class::cast)
+//                .map(ScalarNode::getValue)
+//                .map(String::toLowerCase)
+//                .orElse(EMPTY);
+//    }
 
     public static Optional<Node> yamlToNode(String yaml) {
         var loadSettings = LoadSettings.builder()

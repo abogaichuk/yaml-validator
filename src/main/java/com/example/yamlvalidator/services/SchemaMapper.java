@@ -21,22 +21,22 @@ import static com.example.yamlvalidator.utils.MessagesUtils.getMessage;
 import static com.example.yamlvalidator.utils.ValidatorUtils.*;
 import static org.snakeyaml.engine.v2.nodes.NodeType.*;
 
-public class SchemaMapper implements YamlMapper<Schema> {
+public class SchemaMapper {
     private final PlaceHolderResolver placeHolderResolver;
-    private Optional<NodeTuple> typesNode;
+    private final MappingNode rootNode;
+    private NodeTuple typesNode;
 
-    public SchemaMapper(PlaceHolderResolver placeHolderResolver) {
-        this.placeHolderResolver = placeHolderResolver;
+    public SchemaMapper(MappingNode node) {
+        Objects.requireNonNull(node);
+        this.rootNode = node;
+        this.placeHolderResolver = new PlaceHolderResolver(node);
+        this.typesNode = node.getValue().stream()
+                .filter(nodeTuple -> TYPES.name().equalsIgnoreCase(getName(nodeTuple.getKeyNode())))
+                .findAny().orElse(null);
     }
 
-    @Override
-    public Schema map(Node node) {
-        var root = (MappingNode) node;
-        typesNode = root.getValue().stream()
-                .filter(nodeTuple -> TYPES.name().equalsIgnoreCase(getKey(nodeTuple)))
-                .findAny();
-
-        return build(Position.of(1, 1), Parameter.YamlType.MAPPING, root);
+    public Schema map() {
+        return build(Position.of(1, 1), Parameter.YamlType.MAPPING, rootNode);
     }
 
     private Schema build(Position position, Parameter.YamlType type, MappingNode node) {
@@ -63,13 +63,13 @@ public class SchemaMapper implements YamlMapper<Schema> {
     //todo do we need the parent?
     private Stream<Schema> toParameters(final MappingNode node, final Schema parent) {
         return node.getValue().stream()
-                .filter(tuple -> !TYPES.name().equalsIgnoreCase(getKey(tuple)))
+                .filter(tuple -> !TYPES.name().equalsIgnoreCase(getName(tuple.getKeyNode())))
                 .map(n -> toParameter(n, parent))
                 .filter(Objects::nonNull);
     }
 
     private Schema toParameter(final NodeTuple tuple, final Schema parent) {
-        var paramName = getKey(tuple).toLowerCase();
+        var paramName = getName(tuple.getKeyNode());
         var position = getPosition(tuple.getKeyNode());
 
         if (tuple.getValueNode().getNodeType().equals(MAPPING)) {
@@ -161,12 +161,12 @@ public class SchemaMapper implements YamlMapper<Schema> {
     }
 
     private Optional<NodeTuple> findCustomType(String type) {
-        return typesNode
+        return Optional.ofNullable(typesNode)
                 .map(NodeTuple::getValueNode)
                 .map(MappingNode.class::cast)
                 .map(MappingNode::getValue)
                 .flatMap(types -> types.stream()
-                        .filter(tuple -> getKey(tuple).equalsIgnoreCase(type))
+                        .filter(tuple -> getName(tuple.getKeyNode()).equalsIgnoreCase(type))
                         .findAny());
     }
 
@@ -193,5 +193,20 @@ public class SchemaMapper implements YamlMapper<Schema> {
         } else {
             return build("", ((ScalarNode) node).getValue(), parent, position, Parameter.YamlType.SEQUENCE);
         }
+    }
+
+    public Position getPosition(final Node node) {
+        return Optional.ofNullable(node)
+                .flatMap(Node::getStartMark)
+                .map(mark -> Position.of(mark.getLine(), mark.getColumn()))
+                .orElse(null);
+    }
+
+    public String getName(final Node keyNode) {
+        return Optional.ofNullable(keyNode)
+                .map(ScalarNode.class::cast)
+                .map(ScalarNode::getValue)
+                .map(String::toLowerCase)
+                .orElse(EMPTY);
     }
 }

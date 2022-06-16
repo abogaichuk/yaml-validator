@@ -5,6 +5,7 @@ import com.example.yamlvalidator.entity.Resource;
 import com.example.yamlvalidator.entity.Schema;
 import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.grammar.RuleService;
+import com.example.yamlvalidator.utils.MappingUtils;
 import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
@@ -27,8 +28,8 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.printPreview;
 
 public class YamlService {
     private final RuleService rules = new RuleService();
-    private final YamlMapper<Schema> schemaMapper = new SchemaMapper(new PlaceHolderResolver());
-    private final YamlMapper<Resource> resourceMapper = new ResourceMapper(new PlaceHolderResolver());
+//    private final YamlMapper<Schema> schemaMapper = new SchemaMapper(new PlaceHolderResolver());
+//    private final YamlMapper<Resource> resourceMapper = new ResourceMapper(new PlaceHolderResolver());
 
     public void execute(Execution execution) throws IOException {
         try {
@@ -36,15 +37,15 @@ public class YamlService {
             var resourceNode = readFile(execution.getResource());
 
             var optionalResource = resourceNode
-                    .map(resourceMapper::map);
-            optionalResource.ifPresent(resource -> printPreview(resourceMapper.map(resource)));
+                    .map(node -> new ResourceMapper((MappingNode) node).map());
+            optionalResource.ifPresent(resource -> printPreview(MappingUtils.map(resource)));
 
             defNode
-                    .map(schemaMapper::map)
+                    .map(node -> new SchemaMapper((MappingNode) node).map())
                     .ifPresent(schema -> {
-                        printPreview(schemaMapper.map(schema));
-                        var validationResult = schema.validate(rules, optionalResource.orElse(null));
-                        validationResult.getReasons().forEach(System.out::println);
+                        printPreview(MappingUtils.map(schema));
+//                        var validationResult = schema.validate(rules, optionalResource.orElse(null));
+//                        validationResult.getReasons().forEach(System.out::println);
                     });
 //
 //            System.out.println(preview(resourceString, true));
