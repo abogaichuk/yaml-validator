@@ -251,11 +251,7 @@ public final class ValidatorUtils {
     }
 
     public static void printPreview(Node node) {
-        try {
-            System.out.println(preview(nodeToString(node), false));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
+        System.out.println(preview(nodeToString(node)));
     }
 
     public static String nodeToString(Node root) {
@@ -264,14 +260,18 @@ public final class ValidatorUtils {
         var writer = new MyStreamToStringWriter();
         yaml.dumpNode(root, writer);
 
-        return writer.toString();
+        return writer.toString().trim();
     }
 
-    private static String preview(String data, boolean format) throws JsonProcessingException {
-        var yamlReader = new ObjectMapper(new YAMLFactory());
-        var obj = yamlReader.readValue(data, Object.class);
-
-        var writer = format ? new ObjectMapper() : new ObjectMapper(new YAMLFactory());
-        return writer.writeValueAsString(obj);
+    public static String preview(String data) {
+        try {
+            var yamlReader = new ObjectMapper(new YAMLFactory());
+            var obj = yamlReader.readValue(data, Object.class);
+            var writer = new ObjectMapper(new YAMLFactory());
+            return writer.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return EMPTY;
+        }
     }
 }

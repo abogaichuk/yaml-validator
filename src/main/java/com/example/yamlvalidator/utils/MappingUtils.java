@@ -59,8 +59,19 @@ public class MappingUtils {
     }
 
     private static Node toNode(Parameter parameter) {
-        return parameter.getChildren().findAny().isEmpty()
-                ? new ScalarNode(Tag.STR, parameter.getValue() , ScalarStyle.PLAIN)
-                : new MappingNode(Tag.MAP, toNodes(parameter.getChildren(), MappingUtils::toNodeTuple), FlowStyle.BLOCK);
+//        return parameter.getChildren().findAny().isEmpty()
+//                ? new ScalarNode(Tag.STR, parameter.getValue() , ScalarStyle.PLAIN)
+//                : new MappingNode(Tag.MAP, toNodes(parameter.getChildren(), MappingUtils::toNodeTuple), FlowStyle.BLOCK);
+        if (parameter.getChildren().findAny().isEmpty()) {
+            if (EMPTY.equalsIgnoreCase(parameter.getName())) {
+                return new ScalarNode(Tag.STR, parameter.getValue() , ScalarStyle.PLAIN);
+            } else {
+                var tuple = new NodeTuple(new ScalarNode(Tag.STR, parameter.getName(), ScalarStyle.PLAIN),
+                        new ScalarNode(Tag.STR, parameter.getValue(), ScalarStyle.PLAIN));
+                return new MappingNode(Tag.MAP, List.of(tuple), FlowStyle.BLOCK);
+            }
+        } else {
+            return new MappingNode(Tag.MAP, toNodes(parameter.getChildren(), MappingUtils::toNodeTuple), FlowStyle.BLOCK);
+        }
     }
 }

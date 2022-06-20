@@ -42,20 +42,65 @@
 #  list:
 #    - qa
 #
-types:
-  Admin:
-    type: string
-    list:
-      - system
-      - devops
+#types:
+#  Admin:
+#    type: string
+#    list:
+#      - system
+#      - devops
 #      - ${aaa} todo bug?
-  AutoTest: number
-  ManualTest:
-    id: number
-    executedDate: datetime
-    user: Admin
-#user: Admin
-Test: AutoTest or ManualTest
+
+#user:
+#  type: number
+#user:
+#  oneOf:
+#    - type: boolean
+#    - type: number
+#types:
+#  Admin:
+#    type: string
+#    list:
+#      - system
+#      - devops
+#  AutoTest: number
+#  ManualTest:
+#    id: number
+#    executedDate: datetime
+#    user: Admin
+#Test: AutoTest or ManualTest
+#test:
+#  oneof:
+#  - type: number
+#  - type: object
+#    id:
+#      type: number
+#    executeddate:
+#      type: datetime
+#    user:
+#      type: string
+#      list:
+#        - system
+#        - devops
+tests:
+  - type: number
+  - type: object
+    id:
+      type: number
+    name:
+      type: string
+#    - "number"
+#    - id: "number"
+#      executedDate: "datetime"
+#      user:
+#        type: "string"
+#        list:
+#          - "system"
+#          - "devops"
+#test: string or number
+#test:
+#  oneof:
+#    - string
+#    - number
 #db:
 #  user: string
 #  password: string

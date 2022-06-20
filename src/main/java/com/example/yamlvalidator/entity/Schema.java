@@ -7,6 +7,8 @@ import lombok.Builder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Builder
@@ -64,6 +66,13 @@ public class Schema implements Parameter {
         children.addAll(parameters);
     }
 
+    public void deleteIfPresent(String name) {
+        children.stream()
+                .filter(child -> child.getName().equalsIgnoreCase(name))
+                .findAny()
+                .ifPresent(children::remove);
+    }
+
     public ValidationResult validate(RuleService rules, Resource resource) {
         var result = validateSelf(rules, resource);
 
@@ -76,6 +85,10 @@ public class Schema implements Parameter {
 
     private ValidationResult validateSelf(RuleService rules, Resource resource) {
         return StandardType.getOrDefault(getTypeValue()).ruleFunction.apply(rules).validate(this, resource);
+    }
+
+    public boolean containsChild(Parameter parameter) {
+        return getChildren().anyMatch(child -> child.equals(parameter));
     }
 
     public String getTypeValue() {

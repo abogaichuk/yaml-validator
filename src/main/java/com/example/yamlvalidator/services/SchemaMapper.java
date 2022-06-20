@@ -2,22 +2,21 @@ package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.Position;
-import com.example.yamlvalidator.entity.Resource;
 import com.example.yamlvalidator.entity.Schema;
 import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.grammar.KeyWord;
-import org.snakeyaml.engine.v2.common.FlowStyle;
+import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.nodes.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.grammar.KeyWord.ONEOF;
-import static com.example.yamlvalidator.grammar.KeyWord.TYPES;
+import static com.example.yamlvalidator.grammar.KeyWord.*;
 import static com.example.yamlvalidator.utils.MappingUtils.getName;
 import static com.example.yamlvalidator.utils.MappingUtils.getPosition;
 import static com.example.yamlvalidator.utils.MessagesUtils.MESSAGE_UNKNOWN_TYPE;
@@ -27,6 +26,7 @@ import static org.snakeyaml.engine.v2.nodes.NodeType.*;
 
 public class SchemaMapper {
     private final PlaceHolderResolver placeHolderResolver;
+    private final CustomTypesResolver customTypesResolver;
     private final MappingNode rootNode;
     private final NodeTuple typesNode;
 
@@ -37,10 +37,12 @@ public class SchemaMapper {
         this.typesNode = node.getValue().stream()
                 .filter(nodeTuple -> TYPES.name().equalsIgnoreCase(getName(nodeTuple.getKeyNode())))
                 .findAny().orElse(null);
+        this.customTypesResolver = new CustomTypesResolver(typesNode);
     }
 
     public Schema map() {
-        return build(EMPTY, EMPTY, null, Position.of(1, 1), Parameter.YamlType.MAPPING, rootNode);
+        var schema = build(EMPTY, EMPTY, null, Position.of(1, 1), Parameter.YamlType.MAPPING, rootNode);
+        return schema;
     }
 
     private Schema build(String name, String value, Schema parent, Position position, Parameter.YamlType type) {
@@ -53,15 +55,36 @@ public class SchemaMapper {
     }
 
     private Schema build(String name, String value, Schema parent, Position position,
-                         Parameter.YamlType type, CollectionNode<?> node) {
+                         Parameter.YamlType type, Node node) {
         var schema = build(name, value, parent, position, type);
+        if (parent != null) {
+            parent.deleteIfPresent(name);
+        }
         if (node != null) {
-            schema.addChildren(toParameters(node, schema));
+            if (node instanceof CollectionNode) {
+                schema.addChildren(toParameters((CollectionNode<?>) node, schema));
+            } else {
+                var child = build(TYPE.name().toLowerCase(), ((ScalarNode) node).getValue(),
+                        schema, null, Parameter.YamlType.SCALAR);
+                schema.addChild(child);
+            }
         }
         return schema;
     }
 
-    //todo do we need the parent?
+//    private Schema build(String name, String value, Schema parent, Position position,
+//                         Parameter.YamlType type, CollectionNode<?> node) {
+//        var schema = build(name, value, parent, position, type);
+//        if (parent != null) {
+//            parent.deleteIfPresent(name);
+//        }
+//        if (node != null) {
+//            schema.addChildren(toParameters(node, schema));
+//        }
+//        return schema;
+//    }
+
+    //todo do we need the parent? we need because of we need parent for type section parsing
     private List<Schema> toParameters(final CollectionNode<?> node, final Schema parent) {
         return node.getValue().stream()
                 .map(o -> {
@@ -104,68 +127,118 @@ public class SchemaMapper {
                         if (SCALAR.equals(node.getNodeType())) {
                             return build(paramName, ((ScalarNode) node).getValue(), parent, position, Parameter.YamlType.SCALAR);
                         } else if (MAPPING.equals(node.getNodeType())) {
+                            //todo debug case
                             return build(paramName, value, parent, position, Parameter.YamlType.MAPPING, (MappingNode) node);
                         } else {
                             return build(paramName, EMPTY, parent, position, Parameter.YamlType.SEQUENCE, (MappingNode) node);
                         }
                     })
                     .orElseThrow(() -> new PadmGrammarException(getMessage(MESSAGE_UNKNOWN_TYPE, paramName, value)));
-        } else if (typeResolvingIsNeeded(paramName, value)) {
-            var resolved = resolveTypes(paramName, parent, value.split(OR_TYPE_SPLITTER));
+        } else if (match(paramName)) {
+            var resolved = resolve(paramName, parent, position, value.split(OR_TYPE_SPLITTER));
             return resolved;
         }
         return build(paramName, value, parent, null, Parameter.YamlType.SCALAR);
     }
 
-    private Schema resolveTypes(String name, Schema parent, String[] types) {
+    private boolean match(String paramName) {
+        return isTypeKeyWord(paramName) || (isNotEmpty(paramName) && isNotAKeyword(paramName));
+    }
+
+    private Schema resolve(String name, Schema parent, Position position, String[] types) {
         if (types.length > 1) {
             if (KeyWord.TYPE.name().equalsIgnoreCase(name)) {
-                var oneOf = build(KeyWord.ONEOF.name().toLowerCase(), EMPTY, parent, null, Parameter.YamlType.SEQUENCE);
-                var children = Stream.of(types)
-                        .map(String::trim)
-                        .map(type -> resolveType("", oneOf, type))
-                        .collect(Collectors.toList());
-                oneOf.addChildren(children);
-                parent.addChild(oneOf);
-                return null;
+                setOneOf(parent, types);
+                return null; //return null because we want to delete type section and update its parent
             } else {
-                var param = build(name, EMPTY, parent, null, Parameter.YamlType.MAPPING);
-                var oneOf = build(ONEOF.name().toLowerCase(), EMPTY, param, null, Parameter.YamlType.SEQUENCE);
-                var children = Stream.of(types)
-                        .map(String::trim)
-                        .map(type -> resolveType("", oneOf, type))
-                        .collect(Collectors.toList());
-                oneOf.addChildren(children);
-                param.addChild(oneOf);
+                var param = build(name, EMPTY, parent, position, Parameter.YamlType.MAPPING);
+                setOneOf(param, types);
                 return param;
             }
         } else {
+            var type = types[0];
+
             if (KeyWord.TYPE.name().equalsIgnoreCase(name)) {
-                var children = resolveType(parent.getName(), (Schema) parent.getParent(), types[0]).getChildren()
-                        .map(Schema.class::cast)
-                        .collect(Collectors.toList());
-                parent.addChildren(children);
+                if (isStandardType(type)) {
+                    parent.addChild(build(name, type, parent, position, Parameter.YamlType.SCALAR));
+                } else {
+                    var customTypes = mapCustomParams(name, parent, type, position);
+                    parent.addChildren(customTypes);
+                }
                 return null;
             } else {
-                Schema param = resolveType(name, parent, types[0]);
-                return param;
+                if (isStandardType(type)) {
+                    var param = build(name, EMPTY, parent, position, Parameter.YamlType.MAPPING);
+                    param.addChild(build(TYPE.name().toLowerCase(), type, param, position, Parameter.YamlType.SCALAR));
+                    return param;
+//                    return build(EMPTY, type, parent, position, Parameter.YamlType.SCALAR);
+                } else {
+                    var param = build(name, EMPTY, parent, position, Parameter.YamlType.MAPPING);
+                    var children = getCustomType(type)
+                            .map(tuple -> {
+                                if (tuple.getValueNode() instanceof CollectionNode) {
+                                    return toParameters((MappingNode) tuple.getValueNode(), param);
+                                } else {
+                                    return List.of(build(TYPE.name().toLowerCase(), ((ScalarNode) tuple.getValueNode()).getValue(), param, position, Parameter.YamlType.SCALAR));
+//                                    Schema schema = toParameter(new ScalarNode(Tag.STR, TYPE.name(), ScalarStyle.PLAIN), tuple.getValueNode(), param);
+//                                    return List.of(schema);
+                                }
+                            }).orElseThrow(() -> new PadmGrammarException(getMessage(MESSAGE_UNKNOWN_TYPE, param, type)));
+                    param.addChildren(children);
+//                    findCustomType(type)
+//                            .map(tuple -> build(name, type, parent, position, ))
+//                    var r = customTypes.isEmpty() ? null : customTypes.get(0);
+//                    var r = resolveType(name, parent, type, position);
+//                    return r;
+//                    return resolveType(name, parent, type, position);
+                    return param;
+                }
             }
         }
     }
 
-    private Schema resolveType(String name, Schema parent, String type) {
-        if (isStandardType(type)) {
-            return build("", type, parent, null, Parameter.YamlType.SCALAR);
-        } else {
-            Optional<NodeTuple> customType = findCustomType(type);
-            Schema schemaParams = customType
-                    .map(nodeTuple -> toParameter(new ScalarNode(Tag.STR, name, ScalarStyle.PLAIN), nodeTuple.getValueNode(), parent))
-                    .orElseThrow(() -> new PadmGrammarException(getMessage(MESSAGE_UNKNOWN_TYPE, parent, type)));
-            return schemaParams;
-        }
+    private List<Schema> mapCustomParams(String name, Schema parent, String type, Position position) {
+        return getCustomType(type)
+                .map(tuple -> {
+                    if (tuple.getValueNode() instanceof CollectionNode) {
+                        return toParameters((MappingNode) tuple.getValueNode(), parent);
+                    } else {
+                        var a = build(TYPE.name().toLowerCase(), ((ScalarNode) tuple.getValueNode()).getValue(),
+                                parent, position, Parameter.YamlType.SCALAR);
+                        return List.of(a);
+//                        return List.of(toParameter(new ScalarNode(Tag.STR, name, ScalarStyle.PLAIN), tuple.getValueNode(), parent));
+                    }
+                }).orElseThrow(() -> new PadmGrammarException(getMessage(MESSAGE_UNKNOWN_TYPE, parent, type)));
     }
 
-    private Optional<NodeTuple> findCustomType(String type) {
+    private void setOneOf(Schema parent, String[] types) {
+        var oneOf = build(ONEOF.name().toLowerCase(), EMPTY, parent, null, Parameter.YamlType.SEQUENCE);
+        var children = Stream.of(types)
+                .map(String::trim)
+                .map(type -> resolveType(type, oneOf))
+                .collect(Collectors.toList());
+        oneOf.addChildren(children);
+        parent.addChild(oneOf);
+    }
+
+    private Schema resolveType(String type, Schema parent) {
+        return getStandardType(type)
+                .map(tuple -> build(EMPTY, EMPTY, parent, null, Parameter.YamlType.MAPPING, tuple.getValueNode()))
+                .orElseGet(() -> getCustomType(type)
+                        .map(tuple -> build(EMPTY, EMPTY, parent, null, Parameter.YamlType.MAPPING,
+                                tuple.getValueNode()))
+                        .orElseThrow(() -> new PadmGrammarException(getMessage(MESSAGE_UNKNOWN_TYPE, parent, type))));
+    }
+
+    private Optional<NodeTuple> getStandardType(String type) {
+        return Optional.ofNullable(type)
+                .filter(ValidatorUtils::isStandardType)
+                .map(t -> new NodeTuple(
+                        new ScalarNode(Tag.STR, TYPE.name().toLowerCase(), ScalarStyle.PLAIN),
+                        new ScalarNode(Tag.STR, t, ScalarStyle.PLAIN)));
+    }
+
+    private Optional<NodeTuple> getCustomType(String type) {
         return Optional.ofNullable(typesNode)
                 .map(NodeTuple::getValueNode)
                 .map(MappingNode.class::cast)
@@ -173,10 +246,5 @@ public class SchemaMapper {
                 .flatMap(types -> types.stream()
                         .filter(tuple -> getName(tuple.getKeyNode()).equalsIgnoreCase(type))
                         .findAny());
-    }
-
-    //if paramname == type or paramname is not a keyword(custom type) and value is not a standard type
-    private boolean typeResolvingIsNeeded(String paramName, String typeValue) {
-        return (isTypeKeyWord(paramName) || (isNotEmpty(paramName) && isNotAKeyword(paramName))) && isNotAStandardType(typeValue);
     }
 }

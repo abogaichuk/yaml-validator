@@ -1,6 +1,7 @@
 #ResourceType: GeneralTest
 #Name: Valid name for valid resource
 
+#user: true
 #Test: true
 #bbb: asdasd
 #ManualTest: 7sd
