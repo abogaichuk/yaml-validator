@@ -20,4 +20,8 @@ public enum KeyWord {
     LIST,
     AFTER,
     BEFORE;
+
+    public String lowerCase() {
+        return this.name().toLowerCase();
+    }
 }
