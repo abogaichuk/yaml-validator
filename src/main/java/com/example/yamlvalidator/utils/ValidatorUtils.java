@@ -1,20 +1,8 @@
 package com.example.yamlvalidator.utils;
 
 import com.example.yamlvalidator.MyStreamToStringWriter;
-
 import com.example.yamlvalidator.entity.Parameter;
-import com.example.yamlvalidator.entity.Position;
 import com.example.yamlvalidator.errors.ValidationError;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.function.Function;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import com.example.yamlvalidator.grammar.KeyWord;
 import com.example.yamlvalidator.grammar.StandardType;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -26,32 +14,25 @@ import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.composer.Composer;
 import org.snakeyaml.engine.v2.exceptions.Mark;
 import org.snakeyaml.engine.v2.nodes.Node;
-import org.snakeyaml.engine.v2.nodes.ScalarNode;
 import org.snakeyaml.engine.v2.parser.ParserImpl;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.Function;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.text.MessageFormat.format;
 
 public final class ValidatorUtils {
-//    public static final String MESSAGE_IS_NAN = "{0} is not a number";
-//    public static final String MESSAGE_IS_NOT_A_BOOLEAN = "{0} is not a boolean";
-//    public static final String MESSAGE_IS_NOT_A_DATETIME = "{0} is not a datetime";
-//    public static final String MESSAGE_LESS_THAN = "{0} < {1}";
-//    public static final String MESSAGE_MORE_THAN = "{0} > {1}";
-//    public static final String MESSAGE_IS_BEFORE = "{0} is before {1}";
-//    public static final String MESSAGE_IS_AFTER = "{0} is after {1}";
-//    public static final String MESSAGE_LIST_DOES_NOT_CONTAIN = "{0} is not in validator {1}";
-//    public static final String MESSAGE_HAS_DUPLICATES = "{0} has duplicates: {1}";
-//    public static final String MESSAGE_UNKNOWN_TYPE = "{0}, type {1} is not define";
-//    public static final String MESSAGE_SCHEMA_INCORRECT = "{0} incorrect fields {1}";
-//    public static final String MESSAGE_RESOURCE_UNKNOWN_TYPE = "{0}, value {1} cant be resolved to type {2}";
-//    public static final String MESSAGE_PARAMETER_BYPASS = "Parameter {0} is bypass, validation is skipped, {1}";
-//    public static final String MESSAGE_INVALID_RESOURCE = "{0} resource is invalid";
-//    public static final String DATETIME_PARSED_ERROR = "Can't parse parameter {0} using pattern {1}";
-//
-//    public static final String MANDATORY_PARAMETER = "{0} is mandatory, but missed";
-//    public static final String MANDATORY_CUSTOM_CHILDREN = "{0} is mandatory, and must have at least one custom field: {1}";
-
     public static final String OR_TYPE_SPLITTER = " or ";
     public static final String EMPTY = "";
 
