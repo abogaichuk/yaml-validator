@@ -1,5 +1,6 @@
 package com.example.yamlvalidator.entity;
 
+import com.example.yamlvalidator.grammar.Conditions;
 import com.example.yamlvalidator.grammar.KeyWord;
 import com.example.yamlvalidator.grammar.RuleService;
 import com.example.yamlvalidator.grammar.StandardType;
@@ -10,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static com.example.yamlvalidator.entity.ValidationResult.*;
+import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 
 @Builder
 public class Schema implements Parameter {
@@ -76,19 +80,17 @@ public class Schema implements Parameter {
     public ValidationResult validate(RuleService rules, Resource resource) {
         var result = validateSelf(rules, resource);
 
-        return getChildren()
-                .filter(Parameter::isNotAKeyword)
-                .map(Schema.class::cast)
-                .map(param -> param.validate(rules, getAppropriateResource(param.getName(), resource)))
-                .reduce(result, ValidationResult::merge);
+        return result.isValid()
+                ? getChildren()
+                    .filter(Parameter::isNotAKeyword)
+                    .map(Schema.class::cast)
+                    .map(param -> param.validate(rules, getAppropriateResource(param.getName(), resource)))
+                    .reduce(valid(), ValidationResult::merge)
+                : result;
     }
 
     private ValidationResult validateSelf(RuleService rules, Resource resource) {
         return StandardType.getOrDefault(getTypeValue()).ruleFunction.apply(rules).validate(this, resource);
-    }
-
-    public boolean containsChild(Parameter parameter) {
-        return getChildren().anyMatch(child -> child.equals(parameter));
     }
 
     public String getTypeValue() {
@@ -96,13 +98,6 @@ public class Schema implements Parameter {
                 .map(Parameter::getValue)
                 .orElse(this.getValue());
     }
-//
-//    public List<Schema> getCustomFields() {
-//        return getChildren()
-////                .map(SchemaParam.class::cast)
-//                .filter(Parameter::isCustomTypeDefinition)
-//                .collect(Collectors.toList());
-//    }
 
     public Resource getAppropriateResource(String name, Resource resource) {
         return resource == null ? null : resource.getChildren()

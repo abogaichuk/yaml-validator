@@ -8,6 +8,7 @@ public enum KeyWord {
     UNIQUE,
     ONEOF,
     ANYOF,
+    OPTIONAL,
     PROPERTIES,
     PATTERN,
     DESCRIPTION,

@@ -82,5 +82,8 @@
 #  - datetime: "2222-10-10"
 #  value: 8080 #need new keyword for resource? default or value or?
 #Cisco: ${cisco}
+#test:
+#  idd: 1
+#test: asd
 
 

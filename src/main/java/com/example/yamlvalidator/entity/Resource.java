@@ -15,14 +15,6 @@ public class Resource implements Parameter {
     private final Position position;
     private final YamlType yamlType;
 
-//    public Resource(String name, String value, Resource parent, Position position, YamlType yamlType) {
-//        this.name = name;
-//        this.value = value;
-//        this.parent = parent;
-//        this.position = position;
-//        this.yamlType = yamlType;
-//    }
-
     @Override
     public String getName() {
         return name;

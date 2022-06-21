@@ -145,7 +145,7 @@ public class SchemaMapper {
             }
             return null; //return null because we want to delete type section and update its parent
         } else {
-            return types.length > 1 ? resolveOneOf(name, parent, position, types) : resolveParam(name, types[0], parent);
+            return types.length > 1 ? resolveOneOf(name, parent, position, types) : resolveParam(name, types[0], parent, position);
         }
     }
 
@@ -159,11 +159,11 @@ public class SchemaMapper {
         return TYPE.lowerCase().equals(name);
     }
 
-    private Schema resolveParam(String name, String type, Schema parent) {
+    private Schema resolveParam(String name, String type, Schema parent, Position position) {
         return getStandardType(type)
-                .map(tuple -> build(name, EMPTY, parent, null, Parameter.YamlType.MAPPING, tuple.getValueNode()))
+                .map(tuple -> build(name, EMPTY, parent, position, Parameter.YamlType.MAPPING, tuple.getValueNode()))
                 .orElseGet(() -> getCustomType(type)
-                        .map(tuple -> build(name, EMPTY, parent, null, Parameter.YamlType.MAPPING, tuple.getValueNode()))
+                        .map(tuple -> build(name, EMPTY, parent, position, Parameter.YamlType.MAPPING, tuple.getValueNode()))
                         .orElseThrow(() -> new PadmGrammarException(getMessage(MESSAGE_UNKNOWN_TYPE, parent, type))));
     }
 
@@ -179,7 +179,7 @@ public class SchemaMapper {
         var oneOf = build(ONEOF.lowerCase(), EMPTY, parent, Parameter.YamlType.SEQUENCE);
         var children = Stream.of(types)
                 .map(String::trim)
-                .map(type -> resolveParam(EMPTY, type, oneOf))
+                .map(type -> resolveParam(EMPTY, type, oneOf, null))
                 .collect(Collectors.toList());
         oneOf.addChildren(children);
         parent.addChild(oneOf);

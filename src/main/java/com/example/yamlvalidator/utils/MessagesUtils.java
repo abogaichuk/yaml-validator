@@ -17,8 +17,8 @@ public class MessagesUtils {
     public static final String MESSAGE_INVALID_RESOURCE = "%s resource is invalid";
     public static final String DATETIME_PARSED_ERROR = "Can't parse parameter %1$s using pattern %2$s";
 
-    public static final String MANDATORY_PARAMETER = "{0} is mandatory, but missed";
-    public static final String MANDATORY_CUSTOM_CHILDREN = "{0} is mandatory, and must have at least one custom field: {1}";
+    public static final String MANDATORY_PARAMETER = "%1$s is mandatory, but missed";
+    public static final String MANDATORY_CUSTOM_CHILDREN = "%1$s is mandatory, and must have all mandatory fields: %2$s";
 
 
     public static String getMessage(String code) {

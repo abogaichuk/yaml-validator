@@ -1,5 +1,6 @@
 package com.example.yamlvalidator.entity;
 
+import com.example.yamlvalidator.grammar.Conditions;
 import com.example.yamlvalidator.grammar.KeyWord;
 
 import java.util.Collections;
@@ -66,6 +67,26 @@ public interface Parameter {
         return findCustomFields()
                 .map(Parameter::getName)
                 .collect(Collectors.toList());
+    }
+
+    default boolean isMandatory() {
+        return isRoot() && findChild(KeyWord.OPTIONAL.lowerCase())
+                .filter(Conditions.boolValueIsTrue)
+                .isEmpty();
+    }
+
+    private boolean isRoot() {
+        return getParent() != null;
+    }
+
+    default boolean hasDefaultValue() {
+        return findChild(KeyWord.DEFAULT.lowerCase())
+                .filter(defaultParam -> isNotEmpty(defaultParam.getValue()))
+                .isPresent();
+    }
+
+    default String getParentName() {
+        return getParent() == null ? "" : getParent().getName();
     }
 
 }

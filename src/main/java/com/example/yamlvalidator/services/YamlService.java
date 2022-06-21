@@ -28,8 +28,6 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.printPreview;
 
 public class YamlService {
     private final RuleService rules = new RuleService();
-//    private final YamlMapper<Schema> schemaMapper = new SchemaMapper(new PlaceHolderResolver());
-//    private final YamlMapper<Resource> resourceMapper = new ResourceMapper(new PlaceHolderResolver());
 
     public void execute(Execution execution) throws IOException {
         try {
@@ -44,8 +42,8 @@ public class YamlService {
                     .map(node -> new SchemaMapper((MappingNode) node).map())
                     .ifPresent(schema -> {
                         printPreview(MappingUtils.map(schema));
-//                        var validationResult = schema.validate(rules, optionalResource.orElse(null));
-//                        validationResult.getReasons().forEach(System.out::println);
+                        var validationResult = schema.validate(rules, optionalResource.orElse(null));
+                        validationResult.getReasons().forEach(System.out::println);
                     });
 //
 //            System.out.println(preview(resourceString, true));

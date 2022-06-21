@@ -81,13 +81,21 @@
 #      list:
 #        - system
 #        - devops
-tests:
-  - type: number
-  - type: object
-    id:
-      type: number
-    name:
-      type: string
+test:
+  type: object
+  id:
+    type: number
+    default: 12
+  name:
+    type: string
+    optional: true
+#tests:
+#  - type: number
+#  - type: object
+#    id:
+#      type: number
+#    name:
+#      type: string
 #    - "number"
 #    - id: "number"
 #      executedDate: "datetime"

@@ -5,6 +5,7 @@ import com.example.yamlvalidator.entity.Schema;
 import com.example.yamlvalidator.entity.ValidationResult;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
@@ -57,9 +58,7 @@ public class RuleService {
     }
 
     ValidationRule common() {
-        return bypass().or(noDuplicates()
-//                .and(mandatoryParameter())
-        );
+        return bypass().or(noDuplicates().and(mandatoryParameters()));
     }
 
     private ValidationRule standardTypeRule() {
@@ -74,7 +73,7 @@ public class RuleService {
     }
 
     private ValidationRule bypass() {
-        return (schema, resource) -> schema.findChild(BYPASS.name())
+        return (schema, resource) -> schema.findChild(BYPASS.lowerCase())
                 .filter(boolValueIsTrue)
                 .map(p -> invalid(getMessage(MESSAGE_PARAMETER_BYPASS, schema.getName(), p)))
                 .orElseGet(ValidationResult::valid);
@@ -101,7 +100,7 @@ public class RuleService {
     private ValidationRule oneOfRule() {
         var service = this;
         return (schema, resource) -> {
-            var validationResults = schema.findChild("oneOf")
+            var validationResults = schema.findChild(ONEOF.lowerCase())
                     .map(oneOf -> oneOf.getChildren()
                             .map(Schema.class::cast)
                             .map(schemaParam -> schemaParam.validate(service, resource))
@@ -114,36 +113,21 @@ public class RuleService {
         };
     }
 
-//    private ValidationRule mandatoryParameter() {
-//        var service = this;
-//        return (schema, resource) -> {
-//            if ((schema.isMandatory() || KeyWord.ONEOF.name().equalsIgnoreCase(schema.getParentName())) && !schema.hasDefaultValue()) {
-//                if (resource == null) {
-//                    if (schema.getParent().isMandatory() || schema.getParent().getParent() == null) {
-//                        return invalid(getMessage(MANDATORY_PARAMETER, schema));
-//                    } else {
-//                        return valid();
-//                    }
-//                } else {
-//                    var customFields = schema.findCustomFieldNames();
-//                    var resourceFields = resource.findCustomFieldNames();
-//                    if (customFields.size() > 0) {
-//                        //at least one child must be present
-//                        if (!Collections.disjoint(customFields, resourceFields)) {
-//                            return valid();
-//                        } else {
-//                            return invalid(getMessage(MANDATORY_CUSTOM_CHILDREN, schema, customFields));
-//                        }
-//                    } else {
-//                        if (isEmpty(resource.getValue()) && resourceFields.isEmpty()) {
-//                            return invalid(getMessage(MANDATORY_PARAMETER, schema));
-//                        }
-//                    }
-//                }
-//            }
-//            return valid();
-//        };
-//    }
+    private ValidationRule mandatoryParameters() {
+        return (schema, resource) -> {
+            if (schema.isMandatory()) {
+                var result = schema.findCustomFields()
+                        .filter(customField -> Optional.ofNullable(resource)
+                                .map(res -> res.findChild(customField.getName())).isEmpty()
+                                && customField.findChild(DEFAULT.lowerCase()).isEmpty())
+                        .filter(Parameter::isMandatory)
+                        .map(customField -> invalid(getMessage(MANDATORY_PARAMETER, customField)))
+                        .reduce(valid(), ValidationResult::merge);
+                return result;
+            }
+            return valid();
+        };
+    }
 
 //    private ValidationRule uniqueParameterRule() {
 //        return (schema, resource) -> {
