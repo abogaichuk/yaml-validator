@@ -109,6 +109,8 @@ public class SchemaMapper {
         }
     }
 
+    //core це джарка
+
     private Schema scalarParsing(String paramName, String value, Schema parent, Position position) {
         //todo why it's not a keyword, quick fix to avoid placeholder in description?
         if (isNotAKeyword(paramName) && placeHolderResolver.match(value)) {
@@ -118,7 +120,7 @@ public class SchemaMapper {
                         if (SCALAR.equals(node.getNodeType())) {
                             return build(paramName, ((ScalarNode) node).getValue(), parent, position, Parameter.YamlType.SCALAR);
                         } else if (MAPPING.equals(node.getNodeType())) {
-                            //todo debug case
+                            //todo debug this case
                             return build(paramName, value, parent, position, Parameter.YamlType.MAPPING, node);
                         } else {
                             return build(paramName, EMPTY, parent, position, Parameter.YamlType.SEQUENCE, node);

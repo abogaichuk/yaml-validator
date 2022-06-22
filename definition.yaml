@@ -112,7 +112,6 @@ test:
 #db:
 #  user: string
 #  password: string
-# todo merging validator, optional > required
 #Test: AutoTest or boolean
 #Port:
 #  default: 7002
@@ -134,7 +133,6 @@ test:
 #        type: boolean or number
 #  user:
 #    type: Admin
-#    list: todo merging params?
 #      - qa
 #aaa:
 #  type: Admin

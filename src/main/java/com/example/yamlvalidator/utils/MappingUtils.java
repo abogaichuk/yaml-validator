@@ -2,10 +2,19 @@ package com.example.yamlvalidator.utils;
 
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.Position;
+import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
+import org.snakeyaml.engine.v2.composer.Composer;
 import org.snakeyaml.engine.v2.nodes.*;
+import org.snakeyaml.engine.v2.parser.ParserImpl;
+import org.snakeyaml.engine.v2.scanner.StreamReader;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -15,6 +24,32 @@ import java.util.stream.Stream;
 import static com.example.yamlvalidator.utils.ValidatorUtils.EMPTY;
 
 public class MappingUtils {
+
+    public static Optional<Node> stringToNode(String yaml) {
+        var settings = LoadSettings.builder()
+                .setParseComments(true)
+                .build();
+        var reader = new StreamReader(settings, yaml);
+        var parser = new ParserImpl(settings, reader);
+        var composer = new Composer(settings, parser);
+
+        return composer.getSingleNode();
+    }
+
+    public static Optional<Node> fileToNode(String filename) {
+        return Optional.ofNullable(filename)
+                .map(fn -> readFile(fn).stream().reduce("", (acc, el) -> acc + el +"\n"))
+                .flatMap(MappingUtils::stringToNode);
+    }
+
+    private static List<String> readFile(String filename) {
+        try {
+            return Files.readAllLines(Paths.get(filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
 
     public static Node map(Parameter root) {
         var tuples = toNodes(root.getChildren(), MappingUtils::toNodeTuple);

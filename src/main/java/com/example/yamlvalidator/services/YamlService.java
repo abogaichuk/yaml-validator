@@ -1,24 +1,16 @@
 package com.example.yamlvalidator.services;
 
 import com.example.yamlvalidator.entity.Execution;
-import com.example.yamlvalidator.entity.Resource;
-import com.example.yamlvalidator.entity.Schema;
 import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.grammar.RuleService;
 import com.example.yamlvalidator.utils.MappingUtils;
 import com.example.yamlvalidator.utils.ValidatorUtils;
-import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
-import org.snakeyaml.engine.v2.composer.Composer;
 import org.snakeyaml.engine.v2.exceptions.ParserException;
 import org.snakeyaml.engine.v2.exceptions.ScannerException;
 import org.snakeyaml.engine.v2.nodes.*;
-import org.snakeyaml.engine.v2.parser.ParserImpl;
-import org.snakeyaml.engine.v2.scanner.StreamReader;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -31,8 +23,8 @@ public class YamlService {
 
     public void execute(Execution execution) throws IOException {
         try {
-            var defNode = readFile(execution.getDefinition());
-            var resourceNode = readFile(execution.getResource());
+            var defNode = MappingUtils.fileToNode(execution.getDefinition());
+            var resourceNode = MappingUtils.fileToNode(execution.getResource());
 
             var optionalResource = resourceNode
                     .map(node -> new ResourceMapper((MappingNode) node).map());
@@ -59,46 +51,9 @@ public class YamlService {
         }
     }
 
-//    private void printPreview(Node node) {
-//        try {
-//            System.out.println(preview(nodeToString(node), false));
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    private Optional<Node> readFile(String filename) throws FileNotFoundException {
-        var loadSettings = LoadSettings.builder()
-                .setParseComments(true)
-                .build();
-
-        var reader = new StreamReader(loadSettings, new FileReader(filename));
-        var parser = new ParserImpl(loadSettings, reader);
-        var composer = new Composer(loadSettings, parser);
-
-        return composer.getSingleNode();
-    }
-
-//    private String preview(String data, boolean format) throws JsonProcessingException {
-//        var yamlReader = new ObjectMapper(new YAMLFactory());
-//        var obj = yamlReader.readValue(data, Object.class);
-//
-//        var writer = format ? new ObjectMapper() : new ObjectMapper(new YAMLFactory());
-//        return writer.writeValueAsString(obj);
-//    }
-
     private void save(String filename, String data) throws IOException {
         Files.write(Paths.get(filename), data.getBytes());
     }
-
-//    private String nodeToString(Node root) {
-//        var settings = DumpSettings.builder().build();
-//        var yaml = new Dump(settings);
-//        var writer = new MyStreamToStringWriter();
-//        yaml.dumpNode(root, writer);
-//
-//        return writer.toString();
-//    }
 
     public void updateNodeByPath(Node node, String path, String newValue) {
         List<String> paths = Arrays.asList(path.split("/"));
@@ -189,7 +144,7 @@ public class YamlService {
     private List<Node> createSequenceValueList(List<String> newValues) {
         List<Node> nodeList = new ArrayList<>();
         newValues.forEach(value -> nodeList.add(
-                new ScalarNode(new Tag("tag:yaml.org,2002:str"), value, ScalarStyle.PLAIN)));
+                new ScalarNode(Tag.STR, value, ScalarStyle.PLAIN)));
         return nodeList;
     }
 

@@ -1,6 +1,7 @@
 package com.example.yamlvalidator.services;
 
 
+import com.example.yamlvalidator.utils.MappingUtils;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.composer.Composer;
 import org.snakeyaml.engine.v2.nodes.MappingNode;
@@ -26,16 +27,7 @@ public class PlaceHolderResolver {
                 "    Username: admin\n" +
                 "    Password: nimda";
 //        var yaml = "ccc";
-        var loadSettings = LoadSettings.builder()
-                .setParseComments(true)
-                .build();
-//        Load load = new Load(loadSettings);
-//        Object o = load.loadFromString(yaml);
-        var reader = new StreamReader(loadSettings, yaml);
-        var parser = new ParserImpl(loadSettings, reader);
-        var composer = new Composer(loadSettings, parser);
-
-        return composer.getSingleNode();
+        return MappingUtils.stringToNode(yaml);
     }
 
     public boolean match(String src) {
