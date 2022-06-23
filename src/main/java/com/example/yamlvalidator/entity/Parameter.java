@@ -15,10 +15,10 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
 public interface Parameter {
     String getName();
     String getValue();
-    Position getPosition();
     Parameter getParent();
     Stream<Parameter> getChildren();
     YamlType getType();
+    void addChildren(List<Parameter> parameters);
 
     enum YamlType {
         SCALAR, SEQUENCE, MAPPING
@@ -36,8 +36,12 @@ public interface Parameter {
                 .findAny() : Optional.empty();
     }
 
+    default Optional<Position> getPosition() {
+        return Optional.empty();
+    }
+
     default int getRow() {
-        return Optional.ofNullable(getPosition())
+        return getPosition()
                 .map(Position::getRow)
                 .orElse(-1);
     }
@@ -88,5 +92,4 @@ public interface Parameter {
     default String getParentName() {
         return getParent() == null ? "" : getParent().getName();
     }
-
 }

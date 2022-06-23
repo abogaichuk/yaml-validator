@@ -3,7 +3,7 @@ package com.example.yamlvalidator.services;
 import com.example.yamlvalidator.entity.Execution;
 import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.grammar.RuleService;
-import com.example.yamlvalidator.utils.MappingUtils;
+import com.example.yamlvalidator.mappers.SchemaMapper;
 import com.example.yamlvalidator.utils.ValidatorUtils;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
@@ -16,27 +16,73 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static com.example.yamlvalidator.utils.ValidatorUtils.printPreview;
-
 public class YamlService {
     private final RuleService rules = new RuleService();
 
     public void execute(Execution execution) throws IOException {
         try {
-            var defNode = MappingUtils.fileToNode(execution.getDefinition());
-            var resourceNode = MappingUtils.fileToNode(execution.getResource());
+            var originalSchema = ValidatorUtils.read(execution.getDefinition());
+            var originalResource = ValidatorUtils.read(execution.getResource());
 
-            var optionalResource = resourceNode
-                    .map(node -> new ResourceMapper((MappingNode) node).map());
-            optionalResource.ifPresent(resource -> printPreview(MappingUtils.map(resource)));
+//            var mapper = new PlaceHolderMapper(originalSchema);
+//            var mapper = new PlaceHolderMapper(Schema.SchemaBuilder.builder());
+            var mapper = new SchemaMapper();
+//            var mapper = new PlaceHolderMapper(Resource.ResourceBuilder.builder());
+            mapper.mapToParam(originalSchema)
+                    .map(parameter -> {
+                        System.out.println(parameter);
+                        return mapper.mapToNode(parameter);
+                    })
+                    .map(ValidatorUtils::nodeToString)
+                    .ifPresent(System.out::println);
+//            MappingUtils.stringToNode(originalSchema)
+//                    .map(node -> new PadmTransformer().transform())
 
-            defNode
-                    .map(node -> new SchemaMapper((MappingNode) node).map())
-                    .ifPresent(schema -> {
-                        printPreview(MappingUtils.map(schema));
-                        var validationResult = schema.validate(rules, optionalResource.orElse(null));
-                        validationResult.getReasons().forEach(System.out::println);
-                    });
+//            PadmMapper padmMapper = new PadmMapper();
+//            MappingUtils.stringToNode(originalSchema)
+//                    .map(node -> padmMapper.map(node))
+//                    .map(parameter -> padmMapper.mapToNode(parameter))
+//                    .map(ValidatorUtils::nodeToString)
+//                    .ifPresent(System.out::println);
+
+//            Mapper mapper = new DefaultMapper();
+//            Mapper mapper = new DefaultMapper();
+//            mapper.mapToParam(originalSchema, new SimpleResolver())
+//                    .map(parameter -> mapper.mapToNode(parameter))
+//                    .map(ValidatorUtils::nodeToString)
+//                    .ifPresent(System.out::println);
+
+//            Parameter parameter = MappingUtils.map(originalSchema);
+//            Node node = MappingUtils.map(parameter);
+//            String yaml = ValidatorUtils.nodeToString(node);
+//            System.out.println(yaml);
+
+//            PlaceHolderResolver customTypesResolver = new PlaceHolderResolver(new ResourceMapper());
+//            Optional<Parameter> resolved = customTypesResolver.resolve(originalSchema);
+
+//            resolved
+//                    .map(MappingUtils::map)
+//                    .map(ValidatorUtils::nodeToString)
+//                    .ifPresent(System.out::println);
+//            var mapper = new ResourceMapper();
+//            mapper.map(schema)
+//                    .map(MappingUtils::map)
+//                    .map(ValidatorUtils::nodeToString)
+//                    .ifPresent(System.out::println);
+//            var defNode = MappingUtils.fileToNode(execution.getDefinition());
+//            var resourceNode = MappingUtils.fileToNode(execution.getResource());
+//
+//            var optionalResource = resourceNode
+//                    .map(node -> new ResourceMapper((MappingNode) node).map());
+//            optionalResource.ifPresent(resource -> printPreview(MappingUtils.map(resource)));
+//
+//            defNode
+//                    .map(node -> new SchemaMapper((MappingNode) node).map())
+//                    .ifPresent(schema -> {
+//                        printPreview(MappingUtils.map(schema));
+//                        var validationResult = schema.validate(rules, optionalResource.orElse(null));
+//                        validationResult.getReasons().forEach(System.out::println);
+//                    });
 //
 //            System.out.println(preview(resourceString, true));
 //            System.out.println(preview(resourceString, false));

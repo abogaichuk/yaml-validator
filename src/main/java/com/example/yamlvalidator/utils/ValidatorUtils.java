@@ -17,6 +17,9 @@ import org.snakeyaml.engine.v2.nodes.Node;
 import org.snakeyaml.engine.v2.parser.ParserImpl;
 import org.snakeyaml.engine.v2.scanner.StreamReader;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -253,6 +256,21 @@ public final class ValidatorUtils {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
             return EMPTY;
+        }
+    }
+
+    public static String read(String filename) {
+        return Optional.ofNullable(filename)
+                .map(fn -> readFile(fn).stream().reduce("", (acc, el) -> acc + el +"\n"))
+                .orElse(EMPTY);
+    }
+
+    private static List<String> readFile(String filename) {
+        try {
+            return Files.readAllLines(Paths.get(filename));
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.emptyList();
         }
     }
 }

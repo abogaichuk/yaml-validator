@@ -1,35 +1,30 @@
 package com.example.yamlvalidator.entity;
 
-import com.example.yamlvalidator.grammar.Conditions;
 import com.example.yamlvalidator.grammar.KeyWord;
 import com.example.yamlvalidator.grammar.RuleService;
 import com.example.yamlvalidator.grammar.StandardType;
-import lombok.Builder;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.example.yamlvalidator.entity.ValidationResult.*;
-import static com.example.yamlvalidator.utils.ValidatorUtils.isNotEmpty;
+import static com.example.yamlvalidator.entity.ValidationResult.valid;
 
-@Builder
 public class Schema implements Parameter {
     private final String name;
     private final String value;
-    private final Schema parent;
+    private final Parameter parent;
     private final List<Parameter> children = new ArrayList<>();
     private final Position position;
     private final YamlType yamlType;
 
-    public Schema(String name, String value, Schema parent, Position position, YamlType yamlType) {
-        this.name = name;
-        this.value = value;
-        this.parent = parent;
-        this.position = position;
-        this.yamlType = yamlType;
+    public Schema(SchemaBuilder builder) {
+        this.name = builder.name;
+        this.value = builder.value;
+        this.parent = builder.parent;
+        this.position = builder.position;
+        this.yamlType = builder.yamlType;
     }
 
     @Override
@@ -43,8 +38,8 @@ public class Schema implements Parameter {
     }
 
     @Override
-    public Position getPosition() {
-        return position;
+    public Optional<Position> getPosition() {
+        return Optional.ofNullable(position);
     }
 
     @Override
@@ -62,11 +57,8 @@ public class Schema implements Parameter {
         return yamlType;
     }
 
-    public void addChild(Schema parameter) {
-        children.add(parameter);
-    }
-
-    public void addChildren(List<Schema> parameters) {
+    @Override
+    public void addChildren(List<Parameter> parameters) {
         children.addAll(parameters);
     }
 
@@ -123,5 +115,56 @@ public class Schema implements Parameter {
     @Override
     public int hashCode() {
         return getPath().hashCode();
+    }
+
+    public static class SchemaBuilder implements Builder {
+        private String name;
+        private String value;
+        private Parameter parent;
+        private Position position;
+        private YamlType yamlType;
+
+        public static SchemaBuilder builder()
+        {
+            return new SchemaBuilder();
+        }
+
+        private SchemaBuilder() {}
+
+        @Override
+        public Parameter build()
+        {
+            return new Schema(this);
+        }
+
+        @Override
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        @Override
+        public Builder value(String value) {
+            this.value = value;
+            return this;
+        }
+
+        @Override
+        public Builder parent(Parameter parent) {
+            this.parent = parent;
+            return this;
+        }
+
+        @Override
+        public Builder position(Position position) {
+            this.position = position;
+            return this;
+        }
+
+        @Override
+        public Builder yamlType(YamlType type) {
+            this.yamlType = type;
+            return this;
+        }
     }
 }

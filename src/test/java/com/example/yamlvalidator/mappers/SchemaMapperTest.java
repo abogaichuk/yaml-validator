@@ -1,23 +1,20 @@
 package com.example.yamlvalidator.mappers;
 
-import com.example.yamlvalidator.services.SchemaMapper;
-import com.example.yamlvalidator.utils.MappingUtils;
 import com.example.yamlvalidator.utils.ValidatorUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.snakeyaml.engine.v2.api.LoadSettings;
-import org.snakeyaml.engine.v2.composer.Composer;
-import org.snakeyaml.engine.v2.nodes.MappingNode;
-import org.snakeyaml.engine.v2.nodes.Node;
-import org.snakeyaml.engine.v2.parser.ParserImpl;
-import org.snakeyaml.engine.v2.scanner.StreamReader;
 
-import java.util.Optional;
-
-import static com.example.yamlvalidator.mappers.TestUtils.*;
 import static com.example.yamlvalidator.mappers.TestUtils.TestType.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.example.yamlvalidator.mappers.TestUtils.data;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SchemaMapperTest {
+    private SchemaMapper mapper;
+
+    @BeforeEach
+    void setUpd() {
+        mapper = new SchemaMapper();
+    }
 
     @Test
     public void when_standardTypeDefinedInType_returnExpected() {
@@ -90,18 +87,9 @@ public class SchemaMapperTest {
     }
 
     private String testFlow(String yaml) {
-        return toNode(yaml)
-                .map(MappingNode.class::cast)
-                .map(node -> new SchemaMapper(node).map())
-                .map(MappingUtils::map)
+        return mapper.mapToParam(yaml)
+                .map(mapper::mapToNode)
                 .map(ValidatorUtils::nodeToString)
                 .orElseThrow(() -> new RuntimeException("testFlow exception!!"));
-    }
-
-    private Optional<Node> toNode(String yaml) {
-        var settings = LoadSettings.builder().build();
-        var composer = new Composer(settings, new ParserImpl(settings, new StreamReader(settings, yaml)));
-
-        return composer.getSingleNode();
     }
 }

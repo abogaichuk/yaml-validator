@@ -56,12 +56,13 @@
 #  oneOf:
 #    - type: boolean
 #    - type: number
-#types:
-#  Admin:
-#    type: string
-#    list:
-#      - system
-#      - devops
+types:
+  Admin:
+    type: string
+    list:
+      - system
+      - devops
+user: admin
 #  AutoTest: number
 #  ManualTest:
 #    id: number
@@ -81,14 +82,15 @@
 #      list:
 #        - system
 #        - devops
-test:
-  type: object
-  id:
-    type: number
-    default: 12
-  name:
-    type: string
-    optional: true
+#test:
+#  type: object
+#  id:
+#    type: number
+#    default: 12
+#  name:
+#    type: string
+#    optional: true
+#    default: ${aaa}
 #tests:
 #  - type: number
 #  - type: object
