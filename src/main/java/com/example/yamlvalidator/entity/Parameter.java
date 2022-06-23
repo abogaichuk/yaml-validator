@@ -30,6 +30,16 @@ public interface Parameter {
                 : getName();
     }
 
+    default Optional<Parameter> deepSearch(String path) {
+        if (isNotEmpty(path)) {
+            var parts = path.split("/", 2);
+            return parts.length > 1
+                ? findChild(parts[0]).flatMap(child -> child.deepSearch(parts[1]))
+                : findChild(path);
+        }
+        return Optional.empty();
+    }
+
     default Optional<Parameter> findChild(String paramName) {
         return isNotEmpty(paramName) ? getChildren()
                 .filter(param -> paramName.equalsIgnoreCase(param.getName()))
