@@ -82,8 +82,7 @@ public class Resource implements Parameter {
         private Position position;
         private YamlType yamlType;
 
-        public static ResourceBuilder builder()
-        {
+        public static ResourceBuilder builder() {
             return new ResourceBuilder();
         }
 

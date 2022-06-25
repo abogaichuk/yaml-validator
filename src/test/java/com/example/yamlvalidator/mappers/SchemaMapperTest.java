@@ -1,6 +1,6 @@
 package com.example.yamlvalidator.mappers;
 
-import com.example.yamlvalidator.utils.ValidatorUtils;
+import com.example.yamlvalidator.utils.MappingUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -89,7 +89,7 @@ public class SchemaMapperTest {
     private String testFlow(String yaml) {
         return mapper.mapToParam(yaml)
                 .map(mapper::mapToNode)
-                .map(ValidatorUtils::nodeToString)
+                .map(MappingUtils::nodeToString)
                 .orElseThrow(() -> new RuntimeException("testFlow exception!!"));
     }
 }

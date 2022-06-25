@@ -15,7 +15,7 @@ public class ScalarMapper extends AbstractMapper {
     }
 
     @Override
-    public Parameter scalarParsing(String name, String value, Parameter parent, Position position) {
+    protected Parameter scalarParsing(String name, String value, Parameter parent, Position position) {
         return build(name, value, parent, position, Parameter.YamlType.SCALAR);
     }
 }

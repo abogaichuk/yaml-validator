@@ -223,28 +223,19 @@ public final class ValidatorUtils {
 //                .orElse(EMPTY);
 //    }
 
-    public static Optional<Node> yamlToNode(String yaml) {
-        var loadSettings = LoadSettings.builder()
-                .setParseComments(true)
-                .build();
-        var reader = new StreamReader(loadSettings, yaml);
-        var parser = new ParserImpl(loadSettings, reader);
-        var composer = new Composer(loadSettings, parser);
-
-        return composer.getSingleNode();
-    }
+//    public static Optional<Node> yamlToNode(String yaml) {
+//        var loadSettings = LoadSettings.builder()
+//                .setParseComments(true)
+//                .build();
+//        var reader = new StreamReader(loadSettings, yaml);
+//        var parser = new ParserImpl(loadSettings, reader);
+//        var composer = new Composer(loadSettings, parser);
+//
+//        return composer.getSingleNode();
+//    }
 
     public static void printPreview(Node node) {
-        System.out.println(preview(nodeToString(node)));
-    }
-
-    public static String nodeToString(Node root) {
-        var settings = DumpSettings.builder().build();
-        var yaml = new Dump(settings);
-        var writer = new MyStreamToStringWriter();
-        yaml.dumpNode(root, writer);
-
-        return writer.toString().trim();
+        System.out.println(preview(MappingUtils.nodeToString(node)));
     }
 
     public static String preview(String data) {

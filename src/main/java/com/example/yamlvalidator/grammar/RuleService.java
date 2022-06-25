@@ -17,7 +17,6 @@ import static com.example.yamlvalidator.entity.ValidationResult.valid;
 import static com.example.yamlvalidator.grammar.Conditions.*;
 import static com.example.yamlvalidator.grammar.KeyWord.*;
 import static com.example.yamlvalidator.utils.MessagesUtils.*;
-import static com.example.yamlvalidator.utils.ValidatorUtils.isEmpty;
 
 public class RuleService {
 
@@ -118,9 +117,9 @@ public class RuleService {
             if (schema.isMandatory()) {
                 var result = schema.findCustomFields()
                         .filter(customField -> Optional.ofNullable(resource)
-                                .map(res -> res.findChild(customField.getName())).isEmpty()
-                                && customField.findChild(DEFAULT.lowerCase()).isEmpty())
-                        .filter(Parameter::isMandatory)
+                                .flatMap(res -> res.findChild(customField.getName()))
+                                .isEmpty() && customField.isMandatory() && customField.findChild(DEFAULT.lowerCase()).isEmpty())
+//                        .filter(Parameter::isMandatory)
                         .map(customField -> invalid(getMessage(MANDATORY_PARAMETER, customField)))
                         .reduce(valid(), ValidationResult::merge);
                 return result;
@@ -204,7 +203,7 @@ public class RuleService {
 
     private ParameterRule groupValidationRule(Predicate<Parameter> condition, String errorMessage, KeyWord ... children) {
         return param -> Stream.of(children)
-                .map(KeyWord::name)
+                .map(KeyWord::lowerCase)
                 .map(param::findChild)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

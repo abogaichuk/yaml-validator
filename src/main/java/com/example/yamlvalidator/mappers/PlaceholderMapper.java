@@ -17,8 +17,7 @@ import static com.example.yamlvalidator.utils.ValidatorUtils.EMPTY;
 
 public class PlaceholderMapper extends ScalarMapper {
     private static final Pattern pattern = Pattern.compile(".*?\\$\\{(\\w+)\\}.*?");
-    @Getter
-    private Optional<NodeTuple> nodeTypes;
+    protected Optional<NodeTuple> nodeTypes;
 
     public PlaceholderMapper(Builder builder) {
         super(builder);
@@ -32,12 +31,12 @@ public class PlaceholderMapper extends ScalarMapper {
                 .flatMap(mappingNode -> mappingNode.getValue().stream()
                         .filter(tuple -> TYPES.lowerCase().equals(getName(tuple.getKeyNode())))
                         .findAny());
-
+        
         return super.mapToParam(yaml);
     }
 
     @Override
-    public Parameter scalarParsing(String name, String value, Parameter parent, Position position) {
+    protected Parameter scalarParsing(String name, String value, Parameter parent, Position position) {
         if (match(value)) {
             Optional<Parameter> parameter = MappingUtils.stringToNode(resolve(value))
                     .map(node -> {
@@ -48,7 +47,7 @@ public class PlaceholderMapper extends ScalarMapper {
                         } else {
                             throw new PadmGrammarException("map param with name!");
                         }
-                    });;
+                    });
             if (parameter.isPresent())
                 return parameter.get();
         }

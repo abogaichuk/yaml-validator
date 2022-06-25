@@ -6,7 +6,6 @@ import com.example.yamlvalidator.entity.Position;
 import com.example.yamlvalidator.entity.Resource;
 import com.example.yamlvalidator.errors.PadmGrammarException;
 import com.example.yamlvalidator.utils.MappingUtils;
-import lombok.Getter;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
 import org.snakeyaml.engine.v2.nodes.*;
@@ -27,7 +26,6 @@ import static org.snakeyaml.engine.v2.nodes.NodeType.*;
 
 public abstract class AbstractMapper {
 
-    @Getter
     private final Builder builder;
 
     public AbstractMapper() {
@@ -38,7 +36,7 @@ public abstract class AbstractMapper {
         this.builder = builder;
     }
 
-    public abstract Parameter scalarParsing(String name, String value, Parameter parent, Position position);
+    protected abstract Parameter scalarParsing(String name, String value, Parameter parent, Position position);
 
     public Optional<Parameter> mapToParam(String yaml) {
         return MappingUtils.stringToNode(yaml)
@@ -83,7 +81,7 @@ public abstract class AbstractMapper {
     }
 
     protected Parameter build(String name, String value, Parameter parent, Position position, Parameter.YamlType type) {
-        return getBuilder().name(name).value(value).parent(parent).position(position).yamlType(type).build();
+        return builder.name(name).value(value).parent(parent).position(position).yamlType(type).build();
     }
 
     protected Parameter build(String name, String value, Parameter parent, Position position, Parameter.YamlType type, Node node) {

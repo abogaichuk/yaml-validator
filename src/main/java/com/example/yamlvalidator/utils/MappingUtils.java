@@ -1,9 +1,12 @@
 package com.example.yamlvalidator.utils;
 
+import com.example.yamlvalidator.MyStreamToStringWriter;
 import com.example.yamlvalidator.entity.Parameter;
 import com.example.yamlvalidator.entity.Position;
 import com.example.yamlvalidator.entity.Resource;
 import com.example.yamlvalidator.errors.PadmGrammarException;
+import org.snakeyaml.engine.v2.api.Dump;
+import org.snakeyaml.engine.v2.api.DumpSettings;
 import org.snakeyaml.engine.v2.api.LoadSettings;
 import org.snakeyaml.engine.v2.common.FlowStyle;
 import org.snakeyaml.engine.v2.common.ScalarStyle;
@@ -29,6 +32,15 @@ public class MappingUtils {
         var composer = new Composer(settings, new ParserImpl(settings, new StreamReader(settings, yaml)));
 
         return composer.getSingleNode();
+    }
+
+    public static String nodeToString(Node root) {
+        var settings = DumpSettings.builder().build();
+        var yaml = new Dump(settings);
+        var writer = new MyStreamToStringWriter();
+        yaml.dumpNode(root, writer);
+
+        return writer.toString().trim();
     }
 
 //    public static Node map(Parameter root) {

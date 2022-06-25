@@ -57,12 +57,34 @@
 #    - type: boolean
 #    - type: number
 types:
-  Admin:
+  AutoTest: number
+  ManualTest:
+    id: number
+    executedDate: datetime
+#test:
+#  oneOf:
+#    - type: number
+#    - type: object
+#      id:
+#        type: number
+#      executeddate:
+#        type: datetime
+#      user:
+#        type: string
+#        list:
+#          - system
+#          - devops
+test:
+  id:
+    type: number
+  executeddate:
+    type: datetime
+  user:
     type: string
     list:
       - system
       - devops
-user: admin
+#test: aaa
 #  AutoTest: number
 #  ManualTest:
 #    id: number

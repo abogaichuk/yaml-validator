@@ -69,6 +69,10 @@ public class Schema implements Parameter {
                 .ifPresent(children::remove);
     }
 
+    public ValidationResult validate(RuleService rules) {
+        return validate(rules, null);
+    }
+
     public ValidationResult validate(RuleService rules, Resource resource) {
         var result = validateSelf(rules, resource);
 
@@ -124,8 +128,7 @@ public class Schema implements Parameter {
         private Position position;
         private YamlType yamlType;
 
-        public static SchemaBuilder builder()
-        {
+        public static SchemaBuilder builder() {
             return new SchemaBuilder();
         }
 

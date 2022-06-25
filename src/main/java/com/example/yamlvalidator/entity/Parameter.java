@@ -83,14 +83,18 @@ public interface Parameter {
                 .collect(Collectors.toList());
     }
 
-    default boolean isMandatory() {
-        return isRoot() && findChild(KeyWord.OPTIONAL.lowerCase())
+    default boolean isOptional() {
+        return isRoot() || findChild(KeyWord.OPTIONAL.lowerCase())
                 .filter(Conditions.boolValueIsTrue)
-                .isEmpty();
+                .isPresent();
+    }
+
+    default boolean isMandatory() {
+        return !isOptional();
     }
 
     private boolean isRoot() {
-        return getParent() != null;
+        return getParent() == null;
     }
 
     default boolean hasDefaultValue() {

@@ -27,7 +27,7 @@ public class SchemaMapper extends PlaceholderMapper {
     }
 
     @Override
-    public Parameter scalarParsing(String name, String value, Parameter parent, Position position) {
+    protected Parameter scalarParsing(String name, String value, Parameter parent, Position position) {
 //        if (isNotAKeyword(name) && match(value)) {
         if (match(name)) {
             var types = value.split(OR_TYPE_SPLITTER);
@@ -102,7 +102,7 @@ public class SchemaMapper extends PlaceholderMapper {
     }
 
     private Optional<NodeTuple> getCustomType(String type) {
-        return getNodeTypes()
+        return nodeTypes
                 .map(NodeTuple::getValueNode)
                 .map(MappingNode.class::cast)
                 .map(MappingNode::getValue)
